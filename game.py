@@ -18,7 +18,7 @@ class GameBoard(tk.Tk):
         self.hex_size = self.board_width // self.hexes_across
         self.spot_radius = 25 * self.board_width / 550
         self.piece_radius = 26 * self.board_width / 550
-        self.selection_radius = 30 * self.board_width / 550
+        self.selection_radius = 26 * self.board_width / 550
         self.turn_count_black = 0
         self.turn_count_white = 0
         self.turn = "white"
@@ -35,19 +35,68 @@ class GameBoard(tk.Tk):
         self.black_moves_box = None
         self.settings = None
         self.settings_selections = {}
-        self.spot_coords = {}
-        self.board_screen_pos = None
-        self.board = None
+        self.game_board = {}
 
     def new_game_window(self):
         self.player_info()
         self.create_controls()
+
+        self.initialize_game_board_array()
+        self.setup_board()
         self.draw_game_board()
+        self.draw_pieces()
+
         self.draw_timer_window()
         self.show_timer()
         self.draw_moves_window()
         self.show_moves()
+
+        self.canvas.bind("<Button-1>", self.click_event_listener)  # sets up mouse click event listener
+
         self.mainloop()
+
+    def click_event_listener(self, event):
+        RANGE = 20
+        print(f"Clicked at {event.x}, {event.y}")
+
+        for row in range(self.hexes_across):
+            row_key = self.get_row_key(row)
+            selected_row = self.game_board.get(row_key)
+
+            for col in range(self.calculate_row_length(row)):
+                piece_x_pos = selected_row[col].get("x_pos")
+                piece_y_pos = selected_row[col].get("y_pos")
+
+                if piece_x_pos - RANGE <= event.x <= piece_x_pos + RANGE:  # ensures clicked area is within the drawn board piece
+                    if piece_y_pos - RANGE <= event.y <= piece_y_pos + RANGE:  # ensures clicked area is within the drawn board piece
+                        selected_piece_color = selected_row[col].get("color")
+
+                        if selected_piece_color == "white" or selected_piece_color == "black":  # ensures that the piece clicked is a black or white piece, and not an empty spot on the board
+                            print(f"Selected Piece Location - Row: {row}; Col: {col}")
+
+                            self.redraw_piece(selected_piece_color, piece_x_pos,
+                                              piece_y_pos)  # redraws the original piece color on the selected piece, enables pieces to be "unselected"
+
+                            if not selected_row[col].get("selected"):  # highlights selected piece green
+                                selected_row[col].update({"selected": True})
+                                self.canvas.create_oval(piece_x_pos - self.selection_radius,
+                                                        piece_y_pos - self.selection_radius,
+                                                        piece_x_pos + self.selection_radius,
+                                                        piece_y_pos + self.selection_radius, fill="chartreuse")
+                            else:
+                                selected_row[col].update({"selected": False})
+
+    def redraw_piece(self, selected_piece_color, piece_x_pos, piece_y_pos):
+        if selected_piece_color == "white":
+            self.canvas.create_oval(piece_x_pos - self.piece_radius,
+                                    piece_y_pos - self.piece_radius,
+                                    piece_x_pos + self.piece_radius,
+                                    piece_y_pos + self.piece_radius, fill="white")
+        else:
+            self.canvas.create_oval(piece_x_pos - self.piece_radius,
+                                    piece_y_pos - self.piece_radius,
+                                    piece_x_pos + self.piece_radius,
+                                    piece_y_pos + self.piece_radius, fill="black")
 
     def draw_game_board(self):
         x = self.width // 2
@@ -62,16 +111,52 @@ class GameBoard(tk.Tk):
         self.canvas.grid(row=2, column=2, rowspan=25)
 
     def draw_board_spots(self, x, y, r, sin60):
-        for i in range(self.hexes_across):
-            spot_y = (y - r * sin60) + i * self.hex_size * sin60 + self.hex_size * sin60 / 2
-            row_length = self.calculate_row_length(i)
-            start_x = x - row_length * self.hex_size // 2 + self.hex_size // 2
-            for j in range(row_length):
-                spot_x = start_x + j * self.hex_size
+        for row in range(self.hexes_across):
+            row_key = self.get_row_key(row)
+            spot_y = (y - r * sin60) + (row * self.hex_size * sin60) + (self.hex_size * sin60 / 2)
+            row_length = self.calculate_row_length(row)
+            start_x = x - (row_length * self.hex_size // 2) + (self.hex_size // 2)
+            for col in range(row_length):
+                spot_x = start_x + col * self.hex_size
                 self.canvas.create_oval(spot_x - self.spot_radius, spot_y - self.spot_radius,
                                         spot_x + self.spot_radius, spot_y + self.spot_radius, fill="light grey")
-                # if not self.board_screen_pos[i][j]:
-                #     self.board_screen_pos[i][j] = (spot_x, spot_y)
+                if not self.game_board.get(row_key)[col].get(
+                        "x_pos"):  # populating 2D array with positions of drawn pieces
+                    self.game_board.get(row_key)[col].update({"x_pos": int(spot_x)})
+                    self.game_board.get(row_key)[col].update({"y_pos": int(spot_y)})
+
+    def setup_board(self):
+        lines_to_fill = 2
+
+        for row in range(lines_to_fill):
+            row_key = "row" + str(row)
+
+            for col in range(self.calculate_row_length(row)):
+                self.game_board.get(row_key)[col].update({"color": "white"})
+
+                if row == 1:  # populates front 3 white  pieces
+                    for nested_col in range(2, 5):
+                        self.game_board.get("row2")[nested_col].update({"color": "white"})
+
+        for row in range(7, 9):
+            row_key = "row" + str(row)
+
+            if (row - 1) == 6:  # populates front 3 black pieces
+                for nested_col in range(2, 5):
+                    self.game_board.get("row6")[nested_col].update({"color": "black"})
+            for col in range(self.calculate_row_length(row)):
+                self.game_board.get(row_key)[col].update({"color": "black"})
+
+    def initialize_game_board_array(self):
+        self.game_board = {}
+
+        for col in range(self.hexes_across):
+            row_length = self.calculate_row_length(col)
+            row_key = "row" + str(col)
+            self.game_board.update({row_key: []})
+
+            for row in range(row_length):
+                self.game_board.get(row_key).append({"color": None, "selected": False, "x_pos": None, "y_pos": None})
 
     def calculate_row_length(self, i):
         if self.hexes_per_side + i >= self.hexes_across:
@@ -79,6 +164,9 @@ class GameBoard(tk.Tk):
         else:
             row_length = self.hexes_per_side + i
         return row_length
+
+    def get_row_key(self, row, offset=0):
+        return "row" + str(row + offset)
 
     def draw_timer_window(self):
         timer_white_label = Label(self, text="White Player")
@@ -111,18 +199,18 @@ class GameBoard(tk.Tk):
         white_pieces = 14
         black_pieces = 14
         player_one = Label(self, text="White")
-        player_one.grid( column=1, padx=3)
+        player_one.grid(column=1, padx=3)
         player_one_moves_label = Label(self, text=f"Moves\n{white_moves}")
-        player_one_moves_label.grid( column=1, padx=3)
+        player_one_moves_label.grid(column=1, padx=3)
         player_one_pieces_label = Label(self, text=f"Moves\n{white_pieces}")
-        player_one_pieces_label.grid( column=1, padx=3)
+        player_one_pieces_label.grid(column=1, padx=3)
 
         player_two = Label(self, text="Black")
         player_two.grid(column=1, padx=3)
         player_two_moves_label = Label(self, text=f"Moves\n{black_moves}")
-        player_two_moves_label.grid( column=1, padx=3)
+        player_two_moves_label.grid(column=1, padx=3)
         player_two_pieces_label = Label(self, text=f"Moves\n{black_pieces}")
-        player_two_pieces_label.grid( column=1, padx=3)
+        player_two_pieces_label.grid(column=1, padx=3)
 
     def create_controls(self):
         start = Button(self, text="Start", width=15)
@@ -154,46 +242,24 @@ class GameBoard(tk.Tk):
 
     def draw_pieces(self):
         for row in range(self.hexes_across):
+            row_key = self.get_row_key(row)
             row_length = self.calculate_row_length(row)
+
             for col in range(row_length):
-                (piece_x, piece_y) = self.board_screen_pos[row][col]
-                # Highlight selected pieces:
-                curr_hex = self.board3AxisCoords[row][col]
-                for selected in self.selected_pieces:
-                    if selected == curr_hex:
-                        self.canvas.create_oval(piece_x - self.selection_radius,
-                                                piece_y - self.selection_radius, piece_x + self.selection_radius,
-                                                piece_y + self.selection_radius, fill="chartreuse")
+                piece_x = self.game_board.get(row_key)[col].get(
+                    "x_pos")  # x coordinates of the selected piece
+                piece_y = self.game_board.get(row_key)[col].get(
+                    "y_pos")  # y coordinates of the selected piece
+
                 # Draw pieces
-                if self.board[row][col] == "white":
+                if self.game_board.get(row_key)[col].get("color") == "white":
                     self.canvas.create_oval(piece_x - self.piece_radius,
-                                            piece_y - self.pieceRadius, piece_x + self.piece_radius,
-                                            piece_y + self.pieceRadius, fill="white")
-                elif self.board[row][col] == "black":
+                                            piece_y - self.piece_radius, piece_x + self.piece_radius,
+                                            piece_y + self.piece_radius, fill="white")
+                elif self.game_board.get(row_key)[col].get("color") == "black":
                     self.canvas.create_oval(piece_x - self.piece_radius,
                                             piece_y - self.piece_radius, piece_x + self.piece_radius,
                                             piece_y + self.piece_radius, fill="black")
-
-    def set_up_board(self):
-        # white - fill first two lines
-        lines_to_fill = 2
-        for i in range(lines_to_fill):
-            for j in range(self.calculate_row_length(i)):
-                self.board[i][j] = "white"
-        # white - place front 3 pieces
-        self.board[lines_to_fill][self.calculate_row_length(lines_to_fill) // 2 - 1] = "white"
-        self.board[lines_to_fill][self.calculate_row_length(lines_to_fill) // 2] = "white"
-        self.board[lines_to_fill][self.calculate_row_length(lines_to_fill) // 2 + 1] = "white"
-        # black - fill first two lines
-        lines_to_fill = 2
-        for i in range(lines_to_fill):
-            for j in range(self.calculate_row_length(i)):
-                self.board[self.hexes_across - 1 - i][j] = "black"
-        # black - place front 3 pieces
-        black_front_row = self.hexes_across - 1 - lines_to_fill
-        self.board[black_front_row][self.calculate_row_length(black_front_row) // 2 - 1] = "black"
-        self.board[black_front_row][self.calculate_row_length(black_front_row) // 2] = "black"
-        self.board[black_front_row][self.calculate_row_length(black_front_row) // 2 + 1] = "black"
 
 
 g = GameBoard()
