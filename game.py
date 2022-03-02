@@ -18,7 +18,7 @@ class GameBoard(tk.Tk):
         self.hex_size = self.board_width // self.hexes_across
         self.spot_radius = 25 * self.board_width / 550
         self.piece_radius = 26 * self.board_width / 550
-        self.selection_radius = 30 * self.board_width / 550
+        self.selection_radius = 26 * self.board_width / 550
         self.turn_count_black = 0
         self.turn_count_white = 0
         self.turn = "white"
@@ -57,11 +57,15 @@ class GameBoard(tk.Tk):
         self.draw_moves_window()
         self.show_moves()
 
-        self.canvas.bind("<Button-1>", self.click_event_listener)  # sets up mouse click event listener
-
+        self.canvas.bind("<Button-1>", self.click_event_listener_engine)  # sets up mouse click event listener
         self.mainloop()
 
-    def click_event_listener(self, event):
+    def click_event_listener_engine(self, event):
+        """
+        Handles the user's on-screen click, determines if the player has clicked on a game piece and if so highlights
+        the selected game piece chartreuse.
+        :param event: an Event object containing various data attributes including the x and y coords of the click event
+        """
         RANGE = 20
         print(f"Clicked at {event.x}, {event.y}")
 
@@ -78,7 +82,7 @@ class GameBoard(tk.Tk):
                         selected_piece_color = selected_row[col].get("color")
 
                         if selected_piece_color == "white" or selected_piece_color == "black":  # ensures that the piece clicked is a black or white piece, and not an empty spot on the board
-                            print(f"Selected Piece Location - Row: {row}; Col: {col}")
+                            self.print_selected_piece_coord(row, col)
 
                             self.redraw_piece(selected_piece_color, piece_x_pos,
                                               piece_y_pos)  # redraws the original piece color on the selected piece, enables pieces to be "unselected"
@@ -93,16 +97,42 @@ class GameBoard(tk.Tk):
                                 selected_row[col].update({"selected": False})
 
     def redraw_piece(self, selected_piece_color, piece_x_pos, piece_y_pos):
-        if selected_piece_color == "white":
-            self.canvas.create_oval(piece_x_pos - self.piece_radius,
-                                    piece_y_pos - self.piece_radius,
-                                    piece_x_pos + self.piece_radius,
-                                    piece_y_pos + self.piece_radius, fill="white")
+        """
+        Draws the specified color game piece at the specified x and y coordinates.
+        :param selected_piece_color: a string, either 'white' or 'black'
+        :param piece_x_pos: a float
+        :param piece_y_pos: a float
+        """
+        self.canvas.create_oval(piece_x_pos - self.piece_radius,
+                                piece_y_pos - self.piece_radius,
+                                piece_x_pos + self.piece_radius,
+                                piece_y_pos + self.piece_radius, fill=selected_piece_color)
+
+    def print_selected_piece_coord(self, row, col):
+        """
+        Translates the coordinates for the selected game piece according to the I-A and 1-9 game board
+        coordinate system.
+        :param row: an int
+        :param col: an int
+        """
+        ASCII_ALPHABET_OFFSET = 8
+        ZERO_INDEX_OFFSET = 1
+
+        TOP_ROW = 0
+        UPPER_HALF = range(1, 4 + ZERO_INDEX_OFFSET)
+
+        num_of_cols = self.calculate_row_length(row)
+
+        if row == TOP_ROW:
+            col_coord = num_of_cols + col
+        elif row in UPPER_HALF:
+            col_coord = (num_of_cols - (row * 2)) + col
         else:
-            self.canvas.create_oval(piece_x_pos - self.piece_radius,
-                                    piece_y_pos - self.piece_radius,
-                                    piece_x_pos + self.piece_radius,
-                                    piece_y_pos + self.piece_radius, fill="black")
+            col_coord = col + ZERO_INDEX_OFFSET
+
+        row_coord = chr((ASCII_ALPHABET_OFFSET - row) + 65)
+
+        print(f"Selected piece at: {row_coord}{col_coord}")
 
     def draw_game_board(self):
         x = self.width // 2
@@ -162,7 +192,8 @@ class GameBoard(tk.Tk):
             self.game_board.update({row_key: []})
 
             for row in range(row_length):
-                self.game_board.get(row_key).append({"colNum": row, "color": None, "selected": False, "x_pos": None, "y_pos": None})
+                self.game_board.get(row_key).append(
+                    {"colNum": row, "color": None, "selected": False, "x_pos": None, "y_pos": None})
 
     def calculate_row_length(self, i):
         if self.hexes_per_side + i >= self.hexes_across:
@@ -202,18 +233,18 @@ class GameBoard(tk.Tk):
     def player_info(self):
         self.set_pieces_count()
         player_one = Label(self, text="White")
-        player_one.grid( column=1, padx=3)
+        player_one.grid(column=1, padx=3)
         player_one_moves_label = Label(self, text=f"Moves\n{self.white_move_count}")
-        player_one_moves_label.grid( column=1, padx=3)
+        player_one_moves_label.grid(column=1, padx=3)
         player_one_pieces_label = Label(self, text=f"Pieces\n{self.white_pieces}")
-        player_one_pieces_label.grid( column=1, padx=3)
+        player_one_pieces_label.grid(column=1, padx=3)
 
         player_two = Label(self, text="Black")
         player_two.grid(column=1, padx=3)
         player_two_moves_label = Label(self, text=f"Moves\n{self.black_move_count}")
-        player_two_moves_label.grid( column=1, padx=3)
+        player_two_moves_label.grid(column=1, padx=3)
         player_two_pieces_label = Label(self, text=f"Pieces\n{self.black_pieces}")
-        player_two_pieces_label.grid( column=1, padx=3)
+        player_two_pieces_label.grid(column=1, padx=3)
 
     def set_pieces_count(self):
         if self.white_pieces is None and self.black_pieces is None:
