@@ -50,7 +50,7 @@ class GameBoard(tk.Tk):
         self.initialize_game_board_array()
         self.setup_board()
         self.draw_game_board()
-        self.draw_pieces()
+        self.initialize_game_board_pieces()
 
         self.draw_timer_window()
         self.show_timer()
@@ -89,8 +89,8 @@ class GameBoard(tk.Tk):
                             self.print_selected_piece_coord(row, col)
 
                             # redraws the original piece color on the selected piece, enables pieces to be "unselected"
-                            self.redraw_piece(selected_piece_color, piece_x_pos,
-                                              piece_y_pos)
+                            self.draw_game_piece(selected_piece_color, piece_x_pos,
+                                                 piece_y_pos)
 
                             # highlights selected piece green and toggles the "selected" dictionary key
                             if not selected_row[col].get("selected"):
@@ -102,7 +102,7 @@ class GameBoard(tk.Tk):
                             else:
                                 selected_row[col].update({"selected": False})
 
-    def redraw_piece(self, selected_piece_color, piece_x_pos, piece_y_pos):
+    def draw_game_piece(self, selected_piece_color, piece_x_pos, piece_y_pos):
         """
         Draws the specified color game piece at the specified x and y coordinates.
         :param selected_piece_color: a string, either 'white' or 'black'
@@ -166,6 +166,23 @@ class GameBoard(tk.Tk):
                         "x_pos"):  # populating 2D array with positions of drawn pieces
                     self.game_board.get(row_key)[col].update({"x_pos": int(spot_x)})
                     self.game_board.get(row_key)[col].update({"y_pos": int(spot_y)})
+
+    def initialize_game_board_pieces(self):
+        """
+        Iterates through the game_board data structure, retrieves the x and y coordinates of each board space,
+        and draws the game piece on the board of the specified color.
+        """
+        for row in range(self.hexes_across):
+            row_key = self.get_row_key(row)
+            row_length = self.calculate_row_length(row)
+
+            for col in range(row_length):
+                piece_color = self.game_board.get(row_key)[col].get("color")
+                piece_x = self.game_board.get(row_key)[col].get("x_pos")  # x coordinates of the selected piece
+                piece_y = self.game_board.get(row_key)[col].get("y_pos")  # y coordinates of the selected piece
+
+                self.draw_game_piece(piece_color, piece_x, piece_y)
+
 
     def setup_board(self):
         lines_to_fill = 2
@@ -302,26 +319,7 @@ class GameBoard(tk.Tk):
         self.settings_selections = self.settings.selections
         print(self.settings_selections)
 
-    def draw_pieces(self):
-        for row in range(self.hexes_across):
-            row_key = self.get_row_key(row)
-            row_length = self.calculate_row_length(row)
 
-            for col in range(row_length):
-                piece_x = self.game_board.get(row_key)[col].get(
-                    "x_pos")  # x coordinates of the selected piece
-                piece_y = self.game_board.get(row_key)[col].get(
-                    "y_pos")  # y coordinates of the selected piece
-
-                # Draw pieces
-                if self.game_board.get(row_key)[col].get("color") == "white":
-                    self.canvas.create_oval(piece_x - self.piece_radius,
-                                            piece_y - self.piece_radius, piece_x + self.piece_radius,
-                                            piece_y + self.piece_radius, fill="white")
-                elif self.game_board.get(row_key)[col].get("color") == "black":
-                    self.canvas.create_oval(piece_x - self.piece_radius,
-                                            piece_y - self.piece_radius, piece_x + self.piece_radius,
-                                            piece_y + self.piece_radius, fill="black")
 
 
 g = GameBoard()
