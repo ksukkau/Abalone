@@ -41,7 +41,7 @@ class GameBoard(tk.Tk):
         self.settings_selections = {'color': 0, 'mode': 1, 'config': 0, 'turns': 15, 'time1': 30, 'time2': 30}
         self.spot_coords = {}
         self.board_screen_pos = None
-        self.board = None
+        self.game_board = None
 
     def new_game_window(self):
         self.set_move_counter()
@@ -162,7 +162,7 @@ class GameBoard(tk.Tk):
             self.game_board.update({row_key: []})
 
             for row in range(row_length):
-                self.game_board.get(row_key).append({"color": None, "selected": False, "x_pos": None, "y_pos": None})
+                self.game_board.get(row_key).append({"colNum": row, "color": None, "selected": False, "x_pos": None, "y_pos": None})
 
     def calculate_row_length(self, i):
         if self.hexes_per_side + i >= self.hexes_across:
