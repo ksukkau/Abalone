@@ -77,17 +77,23 @@ class GameBoard(tk.Tk):
                 piece_x_pos = selected_row[col].get("x_pos")
                 piece_y_pos = selected_row[col].get("y_pos")
 
-                if piece_x_pos - RANGE <= event.x <= piece_x_pos + RANGE:  # ensures clicked area is within the drawn board piece
-                    if piece_y_pos - RANGE <= event.y <= piece_y_pos + RANGE:  # ensures clicked area is within the drawn board piece
+                # ensures clicked area is within the drawn board piece
+                if piece_x_pos - RANGE <= event.x <= piece_x_pos + RANGE:
+
+                    # ensures clicked area is within the drawn board piece
+                    if piece_y_pos - RANGE <= event.y <= piece_y_pos + RANGE:
                         selected_piece_color = selected_row[col].get("color")
 
-                        if selected_piece_color == "white" or selected_piece_color == "black":  # ensures that the piece clicked is a black or white piece, and not an empty spot on the board
+                        # ensures that the piece clicked is a black or white piece, and not an empty spot on the board
+                        if selected_piece_color == "white" or selected_piece_color == "black":
                             self.print_selected_piece_coord(row, col)
 
+                            # redraws the original piece color on the selected piece, enables pieces to be "unselected"
                             self.redraw_piece(selected_piece_color, piece_x_pos,
-                                              piece_y_pos)  # redraws the original piece color on the selected piece, enables pieces to be "unselected"
+                                              piece_y_pos)
 
-                            if not selected_row[col].get("selected"):  # highlights selected piece green
+                            # highlights selected piece green and toggles the "selected" dictionary key
+                            if not selected_row[col].get("selected"):
                                 selected_row[col].update({"selected": True})
                                 self.canvas.create_oval(piece_x_pos - self.selection_radius,
                                                         piece_y_pos - self.selection_radius,
@@ -203,6 +209,13 @@ class GameBoard(tk.Tk):
         return row_length
 
     def get_row_key(self, row, offset=0):
+        """
+        Generates the key used for the game_board dictionary for denoting the rows of the game board. An offset
+        may be specified as the index starts at 0, otherwise the offset is default at 0.
+        :param row: an int
+        :param offset: an int
+        :return: a string
+        """
         return "row" + str(row + offset)
 
     def draw_timer_window(self):
