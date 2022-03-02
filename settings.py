@@ -2,6 +2,7 @@ from tkinter import *
 import tkinter as tk
 
 
+
 class Settings(tk.Toplevel):
 
     def __init__(self, master):
@@ -37,7 +38,6 @@ class Settings(tk.Toplevel):
         self.set_turn_limit()
         self.set_turn_timer()
         self.submit_button()
-        self.master.mainloop()
 
     def player_color(self):
         player_color_label = LabelFrame(self, text="Select player color")
@@ -96,7 +96,5 @@ class Settings(tk.Toplevel):
         self.selections["time2"] = self.turn_timer_value2.get()
         self.main_window()
 
-    def get_selections(self):
-        return self.selections
 
 

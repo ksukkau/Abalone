@@ -18,7 +18,7 @@ class GameBoard(tk.Tk):
         self.hex_size = self.board_width // self.hexes_across
         self.spot_radius = 25 * self.board_width / 550
         self.piece_radius = 26 * self.board_width / 550
-        self.selection_radius = 26 * self.board_width / 550
+        self.selection_radius = 30 * self.board_width / 550
         self.turn_count_black = 0
         self.turn_count_white = 0
         self.turn = "white"
@@ -33,12 +33,18 @@ class GameBoard(tk.Tk):
         self.black_timer_box = None
         self.white_moves_box = None
         self.black_moves_box = None
+        self.white_move_count = None
+        self.black_move_count = None
+        self.white_pieces = None
+        self.black_pieces = None
         self.settings = None
-        self.settings_selections = {}
-        self.game_board = {}
+        self.settings_selections = {'color': 0, 'mode': 1, 'config': 0, 'turns': 15, 'time1': 30, 'time2': 30}
+        self.spot_coords = {}
+        self.board_screen_pos = None
+        self.board = None
 
     def new_game_window(self):
-        self.player_info()
+        self.set_move_counter()
         self.create_controls()
 
         self.initialize_game_board_array()
@@ -194,23 +200,34 @@ class GameBoard(tk.Tk):
         self.black_moves_box.insert(END, "Moves:")
 
     def player_info(self):
-        white_moves = 1  # needs to be updated by program
-        black_moves = 2  # needs to be updated by program
-        white_pieces = 14
-        black_pieces = 14
+        self.set_pieces_count()
         player_one = Label(self, text="White")
-        player_one.grid(column=1, padx=3)
-        player_one_moves_label = Label(self, text=f"Moves\n{white_moves}")
-        player_one_moves_label.grid(column=1, padx=3)
-        player_one_pieces_label = Label(self, text=f"Moves\n{white_pieces}")
-        player_one_pieces_label.grid(column=1, padx=3)
+        player_one.grid( column=1, padx=3)
+        player_one_moves_label = Label(self, text=f"Moves\n{self.white_move_count}")
+        player_one_moves_label.grid( column=1, padx=3)
+        player_one_pieces_label = Label(self, text=f"Pieces\n{self.white_pieces}")
+        player_one_pieces_label.grid( column=1, padx=3)
 
         player_two = Label(self, text="Black")
         player_two.grid(column=1, padx=3)
-        player_two_moves_label = Label(self, text=f"Moves\n{black_moves}")
-        player_two_moves_label.grid(column=1, padx=3)
-        player_two_pieces_label = Label(self, text=f"Moves\n{black_pieces}")
-        player_two_pieces_label.grid(column=1, padx=3)
+        player_two_moves_label = Label(self, text=f"Moves\n{self.black_move_count}")
+        player_two_moves_label.grid( column=1, padx=3)
+        player_two_pieces_label = Label(self, text=f"Pieces\n{self.black_pieces}")
+        player_two_pieces_label.grid( column=1, padx=3)
+
+    def set_pieces_count(self):
+        if self.white_pieces is None and self.black_pieces is None:
+            self.white_pieces = 14
+            self.black_pieces = 14
+
+    def set_move_counter(self):
+        try:
+            self.get_settings_selections()
+        except:
+            if self.white_move_count is None:
+                self.white_move_count = self.settings_selections['turns']
+                self.black_move_count = self.settings_selections['turns']
+        self.player_info()
 
     def create_controls(self):
         start = Button(self, text="Start", width=15)
@@ -218,7 +235,7 @@ class GameBoard(tk.Tk):
         pause = Button(self, text="Pause", width=15)
         reset = Button(self, text="Reset", width=15)
         undo = Button(self, text="Undo Last", width=15)
-        settings = Button(self, text="Settings", width=15, command=self.new_settings_window)
+        settings = Button(self, text="Settings", width=15, command=self.settings_set_up)
 
         start.grid(column=1, row=8)
         stop.grid(column=1, row=9)
@@ -227,17 +244,18 @@ class GameBoard(tk.Tk):
         undo.grid(column=1, row=12)
         settings.grid(column=1, row=13)
 
+    def settings_set_up(self):
+        self.new_settings_window()
+        self.get_settings_selections()
+
     def new_settings_window(self):
         self.settings = Settings(self)
         self.settings.focus_set()
-        if 'normal' == self.settings.state():
-            print("running")
         self.settings.draw_settings()
-        self.get_settings_selections()  # i dont know why this wont print till the main window is closed, it does get it but only when we close main.
+        self.wait_window(self.settings)
 
     def get_settings_selections(self):
-        # I dont know why this doesnt print the data till the main window is closed
-        self.settings_selections = self.settings.get_selections()
+        self.settings_selections = self.settings.selections
         print(self.settings_selections)
 
     def draw_pieces(self):
