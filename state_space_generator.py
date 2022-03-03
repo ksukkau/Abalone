@@ -5,4 +5,7 @@ import tkinter as tk
 
 
 class StateSpaceGenerator:
+    """
+    Encapsulates the methods required to generate the state space at any given game state.
+    """
     pass
