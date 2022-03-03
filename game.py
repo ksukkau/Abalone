@@ -22,6 +22,7 @@ class GameBoard(tk.Tk):
         self.spot_radius = 25 * self.board_width / 550
         self.piece_radius = 26 * self.board_width / 550
         self.selection_radius = 26 * self.board_width / 550
+        self.selection_redraw_radius = 23 * self.board_width / 550
         self.turn_count_black = 0
         self.turn_count_white = 0
         self.turn = "white"
@@ -85,6 +86,12 @@ class GameBoard(tk.Tk):
                                                         piece_y_pos - self.selection_radius,
                                                         piece_x_pos + self.selection_radius,
                                                         piece_y_pos + self.selection_radius, fill="green")
+
+                                self.canvas.create_oval(piece_x_pos - self.selection_redraw_radius,
+                                                        piece_y_pos - self.selection_redraw_radius,
+                                                        piece_x_pos + self.selection_redraw_radius,
+                                                        piece_y_pos + self.selection_redraw_radius,
+                                                        fill=selected_piece_color)
                             else:
                                 selected_row[col].update({"selected": False})
 
