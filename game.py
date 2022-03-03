@@ -5,6 +5,9 @@ import tkinter as tk
 
 
 class GameBoard(tk.Tk):
+    """
+    Encapsulates the methods related to drawing, initializing, and creating the game board for Abalone.
+    """
 
     def __init__(self):
         super().__init__()
@@ -43,27 +46,10 @@ class GameBoard(tk.Tk):
         self.board_screen_pos = None
         self.game_board = None
 
-    def new_game_window(self):
-        self.set_move_counter()
-        self.create_controls()
-
-        self.initialize_game_board_array()
-        self.setup_board()
-        self.draw_game_board()
-        self.initialize_game_board_pieces()
-
-        self.draw_timer_window()
-        self.show_timer()
-        self.draw_moves_window()
-        self.show_moves()
-
-        self.canvas.bind("<Button-1>", self.click_event_listener_engine)  # sets up mouse click event listener
-        self.mainloop()
-
     def click_event_listener_engine(self, event):
         """
-        Handles the user's on-screen click, determines if the player has clicked on a game piece and if so highlights
-        the selected game piece chartreuse.
+        Handles the user's on-screen click event, and determines if the player has clicked on a game piece. If a game
+        piece has been clicked, it is highlighted and the selected game piece is colored chartreuse.
         :param event: an Event object containing various data attributes including the x and y coords of the click event
         """
         RANGE = 20
@@ -117,7 +103,7 @@ class GameBoard(tk.Tk):
     def print_selected_piece_coord(self, row, col):
         """
         Translates the coordinates for the selected game piece according to the I-A and 1-9 game board
-        coordinate system.
+        coordinate system, and prints it to the terminal.
         :param row: an int
         :param col: an int
         """
@@ -141,36 +127,49 @@ class GameBoard(tk.Tk):
         print(f"Selected piece at: {row_coord}{col_coord}")
 
     def draw_game_board(self):
-        x = self.width // 2
-        y = self.height // 2
-        r = 500 // 2
+        """
+        Draws the blank game spaces on the game board.
+        """
+        x_pos = self.width // 2
+        y_pos = self.height // 2
+        radius = 500 // 2
         cos60 = math.cos(math.pi / 3)
         sin60 = math.sin(math.pi / 3)
-        self.canvas.create_polygon(x - r, y, x - r * cos60, y - r * sin60, x + r * cos60, y - r * sin60,
-                                   x + r, y, x + r * cos60, y + r * sin60, x - r * cos60, y + r * sin60,
+        self.canvas.create_polygon(x_pos - radius, y_pos, x_pos - radius * cos60, y_pos - radius * sin60, x_pos +
+                                   radius * cos60, y_pos - radius * sin60, x_pos + radius, y_pos, x_pos + radius *
+                                   cos60, y_pos + radius * sin60, x_pos - radius * cos60, y_pos + radius * sin60,
                                    fill="slate grey")
-        self.draw_board_spots(x, y, r, sin60)
+        self.draw_board_spots(x_pos, y_pos, radius, sin60)
         self.canvas.grid(row=2, column=2, rowspan=25)
 
-    def draw_board_spots(self, x, y, r, sin60):
+    def draw_board_spots(self, x_pos: int, y_pos: int, radius: int, sin60: float):
+        """
+        Iterates through the game board containing the representation of the game board and draws the appropriate game
+        piece color to the appropriate spaces on the game board.
+        :param x_pos: an int
+        :param y_pos: an int
+        :param radius: an int
+        :param sin60: a float
+        """
         for row in range(self.hexes_across):
             row_key = self.get_row_key(row)
-            spot_y = (y - r * sin60) + (row * self.hex_size * sin60) + (self.hex_size * sin60 / 2)
+            spot_y = (y_pos - radius * sin60) + (row * self.hex_size * sin60) + (self.hex_size * sin60 / 2)
             row_length = self.calculate_row_length(row)
-            start_x = x - (row_length * self.hex_size // 2) + (self.hex_size // 2)
+            start_x = x_pos - (row_length * self.hex_size // 2) + (self.hex_size // 2)
             for col in range(row_length):
                 spot_x = start_x + col * self.hex_size
                 self.canvas.create_oval(spot_x - self.spot_radius, spot_y - self.spot_radius,
                                         spot_x + self.spot_radius, spot_y + self.spot_radius, fill="light grey")
-                if not self.game_board.get(row_key)[col].get(
-                        "x_pos"):  # populating 2D array with positions of drawn pieces
+
+                # populates game_board dictionary with coordinates of each game piece based on the specified game layout
+                if not self.game_board.get(row_key)[col].get("x_pos"):
                     self.game_board.get(row_key)[col].update({"x_pos": int(spot_x)})
                     self.game_board.get(row_key)[col].update({"y_pos": int(spot_y)})
 
     def initialize_game_board_pieces(self):
         """
         Iterates through the game_board data structure, retrieves the x and y coordinates of each board space,
-        and draws the game piece on the board of the specified color.
+        and draws the game piece on the board of appropriate specified color.
         """
         for row in range(self.hexes_across):
             row_key = self.get_row_key(row)
@@ -183,8 +182,11 @@ class GameBoard(tk.Tk):
 
                 self.draw_game_piece(piece_color, piece_x, piece_y)
 
-
-    def setup_board(self):
+    def setup_default_game_board_pieces(self):
+        """
+        Initializes the game board array representing the game board with the game pieces of each color in the standard,
+        default, layout.
+        """
         lines_to_fill = 2
 
         for row in range(lines_to_fill):
@@ -193,7 +195,7 @@ class GameBoard(tk.Tk):
             for col in range(self.calculate_row_length(row)):
                 self.game_board.get(row_key)[col].update({"color": "white"})
 
-                if row == 1:  # populates front 3 white  pieces
+                if row == 1:  # populates front 3 white pieces
                     for nested_col in range(2, 5):
                         self.game_board.get("row2")[nested_col].update({"color": "white"})
 
@@ -207,6 +209,11 @@ class GameBoard(tk.Tk):
                 self.game_board.get(row_key)[col].update({"color": "black"})
 
     def initialize_game_board_array(self):
+        """
+        Initializes the dictionary representing the game board containing arrays of dictionaries that contain the
+        various attributes of the game pieces. These attributes are: the column number, piece color, if the piece
+        has been clicked on by the player, and the piece's x and y coordinates.
+        """
         self.game_board = {}
 
         for col in range(self.hexes_across):
@@ -218,14 +225,19 @@ class GameBoard(tk.Tk):
                 self.game_board.get(row_key).append(
                     {"colNum": row, "color": None, "selected": False, "x_pos": None, "y_pos": None})
 
-    def calculate_row_length(self, i):
-        if self.hexes_per_side + i >= self.hexes_across:
-            row_length = self.hexes_per_side + (self.hexes_across - i) - 1
+    def calculate_row_length(self, row: int) -> int:
+        """
+        Calculates, and returns, the number of pieces on a given column within the game board.
+        :param row: an int
+        :return: an int
+        """
+        if self.hexes_per_side + row >= self.hexes_across:
+            row_length = self.hexes_per_side + (self.hexes_across - row) - 1
         else:
-            row_length = self.hexes_per_side + i
+            row_length = self.hexes_per_side + row
         return row_length
 
-    def get_row_key(self, row, offset=0):
+    def get_row_key(self, row: int, offset=0) -> str:
         """
         Generates the key used for the game_board dictionary for denoting the rows of the game board. An offset
         may be specified as the index starts at 0, otherwise the offset is default at 0.
@@ -236,6 +248,9 @@ class GameBoard(tk.Tk):
         return "row" + str(row + offset)
 
     def draw_timer_window(self):
+        """
+        Initializes and draws the window containing the turn timer for both the black and white team.
+        """
         timer_white_label = Label(self, text="White Player")
         self.white_timer_box = Listbox(self, height=25, width=20)
         timer_white_label.grid(row=1, column=3, padx=5, columnspan=2)
@@ -246,21 +261,33 @@ class GameBoard(tk.Tk):
         self.black_timer_box.grid(row=9, column=3, rowspan=6, columnspan=1, padx=5)
 
     def draw_moves_window(self):
-
+        """
+        Initializes the window used to display the move count of both the black and white team.
+        """
         self.white_moves_box = Listbox(self, height=25, width=20)
         self.white_moves_box.grid(row=2, column=4, rowspan=6, columnspan=1, padx=5)
         self.black_moves_box = Listbox(self, height=25, width=20)
         self.black_moves_box.grid(row=9, column=4, rowspan=6, columnspan=1, padx=5)
 
     def show_timer(self):
+        """
+        Initializes the data attribute variable to display the total time and time per move for both the black and white
+        teams.
+        """
         self.black_timer_box.insert(END, f"Total Time: ", "Time for per move: ")
         self.white_timer_box.insert(END, f"Total Time: ", "Time for per move: ")
 
     def show_moves(self):
+        """
+        Initializes the move history window within the GUI for both black and white teams.
+        """
         self.white_moves_box.insert(END, "Moves:")
         self.black_moves_box.insert(END, "Moves:")
 
     def player_info(self):
+        """
+        Initializes and draws the statistics for both players, and includes the move and piece count.
+        """
         self.set_pieces_count()
         player_one = Label(self, text="White")
         player_one.grid(column=1, padx=3)
@@ -277,11 +304,17 @@ class GameBoard(tk.Tk):
         player_two_pieces_label.grid(column=1, padx=3)
 
     def set_pieces_count(self):
+        """
+        Initializes the white and black game piece count if it hasn't been initialized.
+        """
         if self.white_pieces is None and self.black_pieces is None:
             self.white_pieces = 14
             self.black_pieces = 14
 
     def set_move_counter(self):
+        """
+        Initializes the turn and game piece counter within the GUI, and draws it to the window.
+        """
         try:
             self.get_settings_selections()
         except:
@@ -291,6 +324,9 @@ class GameBoard(tk.Tk):
         self.player_info()
 
     def create_controls(self):
+        """
+        Initializes and draws the buttons within the GUI.
+        """
         start = Button(self, text="Start", width=15)
         stop = Button(self, text="Stop", width=15)
         pause = Button(self, text="Pause", width=15)
@@ -306,22 +342,56 @@ class GameBoard(tk.Tk):
         settings.grid(column=1, row=13)
 
     def settings_set_up(self):
+        """
+        Calls the required helper methods to initialize the settings menu.
+        """
         self.new_settings_window()
         self.get_settings_selections()
 
     def new_settings_window(self):
+        """
+        Calls the required helper methods to draw the settings window when the user clicks the 'Settings' buttons.
+        """
         self.settings = Settings(self)
         self.settings.focus_set()
         self.settings.draw_settings()
         self.wait_window(self.settings)
 
     def get_settings_selections(self):
+        """
+        Retrieves the specified settings that the user has selected and prints it to the terminal.
+        """
         self.settings_selections = self.settings.selections
         print(self.settings_selections)
 
+    def new_game_window(self):
+        """
+        Performs the method calls for running the Abalone game.
+        """
+        self.set_move_counter()
+        self.create_controls()
+
+        self.initialize_game_board_array()
+        self.setup_default_game_board_pieces()
+        self.draw_game_board()
+        self.initialize_game_board_pieces()
+
+        self.draw_timer_window()
+        self.show_timer()
+        self.draw_moves_window()
+        self.show_moves()
+
+        self.canvas.bind("<Button-1>", self.click_event_listener_engine)  # sets up mouse click event listener
+        self.mainloop()
 
 
+def main():
+    """
+    Main function for the Abalone game that acts as an entry point to run the game.
+    """
+    g = GameBoard()
+    g.new_game_window()
 
-g = GameBoard()
 
-g.new_game_window()
+if __name__ == '__main__':
+    main()
