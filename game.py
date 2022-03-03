@@ -14,7 +14,7 @@ class GameBoard(tk.Tk):
         self.title("Game")
         self.width = 700
         self.height = 500
-        self.canvas = Canvas(self, width=self.width, height=self.height)
+        self.canvas = Canvas(self, width=self.width, height=self.height, bg="ivory")
         self.board_width = 500
         self.hexes_per_side = 5
         self.hexes_across = 2 * self.hexes_per_side - 1
@@ -49,7 +49,7 @@ class GameBoard(tk.Tk):
     def click_event_listener_engine(self, event):
         """
         Handles the user's on-screen click event, and determines if the player has clicked on a game piece. If a game
-        piece has been clicked, it is highlighted and the selected game piece is colored chartreuse.
+        piece has been clicked, it is highlighted and the selected game piece is colored green.
         :param event: an Event object containing various data attributes including the x and y coords of the click event
         """
         RANGE = 20
@@ -84,7 +84,7 @@ class GameBoard(tk.Tk):
                                 self.canvas.create_oval(piece_x_pos - self.selection_radius,
                                                         piece_y_pos - self.selection_radius,
                                                         piece_x_pos + self.selection_radius,
-                                                        piece_y_pos + self.selection_radius, fill="chartreuse")
+                                                        piece_y_pos + self.selection_radius, fill="green")
                             else:
                                 selected_row[col].update({"selected": False})
 
@@ -368,6 +368,7 @@ class GameBoard(tk.Tk):
         """
         Performs the method calls for running the Abalone game.
         """
+        self.configure(bg="ivory")
         self.set_move_counter()
         self.create_controls()
 
