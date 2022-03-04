@@ -42,7 +42,8 @@ class GameBoard(tk.Tk):
         self.white_pieces = None
         self.black_pieces = None
         self.settings = None
-        self.settings_selections = {'color': 0, 'mode': 1, 'config': 0, 'turns': 15, 'time1': 30, 'time2': 30}
+        self.settings_selections = {'color': 0, 'mode_p1': "Human", 'mode_p2': "Human", 'config': 0, 'turns': 15,
+                                    'time1': 30, 'time2': 30}
         self.spot_coords = {}
         self.board_screen_pos = None
         self.game_board = None

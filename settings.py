@@ -14,15 +14,14 @@ class Settings(tk.Toplevel):
         self.title("Settings")
         self.colors = {"Black": 1,
                        "White": 2}
-        self.modes = {"Human v Human": 1,
-                      "Human v Computer": 2,
-                      "Computer v Computer": 3}
+        self.modes = ["Human", "Computer"]
         self.configs = {"Standard": 1,
                         "German Daisy": 2,
                         "Belgian Daisy": 3
                         }
         self.color_choice = IntVar()
-        self.mode_choice = IntVar()
+        self.mode_choice_p1 = StringVar()
+        self.mode_choice_p2 = StringVar()
         self.board_config = IntVar()
         self.turn_value = IntVar()
         self.turn_timer_value = IntVar()
@@ -52,7 +51,7 @@ class Settings(tk.Toplevel):
         Draws and creates the settings menu portion to allow the player to select which color they would like
         to play as.
         """
-        player_color_label = LabelFrame(self, text="Select player color")
+        player_color_label = LabelFrame(self, text="Select Player 1 color")
         player_color_label.grid(sticky=W, padx=10)
 
         for (text, color) in self.colors.items():
@@ -66,9 +65,16 @@ class Settings(tk.Toplevel):
         select_game_mode_label = LabelFrame(self, text="Select game mode")
         select_game_mode_label.grid(sticky=W, padx=10)
 
-        for (text, mode) in self.modes.items():
-            Radiobutton(select_game_mode_label, text=text, variable=self.mode_choice,
-                        value=mode).grid(sticky=W)
+        # for (text, mode) in self.modes.items():
+        #     Radiobutton(select_game_mode_label, text=text, variable=self.mode_choice,
+        #                 value=mode).grid(sticky=W)
+        self.mode_choice_p1.set("Human")
+        Label(select_game_mode_label, text="Player 1").grid(sticky=W)
+        OptionMenu(select_game_mode_label, self.mode_choice_p1, *self.modes).grid(sticky=W)
+        self.mode_choice_p2.set("Human")
+        Label(select_game_mode_label, text="Player 2").grid(sticky=W)
+        OptionMenu(select_game_mode_label, self.mode_choice_p2, *self.modes).grid(sticky=W)
+
 
     def select_configuration(self):
         """
@@ -121,7 +127,8 @@ class Settings(tk.Toplevel):
         Retrieves the specified settings by the player and passes the settings to the main program loop.
         """
         self.selections['color'] = self.color_choice.get()
-        self.selections["mode"] = self.mode_choice.get()
+        self.selections["mode_p1"] = self.mode_choice_p1.get()
+        self.selections["mode_p2"] = self.mode_choice_p2.get()
         self.selections["config"] = self.board_config.get()
         self.selections["turns"] = self.turn_value.get()
         self.selections["time1"] = self.turn_timer_value.get()
