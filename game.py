@@ -11,10 +11,17 @@ class GameBoard(tk.Tk):
 
     def __init__(self):
         super().__init__()
+
+        # default font and color
+        self.font = "Montserrat", 15
+        self.font_color = "White"
+        # default background color
+        self.bg = "#303b41"
+
         self.title("Game")
         self.width = 700
         self.height = 500
-        self.canvas = Canvas(self, width=self.width, height=self.height, bg="ivory")
+        self.canvas = Canvas(self, width=self.width, height=self.height, bg=self.bg, highlightthickness=0)
         self.board_width = 500
         self.hexes_per_side = 5
         self.hexes_across = 2 * self.hexes_per_side - 1
@@ -47,6 +54,7 @@ class GameBoard(tk.Tk):
         self.spot_coords = {}
         self.board_screen_pos = None
         self.game_board = None
+
 
     def click_event_listener_engine(self, event):
         """
@@ -146,9 +154,9 @@ class GameBoard(tk.Tk):
         self.canvas.create_polygon(x_pos - radius, y_pos, x_pos - radius * cos60, y_pos - radius * sin60, x_pos +
                                    radius * cos60, y_pos - radius * sin60, x_pos + radius, y_pos, x_pos + radius *
                                    cos60, y_pos + radius * sin60, x_pos - radius * cos60, y_pos + radius * sin60,
-                                   fill="slate grey")
+                                   fill=self.bg)
         self.draw_board_spots(x_pos, y_pos, radius, sin60)
-        self.canvas.grid(row=2, column=2, rowspan=25)
+        self.canvas.grid(row=2, column=2, rowspan=25, columnspan=2)
 
     def draw_board_spots(self, x_pos: int, y_pos: int, radius: int, sin60: float):
         """
@@ -167,7 +175,7 @@ class GameBoard(tk.Tk):
             for col in range(row_length):
                 spot_x = start_x + col * self.hex_size
                 self.canvas.create_oval(spot_x - self.spot_radius, spot_y - self.spot_radius,
-                                        spot_x + self.spot_radius, spot_y + self.spot_radius, fill="light grey")
+                                        spot_x + self.spot_radius, spot_y + self.spot_radius, fill="slate grey")
 
                 # populates game_board dictionary with coordinates of each game piece based on the specified game layout
                 if not self.game_board.get(row_key)[col].get("x_pos"):
@@ -259,23 +267,24 @@ class GameBoard(tk.Tk):
         """
         Initializes and draws the window containing the turn timer for both the black and white team.
         """
-        timer_white_label = Label(self, text="White Player")
+
+        timer_white_label = Label(self, text="White Player", bg=self.bg, font=self.font, fg=self.font_color)
         self.white_timer_box = Listbox(self, height=25, width=20)
-        timer_white_label.grid(row=1, column=3, padx=5, columnspan=2)
-        self.white_timer_box.grid(row=2, column=3, rowspan=6, columnspan=1, padx=5)
-        timer_black_label = Label(self, text="Black Player")
+        timer_white_label.grid(row=1, column=4, padx=5, columnspan=2)
+        self.white_timer_box.grid(row=2, column=4, rowspan=6, columnspan=1, padx=5, pady=5)
+        timer_black_label = Label(self, text="Black Player", bg=self.bg, font=self.font, fg=self.font_color)
         self.black_timer_box = Listbox(self, height=25, width=20)
-        timer_black_label.grid(row=8, column=3, padx=5, columnspan=2)
-        self.black_timer_box.grid(row=9, column=3, rowspan=6, columnspan=1, padx=5)
+        timer_black_label.grid(row=8, column=4, padx=5, columnspan=2)
+        self.black_timer_box.grid(row=9, column=4, rowspan=6, columnspan=1, padx=5, pady=5)
 
     def draw_moves_window(self):
         """
         Initializes the window used to display the move count of both the black and white team.
         """
         self.white_moves_box = Listbox(self, height=25, width=20)
-        self.white_moves_box.grid(row=2, column=4, rowspan=6, columnspan=1, padx=5)
+        self.white_moves_box.grid(row=2, column=5, rowspan=6, columnspan=1, padx=5, pady=5)
         self.black_moves_box = Listbox(self, height=25, width=20)
-        self.black_moves_box.grid(row=9, column=4, rowspan=6, columnspan=1, padx=5)
+        self.black_moves_box.grid(row=9, column=5, rowspan=6, columnspan=1, padx=5, pady=5)
 
     def show_timer(self):
         """
@@ -296,20 +305,23 @@ class GameBoard(tk.Tk):
         """
         Initializes and draws the statistics for both players, and includes the move and piece count.
         """
+        font = ("Montserrat", 18, "bold")
         self.set_pieces_count()
-        player_one = Label(self, text="White")
-        player_one.grid(column=1, padx=3)
-        player_one_moves_label = Label(self, text=f"Moves\n{self.white_move_count}")
-        player_one_moves_label.grid(column=1, padx=3)
-        player_one_pieces_label = Label(self, text=f"Pieces\n{self.white_pieces}")
-        player_one_pieces_label.grid(column=1, padx=3)
+        player_one = Label(self, text="White", bg=self.bg, font=font, fg=self.font_color)
+        player_one.grid(column=2, padx=3, row=1)
+        player_one_moves_label = Label(self, text=f"Moves\n{self.white_move_count}", bg=self.bg, font=self.font, fg=self.font_color)
+        player_one_moves_label.grid(column=2, row=2)
+        player_one_pieces_label = Label(self, text=f"Pieces lost\n{self.white_pieces}", bg=self.bg, font=self.font, fg=self.font_color)
+        player_one_pieces_label.grid(column=2, row=3)
 
-        player_two = Label(self, text="Black")
-        player_two.grid(column=1, padx=3)
-        player_two_moves_label = Label(self, text=f"Moves\n{self.black_move_count}")
-        player_two_moves_label.grid(column=1, padx=3)
-        player_two_pieces_label = Label(self, text=f"Pieces\n{self.black_pieces}")
-        player_two_pieces_label.grid(column=1, padx=3)
+        player_two = Label(self, text="Black", bg=self.bg, font=font, fg=self.font_color)
+        player_two.grid(column=3, padx=3, row=1)
+        player_two_moves_label = Label(self, text=f"Moves\n{self.black_move_count}",bg=self.bg, font=self.font,
+                                       fg=self.font_color)
+        player_two_moves_label.grid(column=3, row=2)
+        player_two_pieces_label = Label(self, text=f"Pieces lost\n{self.black_pieces}", bg=self.bg, font=self.font,
+                                        fg=self.font_color)
+        player_two_pieces_label.grid(column=3, row=3)
 
     def set_pieces_count(self):
         """
@@ -335,19 +347,23 @@ class GameBoard(tk.Tk):
         """
         Initializes and draws the buttons within the GUI.
         """
-        start = Button(self, text="Start", width=15)
-        stop = Button(self, text="Stop", width=15)
-        pause = Button(self, text="Pause", width=15)
-        reset = Button(self, text="Reset", width=15)
-        undo = Button(self, text="Undo Last", width=15)
-        settings = Button(self, text="Settings", width=15, command=self.settings_set_up)
+        font2 = "Montserrat", 10
+        frame = Frame(self, bg=self.bg)
+        start = Button(frame, text="Start", width=10, bg=self.bg, font=font2, fg=self.font_color)
+        stop = Button(frame, text="Stop", width=10, bg=self.bg, font=font2, fg=self.font_color)
+        pause = Button(frame, text="Pause", width=10, bg=self.bg, font=font2, fg=self.font_color)
+        reset = Button(frame, text="Reset", width=10, bg=self.bg, font=font2, fg=self.font_color)
+        undo = Button(frame, text="Undo Last", width=10, bg=self.bg, font=font2, fg=self.font_color)
+        settings = Button(frame, text="Settings", width=10, bg=self.bg, font=font2, fg=self.font_color,
+                          command=self.settings_set_up)
 
-        start.grid(column=1, row=8)
-        stop.grid(column=1, row=9)
-        pause.grid(column=1, row=10)
-        reset.grid(column=1, row=11)
-        undo.grid(column=1, row=12)
-        settings.grid(column=1, row=13)
+        frame.grid(row=13, columnspan=5, sticky=W, padx=30)
+        start.grid(row=13, column=2, padx=3)
+        stop.grid(row=13, column=3, padx=3)
+        pause.grid(row=13, column=4, padx=3)
+        reset.grid(row=13, column=5, padx=3)
+        undo.grid(row=13, column=6, padx=3)
+        settings.grid(row=13, column=7, padx=3)
 
     def settings_set_up(self):
         """
@@ -376,7 +392,7 @@ class GameBoard(tk.Tk):
         """
         Performs the method calls for running the Abalone game.
         """
-        self.configure(bg="ivory")
+        self.configure(bg=self.bg)
         self.set_move_counter()
         self.create_controls()
 
