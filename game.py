@@ -55,7 +55,6 @@ class GameBoard(tk.Tk):
         self.board_screen_pos = None
         self.game_board = None
 
-
     def click_event_listener_engine(self, event):
         """
         Handles the user's on-screen click event, and determines if the player has clicked on a game piece. If a game
@@ -144,7 +143,7 @@ class GameBoard(tk.Tk):
 
     def draw_game_board(self):
         """
-        Draws the blank game spaces on the game board.
+        Draws the hexagonal shape of the board.
         """
         x_pos = self.width // 2
         y_pos = self.height // 2
@@ -155,13 +154,13 @@ class GameBoard(tk.Tk):
                                    radius * cos60, y_pos - radius * sin60, x_pos + radius, y_pos, x_pos + radius *
                                    cos60, y_pos + radius * sin60, x_pos - radius * cos60, y_pos + radius * sin60,
                                    fill=self.bg)
-        self.draw_board_spots(x_pos, y_pos, radius, sin60)
+        self.draw_board_spaces(x_pos, y_pos, radius, sin60)
         self.canvas.grid(row=2, column=2, rowspan=25, columnspan=2)
 
-    def draw_board_spots(self, x_pos: int, y_pos: int, radius: int, sin60: float):
+    def draw_board_spaces(self, x_pos: int, y_pos: int, radius: int, sin60: float):
         """
-        Iterates through the game board containing the representation of the game board and draws the appropriate game
-        piece color to the appropriate spaces on the game board.
+        Iterates through the game board containing the representation of the game board and draws a circle to represent
+        a game board space in the appropriate location.
         :param x_pos: an int
         :param y_pos: an int
         :param radius: an int
@@ -253,7 +252,8 @@ class GameBoard(tk.Tk):
             row_length = self.hexes_per_side + row
         return row_length
 
-    def get_row_key(self, row: int, offset=0) -> str:
+    @staticmethod
+    def get_row_key(row: int, offset=0) -> str:
         """
         Generates the key used for the game_board dictionary for denoting the rows of the game board. An offset
         may be specified as the index starts at 0, otherwise the offset is default at 0.
