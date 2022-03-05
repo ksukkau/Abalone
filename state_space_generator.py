@@ -26,27 +26,31 @@ class StateSpaceGenerator:
         pass # for reading from our actual board not applicable for test input
 
     def possible_lead_piece_to_select(self):
-        #from current board
-        #if piece has space to move into
+        # from current board
+        # if piece has space to move into
         # generate move then check for 2 piece groups with pre move layout
         # if is next to opponent color
-        #check for 2 piece groups
-        #else move on to next piece
+        # check for 2 piece groups
+        # else move on to next piece
         pass
 
     def possible_2_piece_groups(self):
-        #check for adjacent pieces
-        #if second piece adjacent select check for empty space to move into
-        #geneerate move
-        #check for third piece with pre move layout
-        #else check if group bigger than opponents group
+        # check for adjacent pieces
+        # if second piece adjacent select check for empty space to move into
+        # generate move
+        # if space to move into sidestep
+        # generate move
+        # check for third piece with pre move layout
+        # else check if group bigger than opponents group
         pass
 
     def check_for_3_piece_groups(self):
-        #check for pieces adjacent and in line with 2 piece groups
-        #if space to move into
-        #generate move
-        #if opponents check for piece group bgger
+        # if check for pieces adjacent and in line with 2 piece groups
+        # if space to move into inline
+        # generate move
+        # if space to move into sidestep
+        # generate move
+        # if opponents adjacent check for piece group bgger
 
         # 3 is max group size
         pass
@@ -60,7 +64,7 @@ class StateSpaceGenerator:
 
     def move(self):
         #if previous checks pass create move notation and output move
-        #call new board(
+        #call new board
         pass
 
     def new_board(self):
