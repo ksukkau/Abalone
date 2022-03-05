@@ -11,6 +11,8 @@ class StateSpaceGenerator:
     def __init__(self):
         self.turn = ""
         self.board = ""
+        self.possible_boards = None
+        self.group = None
 
     def read_test_input(self, path):
         with open(path, 'r') as input_file:
@@ -24,16 +26,28 @@ class StateSpaceGenerator:
         pass # for reading from our actual board not applicable for test input
 
     def possible_lead_piece_to_select(self):
-        #if piece has space to move into or is next to opponent color
+        #from current board
+        #if piece has space to move into
+        # generate move then check for 2 piece groups with pre move layout
+        # if is next to opponent color
+        #check for 2 piece groups
         #else move on to next piece
         pass
 
     def possible_2_piece_groups(self):
         #check for adjacent pieces
+        #if second piece adjacent select check for empty space to move into
+        #geneerate move
+        #check for third piece with pre move layout
+        #else check if group bigger than opponents group
         pass
 
     def check_for_3_piece_groups(self):
         #check for pieces adjacent and in line with 2 piece groups
+        #if space to move into
+        #generate move
+        #if opponents check for piece group bgger
+
         # 3 is max group size
         pass
 
@@ -45,11 +59,13 @@ class StateSpaceGenerator:
         pass
 
     def move(self):
-        #if previous checks pass create move notation and redraw board
+        #if previous checks pass create move notation and output move
+        #call new board(
         pass
 
     def new_board(self):
         # board state after move
+        # stored in a list
         pass
 
 
