@@ -103,12 +103,14 @@ class StateSpaceGenerator:
         for row_key in self.game.game_board:
             row = self.game.game_board[row_key]
             for column_detail in row:
+                # if "white" in column_detail.values():
+                #     print(column_detail)
                 if self.turn in column_detail.values():
                     self.possible_lead_piece_to_select(row_key, column_detail)
 
     def possible_lead_piece_to_select(self, row_key, column_detail):
         piece = self.translate_piece_value_for_output(int(row_key.replace("row", '')), column_detail["colNum"])
-        print(piece)
+        #print(piece)
         move_directions = {
             "NE": (-1, 1),
             "E": (0, 1),
@@ -125,7 +127,7 @@ class StateSpaceGenerator:
             try:
                 space_value = self.game.game_board[new_row_key][new_column]['color']
                 if space_value is None:
-                    print(space_value)
+                    #print(space_value)
                     # piece can move
                     pieces = (piece, piece)
                     self.move("i", pieces, direction)
@@ -138,7 +140,7 @@ class StateSpaceGenerator:
                     pass
                     # piece cannot move
                     # move on to next piece
-            except:
+            except IndexError:
                 print("outside board area")
         # from current board
         # if piece has space to move into
