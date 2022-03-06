@@ -171,8 +171,13 @@ class StateSpaceGenerator:
         new_col_dir = direction[1]
 
         if row_num in UPPER_HALF:
+            # checks for SE movement for pieces in the middle row
+            if row_num == MIDDLE_ROW and new_row_dir == 1:
+                if new_col_dir == 1:
+                    new_col_dir = 0
+
             # checks for NE movement
-            if new_row_dir == -1:
+            elif new_row_dir == -1:
                 if new_col_dir == 1:
                     new_col_dir = 0
 
@@ -181,10 +186,6 @@ class StateSpaceGenerator:
                 if new_col_dir == -1:
                     new_col_dir = 0
 
-            # checks for SE movement for pieces in the middle row
-            elif row_num == MIDDLE_ROW and new_row_dir == 1:
-                if new_col_dir == 1:
-                    new_col_dir = 0
 
         # checks for pieces in the bottom half of the game board
         else:
