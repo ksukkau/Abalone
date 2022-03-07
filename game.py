@@ -155,7 +155,7 @@ class GameBoard(tk.Tk):
                                    cos60, y_pos + radius * sin60, x_pos - radius * cos60, y_pos + radius * sin60,
                                    fill=self.bg)
         self.draw_board_spaces(x_pos, y_pos, radius, sin60)
-        self.canvas.grid(row=2, column=2, rowspan=25, columnspan=2)
+        self.canvas.grid(row=2, column=2, rowspan=25, columnspan=3)
 
     def draw_board_spaces(self, x_pos: int, y_pos: int, radius: int, sin60: float):
         """
@@ -270,21 +270,21 @@ class GameBoard(tk.Tk):
 
         timer_white_label = Label(self, text="White Player", bg=self.bg, font=self.font, fg=self.font_color)
         self.white_timer_box = Listbox(self, height=25, width=20)
-        timer_white_label.grid(row=1, column=4, padx=5, columnspan=2)
-        self.white_timer_box.grid(row=2, column=4, rowspan=6, columnspan=1, padx=5, pady=5)
+        timer_white_label.grid(row=1, column=5, padx=5, columnspan=2)
+        self.white_timer_box.grid(row=2, column=5, rowspan=6, columnspan=1, padx=5, pady=5)
         timer_black_label = Label(self, text="Black Player", bg=self.bg, font=self.font, fg=self.font_color)
         self.black_timer_box = Listbox(self, height=25, width=20)
-        timer_black_label.grid(row=8, column=4, padx=5, columnspan=2)
-        self.black_timer_box.grid(row=9, column=4, rowspan=6, columnspan=1, padx=5, pady=5)
+        timer_black_label.grid(row=8, column=5, padx=5, columnspan=2)
+        self.black_timer_box.grid(row=9, column=5, rowspan=6, columnspan=1, padx=5, pady=5)
 
     def draw_moves_window(self):
         """
         Initializes the window used to display the move count of both the black and white team.
         """
         self.white_moves_box = Listbox(self, height=25, width=20)
-        self.white_moves_box.grid(row=2, column=5, rowspan=6, columnspan=1, padx=5, pady=5)
+        self.white_moves_box.grid(row=2, column=6, rowspan=6, columnspan=1, padx=5, pady=5)
         self.black_moves_box = Listbox(self, height=25, width=20)
-        self.black_moves_box.grid(row=9, column=5, rowspan=6, columnspan=1, padx=5, pady=5)
+        self.black_moves_box.grid(row=9, column=6, rowspan=6, columnspan=1, padx=5, pady=5)
 
     def show_timer(self):
         """
@@ -314,14 +314,22 @@ class GameBoard(tk.Tk):
         player_one_pieces_label = Label(self, text=f"Pieces lost\n{self.white_pieces}", bg=self.bg, font=self.font, fg=self.font_color)
         player_one_pieces_label.grid(column=2, row=3)
 
+        self.current_move_timer()
+
         player_two = Label(self, text="Black", bg=self.bg, font=font, fg=self.font_color)
-        player_two.grid(column=3, padx=3, row=1)
-        player_two_moves_label = Label(self, text=f"Moves\n{self.black_move_count}",bg=self.bg, font=self.font,
+        player_two.grid(column=4, padx=3, row=1)
+        player_two_moves_label = Label(self, text=f"Moves\n{self.black_move_count}", bg=self.bg, font=self.font,
                                        fg=self.font_color)
-        player_two_moves_label.grid(column=3, row=2)
+        player_two_moves_label.grid(column=4, row=2)
         player_two_pieces_label = Label(self, text=f"Pieces lost\n{self.black_pieces}", bg=self.bg, font=self.font,
                                         fg=self.font_color)
-        player_two_pieces_label.grid(column=3, row=3)
+        player_two_pieces_label.grid(column=4, row=3)
+
+    def current_move_timer(self):
+        font = ("Montserrat", 18, "bold")
+        current_move_timer = Label(self, text=f"Time:\n3:00", bg=self.bg, font=font,
+                                   fg=self.font_color)
+        current_move_timer.grid(column=3, row=2)
 
     def set_pieces_count(self):
         """
