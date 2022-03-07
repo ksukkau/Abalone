@@ -9,12 +9,28 @@ class StateSpaceGenerator:
     """
     Encapsulates the methods required to generate the state space at any given game state.
     """
+
     def __init__(self):
         self.turn = ""
         self.board_text = ""
         self.possible_boards = None
         self.group = None
         self.game = GameBoard()
+        self.rows = {
+            "I": 0,
+            "H": 1,
+            "G": 2,
+            "F": 3,
+            "E": 4,
+            "D": 5,
+            "C": 6,
+            "B": 7,
+            "A": 8
+        }
+        self.colors = {
+            "b": "black",
+            "w": "white"
+        }
 
     def read_test_input(self, path):
         """
@@ -36,31 +52,24 @@ class StateSpaceGenerator:
         :return: None
         """
         self.game.initialize_game_board_array()
-        rows = {
-            "I": 0,
-            "H": 1,
-            "G": 2,
-            "F": 3,
-            "E": 4,
-            "D": 5,
-            "C": 6,
-            "B": 7,
-            "A": 8
-        }
-        colors = {
-            "b": "black",
-            "w": "white"
-        }
 
         piece_list = self.board_text.split(',')
         for item in piece_list:
-            row = rows[item[0]]
+            row = self.rows[item[0]]
             row_key = "row" + str(row)
             col = int(item[1])
-            color = colors[item[2]]
+            color = self.colors[item[2]]
             column = self.calculate_column(row, col)
             row_list = self.game.game_board[row_key]
             row_list[column]['color'] = color
+
+    def translate_single_piece_to_board_notation(self, piece):
+
+        row = self.rows[piece[0]]
+        row_key = "row" + str(row)
+        col = int(piece[1])
+        column = self.calculate_column(row, col)
+        return row_key, column
 
     @staticmethod
     def calculate_column(row, col):
@@ -135,11 +144,12 @@ class StateSpaceGenerator:
                     # piece can move
                     pieces = (piece, piece)
                     self.move("i", pieces, direction)
-                    #change this to generate move and board, then check for groups
+                    self.update_board("i", pieces, new_row_key, new_column)
+                    # change this to generate move and board, then check for groups
                 elif space_value == "white":
-                    #Piece may be able to move check further
+                    # Piece may be able to move check further
                     pass
-                    #check for groups and opponent group sizes
+                    # check for groups and opponent group sizes
                 else:
                     pass
                     # piece cannot move
@@ -186,7 +196,6 @@ class StateSpaceGenerator:
                 if new_col_dir == -1:
                     new_col_dir = 0
 
-
         # checks for pieces in the bottom half of the game board
         else:
             # checks for NW movement
@@ -202,6 +211,12 @@ class StateSpaceGenerator:
         return new_col_dir
 
     def translate_piece_value_for_output(self, row, col):
+        """
+        Translates piece from internal coordinates to notation as required by game board coordinate system.
+        :param row:
+        :param col:
+        :return:
+        """
         ASCII_ALPHABET_OFFSET = 8
         ZERO_INDEX_OFFSET = 1
 
@@ -242,24 +257,53 @@ class StateSpaceGenerator:
         pass
 
     def check_if_piece_group_bigger_than_opponents(self):
-        #if group adjacent to opponents piece check if opponents pieces in line are >=
-        #else move on to next piece
-        #if not >= verify space behind opponent group is empty or not part of the board
-        #else move on to next piece
+        # if group adjacent to opponents piece check if opponents pieces in line are >=
+        # else move on to next piece
+        # if not >= verify space behind opponent group is empty or not part of the board
+        # else move on to next piece
         pass
 
     @staticmethod
     def move(move_type, pieces, direction):
-        print(f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}")
-        #if previous checks pass create move notation and output move
-        #call new board
+        """
+        Outputs move in move notation.
+        :param move_type: i or s: char
+        :param pieces: tuple: front and end piece locations
+        :param direction:
+        :return:
+        """
+        #print(f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}")
+        # if previous checks pass create move notation and output move
+        # call new board
         pass
 
-    def new_board(self):
-        # board state after move
-        # stored in a list
-        pass
+    def update_board(self, move_type, pieces, new_row_key, new_column):
+        if move_type == 'i':
+            # move front piece up
+            self.game.game_board[new_row_key][new_column]['color'] = self.turn
+            # remove back piece
+            location = self.translate_single_piece_to_board_notation(pieces[1])
+            self.game.game_board[location[0]][location[1]]['color'] = None
+            self.output_board()
 
+    def output_board(self):
+        whites = []
+        blacks = []
+        output_row = ""
+        for row_key in self.game.game_board:
+            for k, v in self.rows.items():
+                if int(row_key.replace("row", '')) == v:
+                    output_row = k
+            row = self.game.game_board[row_key]
+            for column_detail in row[::-1]:
+                col = column_detail['colNum']
+                column = col + 1
+                if "black" in column_detail.values():
+                    blacks.append(output_row + str(column) + "b")
+                if "white" in column_detail.values():
+                    whites.append(output_row + str(column) + "w")
+        all_pieces = blacks[::-1] + whites[::-1]
+        print(all_pieces)
 
 
 s = StateSpaceGenerator()
