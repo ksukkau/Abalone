@@ -12,9 +12,25 @@ class StateSpaceGenerator:
     def __init__(self):
         self.turn = ""
         self.board_text = ""
-        self.possible_boards = None
+        self.possible_moves = set()
         self.group = None
         self.game = GameBoard()
+        self.reset_board = None
+        self.rows = {
+            "I": 0,
+            "H": 1,
+            "G": 2,
+            "F": 3,
+            "E": 4,
+            "D": 5,
+            "C": 6,
+            "B": 7,
+            "A": 8
+        }
+        self.colors = {
+            "b": "black",
+            "w": "white"
+        }
 
     def read_test_input(self, path):
         """
@@ -30,34 +46,27 @@ class StateSpaceGenerator:
             self.turn = colors[input_file.readline().replace('\n', '')]
             self.board_text = input_file.readline()
 
+    def translate_single_piece_to_board_notation(self, piece):
+
+        row = self.rows[piece[0]]
+        row_key = "row" + str(row)
+        col = int(piece[1])
+        column = self.calculate_column(row, col)
+        return row_key, column
+
     def translate_test_input_to_board_notation(self):
         """
         Creates a game board array based on test input.
         :return: None
         """
         self.game.initialize_game_board_array()
-        rows = {
-            "I": 0,
-            "H": 1,
-            "G": 2,
-            "F": 3,
-            "E": 4,
-            "D": 5,
-            "C": 6,
-            "B": 7,
-            "A": 8
-        }
-        colors = {
-            "b": "black",
-            "w": "white"
-        }
 
         piece_list = self.board_text.split(',')
         for item in piece_list:
-            row = rows[item[0]]
+            row = self.rows[item[0]]
             row_key = "row" + str(row)
             col = int(item[1])
-            color = colors[item[2]]
+            color = self.colors[item[2]]
             column = self.calculate_column(row, col)
             row_list = self.game.game_board[row_key]
             row_list[column]['color'] = color
@@ -100,6 +109,9 @@ class StateSpaceGenerator:
         # for reading from our actual board not applicable for test input
 
     def create_piece_list_for_current_turn(self):
+        # create an image of board befor changes
+        self.reset_board = self.game.game_board
+
         for row_key in self.game.game_board:
             row = self.game.game_board[row_key]
             for column_detail in row:
@@ -135,6 +147,7 @@ class StateSpaceGenerator:
                     # piece can move
                     pieces = (piece, piece)
                     self.move("i", pieces, direction)
+                    self.possible_moves.add(("i", pieces, direction, new_row_key, new_column))
                     #change this to generate move and board, then check for groups
                 elif space_value == "white":
                     #Piece may be able to move check further
@@ -250,15 +263,42 @@ class StateSpaceGenerator:
 
     @staticmethod
     def move(move_type, pieces, direction):
+
         print(f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}")
         #if previous checks pass create move notation and output move
         #call new board
         pass
 
-    def new_board(self):
-        # board state after move
-        # stored in a list
-        pass
+    def update_board(self):
+        # ("i", pieces, direction, new_row_key, new_column)
+        for move in self.possible_moves:
+            if move[0] == 'i':
+                # move front piece up
+                self.game.game_board[move[3]][move[4]]['color'] = self.turn
+                # remove back piece
+                location = self.translate_single_piece_to_board_notation(move[1][1])
+                self.game.game_board[location[0]][location[1]]['color'] = None
+                self.output_board()
+                self.game.game_board = self.reset_board
+
+    def output_board(self):
+        whites = []
+        blacks = []
+        output_row = ""
+        for row_key in self.game.game_board:
+            for k, v in self.rows.items():
+                if int(row_key.replace("row", '')) == v:
+                    output_row = k
+            row = self.game.game_board[row_key]
+            for column_detail in row[::-1]:
+                col = column_detail['colNum']
+                column = col + 1
+                if "black" in column_detail.values():
+                    blacks.append(output_row + str(column) + "b")
+                if "white" in column_detail.values():
+                    whites.append(output_row + str(column) + "w")
+        all_pieces = blacks[::-1] + whites[::-1]
+        print(all_pieces)
 
 
 
@@ -266,3 +306,4 @@ s = StateSpaceGenerator()
 s.read_test_input("Test1.input")
 s.translate_test_input_to_board_notation()
 s.create_piece_list_for_current_turn()
+s.update_board()
