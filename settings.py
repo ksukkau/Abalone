@@ -30,8 +30,6 @@ class Settings(tk.Toplevel):
         self.selections = {}
         self.font = "Montserrat", 10
 
-
-
     def main_window(self):
         """
         Calls helper methods to manage the settings window.
@@ -60,7 +58,7 @@ class Settings(tk.Toplevel):
 
         for (text, color) in self.colors.items():
             Radiobutton(player_color_label, text=text, variable=self.color_choice,
-                        value=color, font=self.font,).grid(sticky=W, column=1)
+                        value=color, font=self.font, ).grid(sticky=W, column=1)
 
     def game_mode(self):
         """

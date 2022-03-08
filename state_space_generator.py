@@ -215,6 +215,12 @@ class StateSpaceGenerator:
         return new_col_dir
 
     def translate_piece_value_for_output(self, row, col):
+        """
+        Translates piece from internal coordinates to notation as required by game board coordinate system.
+        :param row:
+        :param col:
+        :return:
+        """
         ASCII_ALPHABET_OFFSET = 8
         ZERO_INDEX_OFFSET = 1
 
@@ -254,19 +260,25 @@ class StateSpaceGenerator:
         # 3 is max group size
         pass
 
-    def check_if_piece_group_bigger_than_opponents(self):
-        #if group adjacent to opponents piece check if opponents pieces in line are >=
-        #else move on to next piece
-        #if not >= verify space behind opponent group is empty or not part of the board
-        #else move on to next piece
+    def check_for_sumito_opponents(self):
+        # if group adjacent to opponents piece check if opponents pieces in line are >=
+        # else move on to next piece
+        # if not >= verify space behind opponent group is empty or not part of the board
+        # else move on to next piece
         pass
 
     @staticmethod
     def move(move_type, pieces, direction):
-
+        """
+        Outputs move in move notation.
+        :param move_type: i or s: char
+        :param pieces: tuple: front and end piece locations
+        :param direction:
+        :return:
+        """
         print(f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}")
-        #if previous checks pass create move notation and output move
-        #call new board
+        # if previous checks pass create move notation and output move
+        # call new board
         pass
 
     def update_board(self):
