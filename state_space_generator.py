@@ -9,6 +9,7 @@ class StateSpaceGenerator:
     """
     Encapsulates the methods required to generate the state space at any given game state.
     """
+
     def __init__(self):
         self.turn = ""
         self.board_text = ""
@@ -30,6 +31,14 @@ class StateSpaceGenerator:
         self.colors = {
             "b": "black",
             "w": "white"
+        }
+        self.move_directions = {
+            "NE": (-1, 1),
+            "E": (0, 1),
+            "SE": (1, 1),
+            "SW": (1, -1),
+            "W": (0, -1),
+            "NW": (-1, -1)
         }
 
     def read_test_input(self, path):
@@ -125,17 +134,8 @@ class StateSpaceGenerator:
         col_num = column_detail['colNum']
         piece = self.translate_piece_value_for_output(row_num, col_num)
 
-        move_directions = {
-            "NE": (-1, 1),
-            "E": (0, 1),
-            "SE": (1, 1),
-            "SW": (1, -1),
-            "W": (0, -1),
-            "NW": (-1, -1)
-        }
-
-        for direction in move_directions:
-            direction_tuple = move_directions.get(direction)
+        for direction in self.move_directions:
+            direction_tuple = self.move_directions.get(direction)
 
             new_row = int(row_key.replace("row", '')) + direction_tuple[0]
             new_column = col_num + self.calc_new_direction_coords(row_num, direction_tuple)
@@ -146,13 +146,15 @@ class StateSpaceGenerator:
                 if space_value is None:
                     # piece can move
                     pieces = (piece, piece)
+                    # generate single piece inline move
                     self.move("i", pieces, direction)
                     self.possible_moves.add(("i", pieces, direction, new_row_key, new_column))
-                    #change this to generate move and board, then check for groups
+                    self.possible_2_piece_inline_groups(piece, direction, row_key, col_num, new_row, new_column)
                 elif space_value == "white":
-                    #Piece may be able to move check further
                     pass
-                    #check for groups and opponent group sizes
+                    #self.possible_2_piece_inline_groups(piece, direction, row_key, col_num, new_row, new_column)
+                    # Piece may be able to move check further
+                    # check for groups and opponent group sizes
                 else:
                     pass
                     # piece cannot move
@@ -239,7 +241,28 @@ class StateSpaceGenerator:
         row_coord = chr((ASCII_ALPHABET_OFFSET - row) + 65)
         return row_coord + str(col_coord)
 
-    def possible_2_piece_groups(self):
+    def possible_2_piece_inline_groups(self, piece, direction, row_key, col_num, new_row, new_column):
+        row_num = int(row_key.replace("row", ''))
+        opposite_direction = {
+            "NE": "SW",
+            "E": "W",
+            "SE": "NW",
+            "SW": "NE",
+            "W": "E",
+            "NW": "SE"
+        }
+        print(piece)
+        print(direction)
+        o_direction = opposite_direction.get(direction)
+        print(o_direction)
+        direction_tuple = self.move_directions.get(o_direction)
+
+        new_row = int(row_key.replace("row", '')) + direction_tuple[0]
+        new_column = col_num + self.calc_new_direction_coords(row_num, direction_tuple)
+        new_row_key = "row" + str(new_row)
+        space_value = self.game.game_board[new_row_key][new_column]['color']
+        if space_value == "black":
+            print(new_row, self.game.game_board[new_row_key][new_column])
         # check for adjacent pieces
         # if second piece adjacent select check for empty space to move into
         # generate move
@@ -249,7 +272,7 @@ class StateSpaceGenerator:
         # else check if group bigger than opponents group
         pass
 
-    def check_for_3_piece_groups(self):
+    def check_for_3_piece_groups(self, piece, row_key, col_num, new_row, new_column):
         # if check for pieces adjacent and in line with 2 piece groups
         # if space to move into inline
         # generate move
@@ -276,7 +299,7 @@ class StateSpaceGenerator:
         :param direction:
         :return:
         """
-        print(f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}")
+        #print(f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}")
         # if previous checks pass create move notation and output move
         # call new board
         pass
@@ -291,6 +314,7 @@ class StateSpaceGenerator:
                 location = self.translate_single_piece_to_board_notation(move[1][1])
                 self.game.game_board[location[0]][location[1]]['color'] = None
                 self.output_board()
+                # resets board to before move
                 self.game.game_board = self.reset_board
 
     def output_board(self):
@@ -310,8 +334,7 @@ class StateSpaceGenerator:
                 if "white" in column_detail.values():
                     whites.append(output_row + str(column) + "w")
         all_pieces = blacks[::-1] + whites[::-1]
-        print(all_pieces)
-
+        #print(all_pieces)
 
 
 s = StateSpaceGenerator()
