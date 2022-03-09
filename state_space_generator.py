@@ -333,7 +333,7 @@ class StateSpaceGenerator:
                 self.updated_game_board = deepcopy(self.game.game_board)
 
         # debug
-        print("===== (Debug) Double =====")
+        print("===== (Debug) 2-piece moves =====")
         for move in self.possible_moves_double:
             # only for single piece moves
             if move[0] == 'i':
@@ -350,7 +350,7 @@ class StateSpaceGenerator:
                 self.updated_game_board = deepcopy(self.game.game_board)
 
         # debug
-        print("===== (Debug) Triple =====")
+        print("===== (Debug) 3-piece moves =====")
         for move in self.possible_moves_triple:
             # only for single piece moves
             if move[0] == 'i':
