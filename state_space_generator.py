@@ -142,7 +142,7 @@ class StateSpaceGenerator:
                     self.possible_2_piece_inline_groups(piece, direction, row_key, col_num, new_row, new_column)
                 elif space_value == "white":
                     pass
-                    #self.possible_2_piece_inline_groups(piece, direction, row_key, col_num, new_row, new_column)
+                    # self.possible_2_piece_inline_groups(piece, direction, row_key, col_num, new_row, new_column)
                     # Piece may be able to move check further
                     # check for groups and opponent group sizes
                 else:
@@ -289,7 +289,7 @@ class StateSpaceGenerator:
         :param direction:
         :return:
         """
-        #print(f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}")
+        # print(f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}")
         # if previous checks pass create move notation and output move
         # call new board
         pass
@@ -338,7 +338,6 @@ class StateSpaceGenerator:
         else:
             print("Invalid value passed. Argument must be a string or an integer.")
 
-
     def output_board(self):
         blacks = []
         whites = []
@@ -358,7 +357,6 @@ class StateSpaceGenerator:
                         whites.append(piece_letter_coord + 'w')
 
         print(sorted(blacks) + sorted(whites))
-
 
 
 s = StateSpaceGenerator()
