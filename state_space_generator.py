@@ -289,14 +289,14 @@ class StateSpaceGenerator:
         :param direction:
         :return:
         """
-        #print(f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}")
+        # print(f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}")
         # if previous checks pass create move notation and output move
         # call new board
         pass
 
     def create_piece_list_for_current_turn(self):
-        # create an image of board befor changes
-        self.reset_board = self.game.game_board
+        # create an image of board before changes
+        self.updated_game_board = deepcopy(self.game.game_board)
 
         for row_key in self.game.game_board:
             row = self.game.game_board[row_key]
@@ -308,7 +308,6 @@ class StateSpaceGenerator:
 
     def update_board(self):
         # ("i", pieces, direction, new_row_key, new_column)
-        self.updated_game_board = deepcopy(self.game.game_board)
 
         for move in self.possible_moves:
             if move[0] == 'i':
@@ -319,8 +318,7 @@ class StateSpaceGenerator:
                 location = self.translate_single_piece_to_board_notation(move[1][1])
                 self.updated_game_board[location[0]][location[1]]['color'] = None
                 self.output_board()
-                # # resets board to before move
-                # self.updated_game_board = self.reset_board
+                # resets board to before move
                 self.updated_game_board = deepcopy(self.game.game_board)
 
     @staticmethod
