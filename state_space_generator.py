@@ -320,6 +320,7 @@ class StateSpaceGenerator:
 
     def update_board(self):
 
+        print("===== (Debug) 1-piece moves =====")
         for move in self.possible_moves_single:
             # only for single piece moves
             if move[0] == 'i':
