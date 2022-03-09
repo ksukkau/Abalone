@@ -158,54 +158,6 @@ class StateSpaceGenerator:
         # check for 2 piece groups
         # else move on to next piece
 
-    @staticmethod
-    def calc_new_direction_coords(row_num, direction):
-        """
-        Calculate the coordinates of the new direction given the current row and column of the game piece, as well as
-        the direction of movement. Required due to the varying columns on each row on the game board because of the
-        hexagonal shaped game board.
-        :param row_num: an int, representing the row of the selected game piece
-        :param direction: an tuple, containing the new movement as (x,y) or (row, col)
-        :return: a int, containing the direction of the new movement along the column (west to east vector)
-        """
-        ZERO_INDEX_OFFSET = 1
-        UPPER_HALF = range(1, 4 + ZERO_INDEX_OFFSET)
-        MIDDLE_ROW = 4
-
-        new_row_dir = direction[0]
-        new_col_dir = direction[1]
-
-        if row_num in UPPER_HALF:
-            # checks for SE movement for pieces in the middle row
-            if row_num == MIDDLE_ROW and new_row_dir == 1:
-                if new_col_dir == 1:
-                    new_col_dir = 0
-
-            # checks for NE movement
-            elif new_row_dir == -1:
-                if new_col_dir == 1:
-                    new_col_dir = 0
-
-            # checks for SW movement
-            elif new_row_dir == 1:
-                if new_col_dir == -1:
-                    new_col_dir = 0
-
-
-        # checks for pieces in the bottom half of the game board
-        else:
-            # checks for NW movement
-            if new_row_dir == -1:
-                if new_col_dir == -1:
-                    new_col_dir = 0
-
-            # checks for SE movement
-            elif new_row_dir == 1:
-                if new_col_dir == 1:
-                    new_col_dir = 0
-
-        return new_col_dir
-
     def translate_piece_value_for_output(self, row, col):
         """
         Translates piece from internal coordinates to notation as required by game board coordinate system.
@@ -241,11 +193,14 @@ class StateSpaceGenerator:
             "W": "E",
             "NW": "SE"
         }
-        print(piece)
-        print(direction)
-        o_direction = opposite_direction.get(direction)
-        print(o_direction)
-        direction_tuple = self.move_directions.get(o_direction)
+        opposite_dir = opposite_direction.get(direction)
+        direction_tuple = self.move_directions.get(opposite_dir)
+        print(f"Piece {piece} - Direction {direction} - O_Direction {opposite_direction.get(direction)}")
+
+        direction_coords = self.move_directions[direction]
+        opposite_dir_coords = self.move_directions[opposite_dir]
+
+        print(f"Dir Coords {direction_coords} - Opposite Dir Coords {opposite_dir_coords}\n")
 
         new_row = int(row_key.replace("row", '')) + direction_tuple[0]
         new_column = col_num + self.calc_new_direction_coords(row_num, direction_tuple)
@@ -320,6 +275,57 @@ class StateSpaceGenerator:
                 # resets board to before move
                 self.updated_game_board = deepcopy(self.game.game_board)
 
+    def calc_new_direction_coords(self, row_num, direction):
+        """
+        Calculate the coordinates of the new direction given the current row and column of the game piece, as well as
+        the direction of movement. Required due to the varying columns on each row on the game board because of the
+        hexagonal shaped game board.
+        :param row_num: an int, representing the row of the selected game piece
+        :param direction: an tuple, containing the new movement as (x,y) or (row, col)
+        :return: a int, containing the direction of the new movement along the column (west to east vector)
+        """
+        ZERO_INDEX_OFFSET = 1
+        UPPER_HALF = range(1, 4 + ZERO_INDEX_OFFSET)
+        MIDDLE_ROW = 4
+
+        new_row_dir = direction[0]
+        new_col_dir = direction[1]
+
+        # if the string row_key is passed, then it is converted to an int representing the row
+        if type(row_num) != int:
+            row_num = self.convert_row_string_int(row_num)
+
+        if row_num in UPPER_HALF:
+            # checks for SE movement for pieces in the middle row
+            if row_num == MIDDLE_ROW and new_row_dir == 1:
+                if new_col_dir == 1:
+                    new_col_dir = 0
+
+            # checks for NE movement
+            elif new_row_dir == -1:
+                if new_col_dir == 1:
+                    new_col_dir = 0
+
+            # checks for SW movement
+            elif new_row_dir == 1:
+                if new_col_dir == -1:
+                    new_col_dir = 0
+
+
+        # checks for pieces in the bottom half of the game board
+        else:
+            # checks for NW movement
+            if new_row_dir == -1:
+                if new_col_dir == -1:
+                    new_col_dir = 0
+
+            # checks for SE movement
+            elif new_row_dir == 1:
+                if new_col_dir == 1:
+                    new_col_dir = 0
+
+        return new_col_dir
+
     @staticmethod
     def convert_row_string_int(row_val):
         """
@@ -335,6 +341,7 @@ class StateSpaceGenerator:
             return row_num
         elif type(row_val) == int:
             row_key = "row" + str(row_val)
+            return row_key
         else:
             print("Invalid value passed. Argument must be a string or an integer.")
 
