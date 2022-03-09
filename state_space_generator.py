@@ -150,8 +150,8 @@ class StateSpaceGenerator:
                     # generate single piece inline move
                     self.move("i", pieces, direction)
                     self.possible_moves_single.add(("i", pieces, direction, new_row_key, new_column))
-                    self.possible_2_piece_inline_groups(piece, direction, row_key, col_num, new_row, new_column)
-                    self.check_for_3_piece_groups(piece, direction, row_key, col_num, new_row, new_column)
+                    self.possible_2_piece_inline_groups(direction, row_key, col_num, new_row, new_column)
+                    self.check_for_3_piece_groups(direction, row_key, col_num, new_row, new_column)
                 elif space_value == "white":
                     pass
                     # self.possible_2_piece_inline_groups(piece, direction, row_key, col_num, new_row, new_column)
