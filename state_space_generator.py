@@ -338,7 +338,7 @@ class StateSpaceGenerator:
 
 
 s = StateSpaceGenerator()
-s.read_test_input("Test1.input")
+s.read_test_input("Test2.input")
 s.translate_test_input_to_board_notation()
 s.create_piece_list_for_current_turn()
 s.update_board()
