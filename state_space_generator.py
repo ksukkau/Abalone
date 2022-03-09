@@ -142,7 +142,7 @@ class StateSpaceGenerator:
                     self.possible_2_piece_inline_groups(piece, direction, row_key, col_num, new_row, new_column)
                 elif space_value == "white":
                     pass
-                    #self.possible_2_piece_inline_groups(piece, direction, row_key, col_num, new_row, new_column)
+                    # self.possible_2_piece_inline_groups(piece, direction, row_key, col_num, new_row, new_column)
                     # Piece may be able to move check further
                     # check for groups and opponent group sizes
                 else:
@@ -312,6 +312,7 @@ class StateSpaceGenerator:
 
         for move in self.possible_moves:
             if move[0] == 'i':
+                print(move)
                 # move front piece up
                 self.updated_game_board[move[3]][move[4]]['color'] = self.turn
                 # remove back piece
@@ -340,7 +341,6 @@ class StateSpaceGenerator:
         else:
             print("Invalid value passed. Argument must be a string or an integer.")
 
-
     def output_board(self):
         blacks = []
         whites = []
@@ -348,7 +348,7 @@ class StateSpaceGenerator:
         for row, col in self.updated_game_board.items():
             for piece in col:
 
-                if piece["color"] != None:
+                if piece["color"] is not None:
 
                     row_num = self.convert_row_string_int(row)
                     col_num = piece["colNum"]
@@ -360,7 +360,6 @@ class StateSpaceGenerator:
                         whites.append(piece_letter_coord + 'w')
 
         print(sorted(blacks) + sorted(whites))
-
 
 
 s = StateSpaceGenerator()
