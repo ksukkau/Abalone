@@ -17,6 +17,7 @@ class StateSpaceGenerator:
         self.possible_moves_single = set()
         self.possible_moves_double = set()
         self.possible_moves_triple = set()
+        self.possible_moves_sumito = set()
         self.group = None
         self.game = GameBoard()
         self.reset_board = None
@@ -52,7 +53,6 @@ class StateSpaceGenerator:
             "NW": "SE"
         }
         self.updated_game_board = None
-        self.debug = 0
 
     def read_test_input(self, path):
         """
@@ -150,8 +150,7 @@ class StateSpaceGenerator:
                     # generate single piece inline move
                     self.move("i", pieces, direction)
                     self.possible_moves_single.add(("i", pieces, direction, new_row_key, new_column))
-                    self.possible_2_piece_inline_groups(direction, row_key, col_num, new_row, new_column)
-                    self.check_for_3_piece_groups(direction, row_key, col_num, new_row, new_column)
+                    self.possible_multiple_piece_inline_groups(direction, row_key, col_num, new_row, new_column)
                 elif space_value == "white":
                     pass
                     # self.possible_2_piece_inline_groups(piece, direction, row_key, col_num, new_row, new_column)
@@ -200,7 +199,7 @@ class StateSpaceGenerator:
         row_coord = chr((ASCII_ALPHABET_OFFSET - row_num) + 65)
         return row_coord + str(col_coord)
 
-    def possible_2_piece_inline_groups(self, direction, row_key, col_num, new_row, new_column):
+    def possible_multiple_piece_inline_groups(self, direction, row_key, col_num, new_row, new_column):
         selected_row_num = self.convert_row_string_int(row_key)
 
         opposite_dir = self.opposite_direction.get(direction)
@@ -218,7 +217,22 @@ class StateSpaceGenerator:
             new_row_key = self.convert_row_string_int(new_row)
 
             self.possible_moves_double.add(("i", pieces, direction, new_row_key, new_column))
-            self.debug += 1
+
+            # Checks for 3-piece move group
+            # ----------------------------------------------------------------------------------------------------
+            adj_new_row_num = adj_new_row_num + opposite_dir_coords[0]
+            adj_piece_row_key = self.convert_row_string_int(adj_new_row_num)
+            adj_piece_col_num = adj_piece_col_num + self.calc_new_direction_coords(selected_row_num,
+                                                                                   opposite_dir_coords)
+
+            if self.is_valid_adjacent_piece(adj_piece_row_key, adj_piece_col_num):
+                leading_piece_coords = self.translate_piece_value_for_output(selected_row_num, col_num)
+                trailing_piece_coords = self.translate_piece_value_for_output(adj_new_row_num, adj_piece_col_num)
+
+                pieces = (leading_piece_coords, trailing_piece_coords)
+                new_row_key = self.convert_row_string_int(new_row)
+
+                self.possible_moves_triple.add(("i", pieces, direction, new_row_key, new_column))
 
         # if adjacent_piece_val == self.turn:
         # check for adjacent pieces
@@ -248,42 +262,6 @@ class StateSpaceGenerator:
         except IndexError:
             print("Adjacent 2nd piece out of board area")
             return False
-
-    def check_for_3_piece_groups(self, direction, row_key, col_num, new_row, new_column):
-        selected_row_num = self.convert_row_string_int(row_key)
-
-        opposite_dir = self.opposite_direction.get(direction)
-        opposite_dir_coords = self.move_directions[opposite_dir]
-
-        adj_new_row_num = selected_row_num + opposite_dir_coords[0]
-        adj_piece_row_key = self.convert_row_string_int(adj_new_row_num)
-        adj_piece_col_num = col_num + self.calc_new_direction_coords(selected_row_num, opposite_dir_coords)
-
-        if self.is_valid_adjacent_piece(adj_piece_row_key, adj_piece_col_num):
-            adj_new_row_num = adj_new_row_num + opposite_dir_coords[0]
-            adj_piece_row_key = self.convert_row_string_int(adj_new_row_num)
-            adj_piece_col_num = adj_piece_col_num + self.calc_new_direction_coords(selected_row_num,
-                                                                                   opposite_dir_coords)
-
-            if self.is_valid_adjacent_piece(adj_piece_row_key, adj_piece_col_num):
-                leading_piece_coords = self.translate_piece_value_for_output(selected_row_num, col_num)
-                trailing_piece_coords = self.translate_piece_value_for_output(adj_new_row_num, adj_piece_col_num)
-
-                pieces = (leading_piece_coords, trailing_piece_coords)
-                new_row_key = self.convert_row_string_int(new_row)
-
-                self.possible_moves_triple.add(("i", pieces, direction, new_row_key, new_column))
-                self.debug += 1
-
-        # if check for pieces adjacent and in line with 2 piece groups
-        # if space to move into inline
-        # generate move
-        # if space to move into sidestep
-        # generate move
-        # if opponents adjacent check for piece group bgger
-
-        # 3 is max group size
-        pass
 
     def check_for_sumito_opponents(self):
         # if group adjacent to opponents piece check if opponents pieces in line are >=
