@@ -183,7 +183,7 @@ class StateSpaceGenerator:
                             pieces = (leading_piece, second_place_piece, trailing_piece)
                             self.possible_moves_sumito.add(("i", pieces, direction, empty_space_coords[0], empty_space_coords[1]))
 
-                            move_notation_pieces = (piece, self.sumito_trailing_piece_turn_color)
+                            move_notation_pieces = (piece, trailing_piece)
                             self.possible_moves_sumito_move_notation.add(("i", move_notation_pieces, direction,  empty_space_coords[0], empty_space_coords[1]))
 
                         sumito_groupings += 1
