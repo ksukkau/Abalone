@@ -186,7 +186,7 @@ class StateSpaceGenerator:
                             self.possible_moves_sumito.add(("i", pieces, direction, sumito_row_key, sumito_col_num))
 
                             move_notation_pieces = (piece, self.sumito_trailing_piece)
-                            self.possible_moves_sumito_move_notation.add(("i", move_notation_pieces, sumito_row_key, sumito_col_num))
+                            self.possible_moves_sumito_move_notation.add(("i", move_notation_pieces, direction, sumito_row_key, sumito_col_num))
 
                         sumito_groupings += 1
 
@@ -578,24 +578,14 @@ class StateSpaceGenerator:
         :param direction:
         :return:
         """
-        possible_inline_moves = set().union(self.possible_moves_single).union(self.possible_moves_double)\
-            .union(self.possible_moves_triple)
+        possible_moves = set().union(self.possible_moves_single).union(self.possible_moves_double)\
+            .union(self.possible_moves_triple).union(self.possible_moves_sumito_move_notation)
         with open("test1.moves", "a") as file:
 
-            for i in possible_inline_moves:
+            for i in possible_moves:
                 move_type = i[0]
                 pieces = i[1]
                 direction = i[2]
-                item = f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}"
-                file.write(item)
-                file.write("\n")
-                #print(f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}")
-
-            for i in self.possible_moves_sumito:
-                move_type = i[0]
-                pieces = i[1][1], i[1][1]
-                direction = i[2]
-
                 item = f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}"
                 file.write(item)
                 file.write("\n")
