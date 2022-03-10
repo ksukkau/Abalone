@@ -132,7 +132,7 @@ class StateSpaceGenerator:
         self.turn = self.game.turn
         # for reading from our actual board not applicable for test input
 
-    def possible_lead_piece_to_select(self, row_key, column_detail):
+    def generate_inline_moves(self, row_key, column_detail):
         row_num = self.convert_row_string_int(row_key)
         col_num = column_detail['colNum']
         piece = self.translate_piece_value_for_output(row_num, col_num)
@@ -151,10 +151,14 @@ class StateSpaceGenerator:
                     pieces = (piece, piece)
                     # generate single piece inline move
                     self.move("i", pieces, direction)
+
+                    # gets moves for a single piece
                     self.possible_moves_single.add(("i", pieces, direction, new_row_key, new_col_num))
 
+                    # gets moves for multiple pieces grouped
                     self.possible_multiple_piece_inline_groups(direction, row_key, col_num, new_row_num, new_col_num)
 
+                # checks for valid sumito
                 opposite_color = self.get_opposite_color(self.turn)
                 if space_value == opposite_color:
 
@@ -166,6 +170,8 @@ class StateSpaceGenerator:
                         opposite_direction_tuple = self.move_directions[opposite_direction]
                         num_of_adj_opposing_pieces = self.get_num_of_adj_pieces("white", new_row_key, new_col_num, opposite_direction, sumito_groupings)
 
+                        # if num of adjacent pieces of current color is greater than num of adjacent pieces of opposing
+                        # color them sumito is performed
                         if num_of_adj_selected_pieces > num_of_adj_opposing_pieces:
                             # getting row and col of space where sumito'ed piece is going to end up
 
@@ -188,22 +194,8 @@ class StateSpaceGenerator:
 
                         sumito_groupings += 1
 
-                    # self.possible_2_piece_inline_groups(piece, direction, row_key, col_num, new_row, new_column)
-                    # Piece may be able to move check further
-                    # check for groups and oppo
-                    # nent group sizes
-                else:
-                    pass
-                    # piece cannot move
-                    # move on to next piece
             except IndexError:
                 print("outside board area")
-        # from current board
-        # if piece has space to move into
-        # generate move then check for 2 piece groups with pre move layout
-        # if is next to opponent color
-        # check for 2 piece groups
-        # else move on to next piece
 
     def get_piece_coords_movement(self, row_num, col_num, direction):
         row_dir = direction[0]
@@ -243,8 +235,6 @@ class StateSpaceGenerator:
         :param sumito_grouping: an int, the number of grouped pieces to perform a sumito, set to 2 by default
         :return:
         """
-        opposite_color = self.get_opposite_color(self.turn)
-
         row_num = self.convert_row_string_int(row_key)
         opposite_dir_coords = self.move_directions[self.opposite_direction[direction]]
         processed_opposite_dir = (opposite_dir_coords[0], self.calc_new_direction_coords(row_num, opposite_dir_coords))
@@ -342,16 +332,6 @@ class StateSpaceGenerator:
 
                 self.possible_moves_triple.add(("i", pieces, direction, new_row_key, new_column))
 
-        # if adjacent_piece_val == self.turn:
-        # check for adjacent pieces
-        # if second piece adjacent select check for empty space to move into
-        # generate move
-        # if space to move into sidestep
-        # generate move
-        # check for third piece with pre move layout
-        # else check if group bigger than opponents group
-        pass
-
     def is_valid_adjacent_piece(self, opposite_adj_row_key, opposite_adj_col_num):
         """
         Checks if the piece behind is of the same color, and returns a true if it is, or else false is returned.
@@ -395,7 +375,7 @@ class StateSpaceGenerator:
                 # if "white" in column_detail.values():
                 #     print(column_detail)
                 if self.turn in column_detail.values():
-                    self.possible_lead_piece_to_select(row_key, column_detail)
+                    self.generate_inline_moves(row_key, column_detail)
 
     def update_board(self):
 
