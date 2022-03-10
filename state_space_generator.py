@@ -148,7 +148,7 @@ class StateSpaceGenerator:
                     # piece can move
                     pieces = (piece, piece)
                     # generate single piece inline move
-                    self.move("i", pieces, direction)
+                    #self.move("i", pieces, direction)
                     self.possible_moves_single.add(("i", pieces, direction, new_row_key, new_column))
                     self.possible_multiple_piece_inline_groups(direction, row_key, col_num, new_row, new_column)
                 elif space_value == "white":
@@ -270,20 +270,6 @@ class StateSpaceGenerator:
         # else move on to next piece
         pass
 
-    @staticmethod
-    def move(move_type, pieces, direction):
-        """
-        Outputs move in move notation.
-        :param move_type: i or s: char
-        :param pieces: tuple: front and end piece locations
-        :param direction:
-        :return:
-        """
-        # print(f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}")
-        # if previous checks pass create move notation and output move
-        # call new board
-        pass
-
     def create_piece_list_for_current_turn(self):
         # create an image of board before changes
         self.updated_game_board = deepcopy(self.game.game_board)
@@ -298,11 +284,10 @@ class StateSpaceGenerator:
 
     def update_board(self):
 
-        print("===== (Debug) 1-piece moves =====")
+      #  print("===== (Debug) 1-piece moves =====")
         for move in self.possible_moves_single:
             # only for single piece moves
             if move[0] == 'i':
-                print(move)
                 # move front piece up
                 self.updated_game_board[move[3]][move[4]]['color'] = self.turn
                 # remove back piece
@@ -313,7 +298,7 @@ class StateSpaceGenerator:
                 self.updated_game_board = deepcopy(self.game.game_board)
 
         # debug
-        print("===== (Debug) 2-piece moves =====")
+     #   print("===== (Debug) 2-piece moves =====")
         for move in self.possible_moves_double:
             # only for single piece moves
             if move[0] == 'i':
@@ -330,7 +315,7 @@ class StateSpaceGenerator:
                 self.updated_game_board = deepcopy(self.game.game_board)
 
         # debug
-        print("===== (Debug) 3-piece moves =====")
+      #  print("===== (Debug) 3-piece moves =====")
         for move in self.possible_moves_triple:
             # only for single piece moves
             if move[0] == 'i':
@@ -456,8 +441,34 @@ class StateSpaceGenerator:
                         blacks.append(piece_letter_coord + 'b')
                     else:
                         whites.append(piece_letter_coord + 'w')
+        #print(sorted(blacks) + sorted(whites))
+        # self.print_to_text_file(sorted(blacks) + sorted(whites), "test1.board")
 
-        print(sorted(blacks) + sorted(whites))
+    def text_output_moves(self):
+        """
+        Outputs move in move notation.
+        :param move_type: i or s: char
+        :param pieces: tuple: front and end piece locations
+        :param direction:
+        :return:
+        """
+        possible_inline_moves = set().union(self.possible_moves_single).union(self.possible_moves_double)\
+            .union(self.possible_moves_triple)
+
+        for i in possible_inline_moves:
+            move_type = i[0]
+            pieces = i[1]
+            direction = i[2]
+            print(f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}")
+
+    @staticmethod
+    def print_to_text_file(item, path):
+
+        item = str(item)
+        item = item.replace('[', '').replace(']', '').replace(' ', '').replace("'", '')
+        with open(path, "a") as file:
+            file.write(item)
+            file.write("\n")
 
 
 s = StateSpaceGenerator()
@@ -465,3 +476,4 @@ s.read_test_input("Test1.input")
 s.translate_test_input_to_board_notation()
 s.create_piece_list_for_current_turn()
 s.update_board()
+s.text_output_moves()
