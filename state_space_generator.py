@@ -14,7 +14,10 @@ class StateSpaceGenerator:
     def __init__(self):
         self.turn = ""
         self.board_text = ""
-        self.possible_moves = set()
+        self.possible_moves_single = set()
+        self.possible_moves_double = set()
+        self.possible_moves_triple = set()
+        self.possible_moves_sumito = set()
         self.group = None
         self.game = GameBoard()
         self.reset_board = None
@@ -40,6 +43,14 @@ class StateSpaceGenerator:
             "SW": (1, -1),
             "W": (0, -1),
             "NW": (-1, -1)
+        }
+        self.opposite_direction = {
+            "NE": "SW",
+            "E": "W",
+            "SE": "NW",
+            "SW": "NE",
+            "W": "E",
+            "NW": "SE"
         }
         self.updated_game_board = None
 
@@ -138,8 +149,8 @@ class StateSpaceGenerator:
                     pieces = (piece, piece)
                     # generate single piece inline move
                     self.move("i", pieces, direction)
-                    self.possible_moves.add(("i", pieces, direction, new_row_key, new_column))
-                    self.possible_2_piece_inline_groups(piece, direction, row_key, col_num, new_row, new_column)
+                    self.possible_moves_single.add(("i", pieces, direction, new_row_key, new_column))
+                    self.possible_multiple_piece_inline_groups(direction, row_key, col_num, new_row, new_column)
                 elif space_value == "white":
                     pass
                     # self.possible_2_piece_inline_groups(piece, direction, row_key, col_num, new_row, new_column)
@@ -158,59 +169,11 @@ class StateSpaceGenerator:
         # check for 2 piece groups
         # else move on to next piece
 
-    @staticmethod
-    def calc_new_direction_coords(row_num, direction):
-        """
-        Calculate the coordinates of the new direction given the current row and column of the game piece, as well as
-        the direction of movement. Required due to the varying columns on each row on the game board because of the
-        hexagonal shaped game board.
-        :param row_num: an int, representing the row of the selected game piece
-        :param direction: an tuple, containing the new movement as (x,y) or (row, col)
-        :return: a int, containing the direction of the new movement along the column (west to east vector)
-        """
-        ZERO_INDEX_OFFSET = 1
-        UPPER_HALF = range(1, 4 + ZERO_INDEX_OFFSET)
-        MIDDLE_ROW = 4
-
-        new_row_dir = direction[0]
-        new_col_dir = direction[1]
-
-        if row_num in UPPER_HALF:
-            # checks for SE movement for pieces in the middle row
-            if row_num == MIDDLE_ROW and new_row_dir == 1:
-                if new_col_dir == 1:
-                    new_col_dir = 0
-
-            # checks for NE movement
-            elif new_row_dir == -1:
-                if new_col_dir == 1:
-                    new_col_dir = 0
-
-            # checks for SW movement
-            elif new_row_dir == 1:
-                if new_col_dir == -1:
-                    new_col_dir = 0
-
-
-        # checks for pieces in the bottom half of the game board
-        else:
-            # checks for NW movement
-            if new_row_dir == -1:
-                if new_col_dir == -1:
-                    new_col_dir = 0
-
-            # checks for SE movement
-            elif new_row_dir == 1:
-                if new_col_dir == 1:
-                    new_col_dir = 0
-
-        return new_col_dir
-
-    def translate_piece_value_for_output(self, row, col):
+    def translate_piece_value_for_output(self, row_num, col_num):
         """
         Translates piece from internal coordinates to notation as required by game board coordinate system.
-        :param row:
-        :param col:
+        :param row_num: an int
+        :param col_num: an int
         :return:
         """
         ASCII_ALPHABET_OFFSET = 8
@@ -219,40 +182,59 @@ class StateSpaceGenerator:
         TOP_ROW = 0
         UPPER_HALF = range(1, 4 + ZERO_INDEX_OFFSET)
 
-        num_of_cols = self.game.calculate_row_length(row)
+        num_of_cols = self.game.calculate_row_length(row_num)
 
-        if row == TOP_ROW:
-            col_coord = num_of_cols + col
-        elif row in UPPER_HALF:
-            col_coord = (num_of_cols - (row * 2)) + col
+        # if the string row_key is passed, then it is converted to an int representing the row
+        if type(row_num) != int:
+            print("translate_piece_value_for_output passed wrong row_num value type")
+            row_num = self.convert_row_string_int(row_num)
+
+        if row_num == TOP_ROW:
+            col_coord = num_of_cols + col_num
+        elif row_num in UPPER_HALF:
+            col_coord = (num_of_cols - (row_num * 2)) + col_num
         else:
-            col_coord = col + ZERO_INDEX_OFFSET
+            col_coord = col_num + ZERO_INDEX_OFFSET
 
-        row_coord = chr((ASCII_ALPHABET_OFFSET - row) + 65)
+        row_coord = chr((ASCII_ALPHABET_OFFSET - row_num) + 65)
         return row_coord + str(col_coord)
 
-    def possible_2_piece_inline_groups(self, piece, direction, row_key, col_num, new_row, new_column):
-        row_num = int(row_key.replace("row", ''))
-        opposite_direction = {
-            "NE": "SW",
-            "E": "W",
-            "SE": "NW",
-            "SW": "NE",
-            "W": "E",
-            "NW": "SE"
-        }
-        print(piece)
-        print(direction)
-        o_direction = opposite_direction.get(direction)
-        print(o_direction)
-        direction_tuple = self.move_directions.get(o_direction)
+    def possible_multiple_piece_inline_groups(self, direction, row_key, col_num, new_row, new_column):
+        selected_row_num = self.convert_row_string_int(row_key)
 
-        new_row = int(row_key.replace("row", '')) + direction_tuple[0]
-        new_column = col_num + self.calc_new_direction_coords(row_num, direction_tuple)
-        new_row_key = "row" + str(new_row)
-        space_value = self.game.game_board[new_row_key][new_column]['color']
-        if space_value == "black":
-            print(new_row, self.game.game_board[new_row_key][new_column])
+        opposite_dir = self.opposite_direction.get(direction)
+        opposite_dir_coords = self.move_directions[opposite_dir]
+
+        adj_new_row_num = selected_row_num + opposite_dir_coords[0]
+        ajd_piece_row_key = self.convert_row_string_int(adj_new_row_num)
+        adj_piece_col_num = col_num + self.calc_new_direction_coords(selected_row_num, opposite_dir_coords)
+
+        if self.is_valid_adjacent_piece(ajd_piece_row_key, adj_piece_col_num):
+            leading_piece_coords = self.translate_piece_value_for_output(selected_row_num, col_num)
+            trailing_piece_coords = self.translate_piece_value_for_output(adj_new_row_num, adj_piece_col_num)
+
+            pieces = (leading_piece_coords, trailing_piece_coords)
+            new_row_key = self.convert_row_string_int(new_row)
+
+            self.possible_moves_double.add(("i", pieces, direction, new_row_key, new_column))
+
+            # Checks for 3-piece move group
+            # ----------------------------------------------------------------------------------------------------
+            adj_new_row_num = adj_new_row_num + opposite_dir_coords[0]
+            adj_piece_row_key = self.convert_row_string_int(adj_new_row_num)
+            adj_piece_col_num = adj_piece_col_num + self.calc_new_direction_coords(selected_row_num,
+                                                                                   opposite_dir_coords)
+
+            if self.is_valid_adjacent_piece(adj_piece_row_key, adj_piece_col_num):
+                leading_piece_coords = self.translate_piece_value_for_output(selected_row_num, col_num)
+                trailing_piece_coords = self.translate_piece_value_for_output(adj_new_row_num, adj_piece_col_num)
+
+                pieces = (leading_piece_coords, trailing_piece_coords)
+                new_row_key = self.convert_row_string_int(new_row)
+
+                self.possible_moves_triple.add(("i", pieces, direction, new_row_key, new_column))
+
+        # if adjacent_piece_val == self.turn:
         # check for adjacent pieces
         # if second piece adjacent select check for empty space to move into
         # generate move
@@ -262,16 +244,24 @@ class StateSpaceGenerator:
         # else check if group bigger than opponents group
         pass
 
-    def check_for_3_piece_groups(self, piece, row_key, col_num, new_row, new_column):
-        # if check for pieces adjacent and in line with 2 piece groups
-        # if space to move into inline
-        # generate move
-        # if space to move into sidestep
-        # generate move
-        # if opponents adjacent check for piece group bgger
+    def is_valid_adjacent_piece(self, opposite_adj_row_key, opposite_adj_col_num):
+        """
+        Checks if the piece behind is of the same color, and returns a true if it is, or else false is returned.
+        :param opposite_adj_col_num: a string of row_key of the adjacent piece to be checked
+        :param opposite_adj_row_key: an int, of the column of the adjacent piece to be checked
+        :return: a boolean
+        """
 
-        # 3 is max group size
-        pass
+        # checks if the adjacent piece in the opposing direction of movement is the same color as the select piece
+        try:
+            if self.updated_game_board[opposite_adj_row_key][opposite_adj_col_num]["color"] == self.turn:
+                return True
+            else:
+                return False
+
+        except IndexError:
+            print("Adjacent 2nd piece out of board area")
+            return False
 
     def check_for_sumito_opponents(self):
         # if group adjacent to opponents piece check if opponents pieces in line are >=
@@ -307,9 +297,10 @@ class StateSpaceGenerator:
                     self.possible_lead_piece_to_select(row_key, column_detail)
 
     def update_board(self):
-        # ("i", pieces, direction, new_row_key, new_column)
 
-        for move in self.possible_moves:
+        print("===== (Debug) 1-piece moves =====")
+        for move in self.possible_moves_single:
+            # only for single piece moves
             if move[0] == 'i':
                 print(move)
                 # move front piece up
@@ -320,6 +311,107 @@ class StateSpaceGenerator:
                 self.output_board()
                 # resets board to before move
                 self.updated_game_board = deepcopy(self.game.game_board)
+
+        # debug
+        print("===== (Debug) 2-piece moves =====")
+        for move in self.possible_moves_double:
+            # only for single piece moves
+            if move[0] == 'i':
+                # move trailing piece up front
+                self.updated_game_board[move[3]][move[4]]["color"] = self.turn
+
+                trailing_piece_external_coords = move[1][1]
+                trailing_piece_coords = self.translate_external_coords_to_internal_coords(
+                    trailing_piece_external_coords)
+                # remove old trailing piece
+                self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["color"] = None
+                self.output_board()
+                # resets board to before move
+                self.updated_game_board = deepcopy(self.game.game_board)
+
+        # debug
+        print("===== (Debug) 3-piece moves =====")
+        for move in self.possible_moves_triple:
+            # only for single piece moves
+            if move[0] == 'i':
+                # move trailing piece up front
+                self.updated_game_board[move[3]][move[4]]["color"] = self.turn
+
+                trailing_piece_external_coords = move[1][1]
+                trailing_piece_coords = self.translate_external_coords_to_internal_coords(
+                    trailing_piece_external_coords)
+                # remove old trailing piece
+                self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["color"] = None
+                self.output_board()
+                # resets board to before move
+                self.updated_game_board = deepcopy(self.game.game_board)
+
+    def translate_external_coords_to_internal_coords(self, piece_coord: str) -> tuple:
+        ASCII_OFFSET = 65
+        NUM_OF_ROWS_OFFSET = 8
+
+        row_letter = piece_coord[0]
+
+        row_num = (ord(row_letter) - ASCII_OFFSET - NUM_OF_ROWS_OFFSET) * -1
+        col_num = self.calculate_column(row_num, int(piece_coord[1]))
+
+        if row_num < 0:
+            print("Out of range coordinates passed to transate_external_coords_to_internal_coords")
+
+        row_key = self.convert_row_string_int(row_num)
+        return (row_key, col_num)
+
+    def calc_new_direction_coords(self, row_num, direction):
+        """
+        Calculate the coordinates of the new direction given the current row and column of the game piece, as well as
+        the direction of movement. Required due to the varying columns on each row on the game board because of the
+        hexagonal shaped game board.
+        :param row_num: an int, representing the row of the selected game piece
+        :param direction: a tuple, containing the new movement as (x,y) or (row, col)
+        :return: a int, containing the direction of the new movement along the column (west to east vector)
+        """
+        ZERO_INDEX_OFFSET = 1
+        UPPER_HALF = range(1, 4 + ZERO_INDEX_OFFSET)
+        MIDDLE_ROW = 4
+
+        new_row_dir = direction[0]
+        new_col_dir = direction[1]
+
+        # if the string row_key is passed, then it is converted to an int representing the row
+        if type(row_num) != int:
+            print("calc_new_direction_coords passed wrong row_num value type")
+            row_num = self.convert_row_string_int(row_num)
+
+        if row_num in UPPER_HALF:
+            # checks for SE movement for pieces in the middle row
+            if row_num == MIDDLE_ROW and new_row_dir == 1:
+                if new_col_dir == 1:
+                    new_col_dir = 0
+
+            # checks for NE movement
+            elif new_row_dir == -1:
+                if new_col_dir == 1:
+                    new_col_dir = 0
+
+            # checks for SW movement
+            elif new_row_dir == 1:
+                if new_col_dir == -1:
+                    new_col_dir = 0
+
+
+        # checks for pieces in the bottom half of the game board
+        else:
+            # checks for NW movement
+            if new_row_dir == -1:
+                if new_col_dir == -1:
+                    new_col_dir = 0
+
+            # checks for SE movement
+            elif new_row_dir == 1:
+                if new_col_dir == 1:
+                    new_col_dir = 0
+
+        return new_col_dir
 
     @staticmethod
     def convert_row_string_int(row_val):
@@ -336,8 +428,16 @@ class StateSpaceGenerator:
             return row_num
         elif type(row_val) == int:
             row_key = "row" + str(row_val)
+            return row_key
         else:
             print("Invalid value passed. Argument must be a string or an integer.")
+
+    @staticmethod
+    def get_opposite_color(color):
+        if color == "black":
+            return "white"
+        else:
+            return "black"
 
     def output_board(self):
         blacks = []
