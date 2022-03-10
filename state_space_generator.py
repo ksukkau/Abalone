@@ -1,9 +1,7 @@
-import math
-from settings import *
-from tkinter import *
-import tkinter as tk
+
 from game import *
 from copy import deepcopy
+import sys
 
 
 class StateSpaceGenerator:
@@ -12,7 +10,7 @@ class StateSpaceGenerator:
     """
 
     def __init__(self):
-        self.test_number = 0
+        self.file_name = ''
         self.turn = ""
         self.board_text = ""
         self.possible_moves_single = set()
@@ -67,7 +65,7 @@ class StateSpaceGenerator:
             "b": "black",
             "w": "white"
         }
-        with open(f"test{self.test_number}.input", 'r') as input_file:
+        with open(f"{self.file_name}.input", 'r') as input_file:
             self.turn = colors[input_file.readline().replace('\n', '')]
             self.board_text = input_file.readline()
 
@@ -581,7 +579,7 @@ class StateSpaceGenerator:
         """
         possible_moves = set().union(self.possible_moves_single).union(self.possible_moves_double)\
             .union(self.possible_moves_triple).union(self.possible_moves_sumito_move_notation)
-        with open(f"test{self.test_number}.moves", "a") as file:
+        with open(f"{self.file_name}.moves", "a") as file:
 
             for i in possible_moves:
                 move_type = i[0]
@@ -595,7 +593,7 @@ class StateSpaceGenerator:
 
         item = str(item)
         item = item.replace('[', '').replace(']', '').replace(' ', '').replace("'", '')
-        with open(f"test{self.test_number}.board", "a") as file:
+        with open(f"{self.file_name}.board", "a") as file:
             file.write(item)
             file.write("\n")
 
@@ -612,12 +610,10 @@ def main():
     Main function for the statespace generator tests.
     """
     s = StateSpaceGenerator()
-    print("Press n to exit")
-    user_input = 0
-    while user_input != "n":
-        user_input = input("Please enter the number of the test: ")
-        s.test_number = int(user_input)
+    for i in sys.argv[1:]:
+        s.file_name = i.split('.')
         s.run_tests()
+
 
 if __name__ == '__main__':
     main()
