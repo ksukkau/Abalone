@@ -644,7 +644,7 @@ def main():
     """
     s = StateSpaceGenerator()
     for i in sys.argv[1:]:
-        s.file_name = i.split('.')
+        s.file_name = i.split('.')[0]
         s.run_tests()
 
 
