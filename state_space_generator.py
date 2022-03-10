@@ -18,6 +18,7 @@ class StateSpaceGenerator:
         self.possible_moves_double = set()
         self.possible_moves_triple = set()
         self.possible_moves_sumito = set()
+        self.possible_moves_sumito_move_notation = set()
         self.sumito_trailing_piece = None
         self.group = None
         self.game = GameBoard()
@@ -182,8 +183,10 @@ class StateSpaceGenerator:
                             second_place_piece = self.translate_piece_value_for_output(second_place_piece_row_num, second_place_piece_col_num)
 
                             pieces = (new_piece, second_place_piece, self.sumito_trailing_piece)
-
                             self.possible_moves_sumito.add(("i", pieces, direction, sumito_row_key, sumito_col_num))
+
+                            move_notation_pieces = (piece, self.sumito_trailing_piece)
+                            self.possible_moves_sumito_move_notation.add(("i", move_notation_pieces, sumito_row_key, sumito_col_num))
 
                         sumito_groupings += 1
 
