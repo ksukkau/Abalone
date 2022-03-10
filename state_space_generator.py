@@ -582,7 +582,12 @@ class StateSpaceGenerator:
             move_type = i[0]
             pieces = i[1]
             direction = i[2]
-            print(f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}")
+            #print(f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}")
+
+        for i in self.possible_moves_sumito:
+            move_type = i[0]
+            pieces = i[1][1], i[1][1]
+            direction = i[2]
 
     @staticmethod
     def print_to_text_file(item, path):
