@@ -156,36 +156,41 @@ class StateSpaceGenerator:
 
                 opposite_color = self.get_opposite_color(self.turn)
                 if space_value == opposite_color:
-                    num_of_adj_selected_piece = self.get_num_of_adj_pieces(self.turn, row_key, col_num, direction)
 
-                    opposite_direction = self.opposite_direction[direction]
-                    num_of_adj_opposite_pieces = self.get_num_of_adj_pieces("white", new_row_key, new_col_num, opposite_direction)
+                    sumito_groupings = 2
+                    while (sumito_groupings < 4):
+                        num_of_adj_selected_piece = self.get_num_of_adj_pieces(self.turn, row_key, col_num, direction, sumito_groupings)
 
-                    if num_of_adj_selected_piece > num_of_adj_opposite_pieces:
-                        # getting row and col of space where sumito'ed piece is going to end up
-                        sumito_row_num = self.convert_row_string_int(new_row_key) + direction_tuple[0]
-                        sumito_row_key = self.convert_row_string_int(sumito_row_num)
-                        sumito_col_num = self.calc_new_direction_coords(row_num, direction_tuple) + new_col_num
+                        opposite_direction = self.opposite_direction[direction]
+                        num_of_adj_opposing_pieces = self.get_num_of_adj_pieces("white", new_row_key, new_col_num, opposite_direction, sumito_groupings)
 
+                        if num_of_adj_selected_piece > num_of_adj_opposing_pieces:
+                            # getting row and col of space where sumito'ed piece is going to end up
+                            sumito_row_num = self.convert_row_string_int(new_row_key) + direction_tuple[0]
+                            sumito_row_key = self.convert_row_string_int(sumito_row_num)
+                            sumito_col_num = self.calc_new_direction_coords(row_num, direction_tuple) + new_col_num
 
-                        # gets the leading piece of the opposing color
-                        new_row_num = self.convert_row_string_int(new_row_key)
-                        new_piece = self.translate_piece_value_for_output(new_row_num, new_col_num)
+                            # gets the leading piece of the opposing color
+                            new_row_num = self.convert_row_string_int(new_row_key)
+                            new_piece = self.translate_piece_value_for_output(new_row_num, new_col_num)
 
-                        # gets the 2nd piece to the leading piece
-                        opposite_dir_coords = self.move_directions[opposite_direction]
-                        opposite_dir_coords = (opposite_dir_coords[0], self.calc_new_direction_coords(new_row_num, opposite_dir_coords))
-                        second_place_piece_row_num = new_row_num + opposite_dir_coords[0]
-                        second_place_piece_col_num = new_col_num + opposite_dir_coords[1]
-                        second_place_piece = self.translate_piece_value_for_output(second_place_piece_row_num, second_place_piece_col_num)
+                            # gets the 2nd piece to the leading piece
+                            opposite_dir_coords = self.move_directions[opposite_direction]
+                            opposite_dir_coords = (opposite_dir_coords[0], self.calc_new_direction_coords(new_row_num, opposite_dir_coords))
+                            second_place_piece_row_num = new_row_num + opposite_dir_coords[0]
+                            second_place_piece_col_num = new_col_num + opposite_dir_coords[1]
+                            second_place_piece = self.translate_piece_value_for_output(second_place_piece_row_num, second_place_piece_col_num)
 
-                        pieces = (new_piece, second_place_piece, self.sumito_trailing_piece)
+                            pieces = (new_piece, second_place_piece, self.sumito_trailing_piece)
 
-                        self.possible_moves_sumito.add(("i", pieces, direction, sumito_row_key, sumito_col_num))
+                            self.possible_moves_sumito.add(("i", pieces, direction, sumito_row_key, sumito_col_num))
+
+                        sumito_groupings += 1
 
                     # self.possible_2_piece_inline_groups(piece, direction, row_key, col_num, new_row, new_column)
                     # Piece may be able to move check further
-                    # check for groups and opponent group sizes
+                    # check for groups and oppo
+                    # nent group sizes
                 else:
                     pass
                     # piece cannot move
@@ -208,7 +213,16 @@ class StateSpaceGenerator:
         # else move on to next piece
         pass
 
-    def get_num_of_adj_pieces(self, piece_color, row_key, col_num, direction):
+    def get_num_of_adj_pieces(self, piece_color, row_key, col_num, direction, sumito_grouping=2):
+        """
+
+        :param piece_color: a string, the color of the adjacent pieces to get
+        :param row_key: a string
+        :param col_num: an int
+        :param direction: a tuple
+        :param sumito_grouping: an int, the number of grouped pieces to perform a sumito, set to 2 by default
+        :return:
+        """
         row_num = self.convert_row_string_int(row_key)
         opposite_dir = self.move_directions[self.opposite_direction[direction]]
         processed_opposite_dir = (opposite_dir[0], self.calc_new_direction_coords(row_num, opposite_dir))
@@ -227,7 +241,7 @@ class StateSpaceGenerator:
                 new_row_key = self.convert_row_string_int(new_row_num)
                 new_col_num = self.calc_new_direction_coords(new_row_num, processed_opposite_dir) + new_col_num
 
-                if self.updated_game_board[new_row_key][new_col_num]["color"] == piece_color:
+                if self.updated_game_board[new_row_key][new_col_num]["color"] == piece_color and sumito_grouping == 3:
                     self.sumito_trailing_piece = self.translate_piece_value_for_output(new_row_num, new_col_num)
                     num_of_adj_pieces += 1
         except IndexError:
