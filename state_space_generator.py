@@ -551,7 +551,7 @@ class StateSpaceGenerator:
                     else:
                         whites.append(piece_letter_coord + 'w')
         #print(sorted(blacks) + sorted(whites))
-        # self.print_to_text_file(sorted(blacks) + sorted(whites), "test1.board")
+        self.print_to_text_file(sorted(blacks) + sorted(whites), "test1.board")
 
     def text_output_moves(self):
         """
