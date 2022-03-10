@@ -577,17 +577,28 @@ class StateSpaceGenerator:
         """
         possible_inline_moves = set().union(self.possible_moves_single).union(self.possible_moves_double)\
             .union(self.possible_moves_triple)
+        with open("test1.moves", "a") as file:
 
-        for i in possible_inline_moves:
-            move_type = i[0]
-            pieces = i[1]
-            direction = i[2]
-            #print(f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}")
+            for i in possible_inline_moves:
+                move_type = i[0]
+                pieces = i[1]
+                direction = i[2]
+                item = f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}"
+                file.write(item)
+                file.write("\n")
+                #print(f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}")
 
-        for i in self.possible_moves_sumito:
-            move_type = i[0]
-            pieces = i[1][1], i[1][1]
-            direction = i[2]
+            for i in self.possible_moves_sumito:
+                move_type = i[0]
+                pieces = i[1][1], i[1][1]
+                direction = i[2]
+
+                item = f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}"
+                file.write(item)
+                file.write("\n")
+
+
+
 
     @staticmethod
     def print_to_text_file(item, path):
