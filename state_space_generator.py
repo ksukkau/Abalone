@@ -590,9 +590,6 @@ class StateSpaceGenerator:
                 file.write(item)
                 file.write("\n")
 
-
-
-
     @staticmethod
     def print_to_text_file(item, path):
 
