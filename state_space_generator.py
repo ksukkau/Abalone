@@ -363,20 +363,6 @@ class StateSpaceGenerator:
             print("Adjacent 2nd piece out of board area")
             return False
 
-    @staticmethod
-    def move(move_type, pieces, direction):
-        """
-        Outputs move in move notation.
-        :param move_type: i or s: char
-        :param pieces: tuple: front and end piece locations
-        :param direction:
-        :return:
-        """
-        # print(f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}")
-        # if previous checks pass create move notation and output move
-        # call new board
-        pass
-
     def create_piece_list_for_current_turn(self):
         # create an image of board before changes
         self.updated_game_board = deepcopy(self.game.game_board)
