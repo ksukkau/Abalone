@@ -643,9 +643,8 @@ def main():
     Main function for the statespace generator tests.
     """
     s = StateSpaceGenerator()
-    for i in sys.argv[1:]:
-        s.file_name = i.split('.')[0]
-        s.run_tests()
+    s.file_name = sys.argv[1].split('.')[0]
+    s.run_tests()
 
 
 if __name__ == '__main__':
