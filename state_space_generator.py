@@ -12,6 +12,7 @@ class StateSpaceGenerator:
     """
 
     def __init__(self):
+        self.test_number = 0
         self.turn = ""
         self.board_text = ""
         self.possible_moves_single = set()
@@ -56,7 +57,7 @@ class StateSpaceGenerator:
         }
         self.updated_game_board = None
 
-    def read_test_input(self, path):
+    def read_test_input(self):
         """
         Reads test input and sets the board and turn
         :param path: filepath to test input
@@ -66,7 +67,7 @@ class StateSpaceGenerator:
             "b": "black",
             "w": "white"
         }
-        with open(path, 'r') as input_file:
+        with open(f"test{self.test_number}.input", 'r') as input_file:
             self.turn = colors[input_file.readline().replace('\n', '')]
             self.board_text = input_file.readline()
 
@@ -568,7 +569,7 @@ class StateSpaceGenerator:
                     else:
                         whites.append(piece_letter_coord + 'w')
         #print(sorted(blacks) + sorted(whites))
-        self.print_to_text_file(sorted(blacks) + sorted(whites), "test1.board")
+        self.print_to_text_file(sorted(blacks) + sorted(whites))
 
     def text_output_moves(self):
         """
@@ -580,7 +581,7 @@ class StateSpaceGenerator:
         """
         possible_moves = set().union(self.possible_moves_single).union(self.possible_moves_double)\
             .union(self.possible_moves_triple).union(self.possible_moves_sumito_move_notation)
-        with open("test1.moves", "a") as file:
+        with open(f"test{self.test_number}.moves", "a") as file:
 
             for i in possible_moves:
                 move_type = i[0]
@@ -590,19 +591,33 @@ class StateSpaceGenerator:
                 file.write(item)
                 file.write("\n")
 
-    @staticmethod
-    def print_to_text_file(item, path):
+    def print_to_text_file(self, item):
 
         item = str(item)
         item = item.replace('[', '').replace(']', '').replace(' ', '').replace("'", '')
-        with open(path, "a") as file:
+        with open(f"test{self.test_number}.board", "a") as file:
             file.write(item)
             file.write("\n")
 
+    def run_tests(self):
+        self.read_test_input()
+        self.translate_test_input_to_board_notation()
+        self.create_piece_list_for_current_turn()
+        self.update_board()
+        self.text_output_moves()
 
-s = StateSpaceGenerator()
-s.read_test_input("Test1.input")
-s.translate_test_input_to_board_notation()
-s.create_piece_list_for_current_turn()
-s.update_board()
-s.text_output_moves()
+
+def main():
+    """
+    Main function for the statespace generator tests.
+    """
+    s = StateSpaceGenerator()
+    print("Press n to exit")
+    user_input = 0
+    while user_input != "n":
+        user_input = input("Please enter the number of the test: ")
+        s.test_number = int(user_input)
+        s.run_tests()
+
+if __name__ == '__main__':
+    main()
