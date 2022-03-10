@@ -18,6 +18,7 @@ class StateSpaceGenerator:
         self.possible_moves_double = set()
         self.possible_moves_triple = set()
         self.possible_moves_sumito = set()
+        self.sumito_trailing_piece = None
         self.group = None
         self.game = GameBoard()
         self.reset_board = None
@@ -131,28 +132,57 @@ class StateSpaceGenerator:
         # for reading from our actual board not applicable for test input
 
     def possible_lead_piece_to_select(self, row_key, column_detail):
-        row_num = int(row_key.replace("row", ''))
+        row_num = self.convert_row_string_int(row_key)
         col_num = column_detail['colNum']
         piece = self.translate_piece_value_for_output(row_num, col_num)
 
         for direction in self.move_directions:
             direction_tuple = self.move_directions.get(direction)
 
-            new_row = int(row_key.replace("row", '')) + direction_tuple[0]
-            new_column = col_num + self.calc_new_direction_coords(row_num, direction_tuple)
-            new_row_key = "row" + str(new_row)
+            new_row = self.convert_row_string_int(row_key) + direction_tuple[0]
+            new_col_num = col_num + self.calc_new_direction_coords(row_num, direction_tuple)
+            new_row_key = self.convert_row_string_int(new_row)
 
             try:
-                space_value = self.game.game_board[new_row_key][new_column]['color']
+                space_value = self.game.game_board[new_row_key][new_col_num]['color']
                 if space_value is None:
                     # piece can move
                     pieces = (piece, piece)
                     # generate single piece inline move
-                    #self.move("i", pieces, direction)
-                    self.possible_moves_single.add(("i", pieces, direction, new_row_key, new_column))
-                    self.possible_multiple_piece_inline_groups(direction, row_key, col_num, new_row, new_column)
-                elif space_value == "white":
-                    pass
+                    self.move("i", pieces, direction)
+                    self.possible_moves_single.add(("i", pieces, direction, new_row_key, new_col_num))
+
+                    self.possible_multiple_piece_inline_groups(direction, row_key, col_num, new_row, new_col_num)
+
+                opposite_color = self.get_opposite_color(self.turn)
+                if space_value == opposite_color:
+                    num_of_adj_selected_piece = self.get_num_of_adj_pieces(self.turn, row_key, col_num, direction)
+
+                    opposite_direction = self.opposite_direction[direction]
+                    num_of_adj_opposite_pieces = self.get_num_of_adj_pieces("white", new_row_key, new_col_num, opposite_direction)
+
+                    if num_of_adj_selected_piece > num_of_adj_opposite_pieces:
+                        # getting row and col of space where sumito'ed piece is going to end up
+                        sumito_row_num = self.convert_row_string_int(new_row_key) + direction_tuple[0]
+                        sumito_row_key = self.convert_row_string_int(sumito_row_num)
+                        sumito_col_num = self.calc_new_direction_coords(row_num, direction_tuple) + new_col_num
+
+
+                        # gets the leading piece of the opposing color
+                        new_row_num = self.convert_row_string_int(new_row_key)
+                        new_piece = self.translate_piece_value_for_output(new_row_num, new_col_num)
+
+                        # gets the 2nd piece to the leading piece
+                        opposite_dir_coords = self.move_directions[opposite_direction]
+                        opposite_dir_coords = (opposite_dir_coords[0], self.calc_new_direction_coords(new_row_num, opposite_dir_coords))
+                        second_place_piece_row_num = new_row_num + opposite_dir_coords[0]
+                        second_place_piece_col_num = new_col_num + opposite_dir_coords[1]
+                        second_place_piece = self.translate_piece_value_for_output(second_place_piece_row_num, second_place_piece_col_num)
+
+                        pieces = (new_piece, second_place_piece, self.sumito_trailing_piece)
+
+                        self.possible_moves_sumito.add(("i", pieces, direction, sumito_row_key, sumito_col_num))
+
                     # self.possible_2_piece_inline_groups(piece, direction, row_key, col_num, new_row, new_column)
                     # Piece may be able to move check further
                     # check for groups and opponent group sizes
@@ -168,6 +198,43 @@ class StateSpaceGenerator:
         # if is next to opponent color
         # check for 2 piece groups
         # else move on to next piece
+
+    def perform_sumito(self, direction, row_key, col_num, pushed_piece_row_key, pushed_piece_col_num):
+
+
+        # if group adjacent to opponents piece check if opponents pieces in line are >=
+        # else move on to next piece
+        # if not >= verify space behind opponent group is empty or not part of the board
+        # else move on to next piece
+        pass
+
+    def get_num_of_adj_pieces(self, piece_color, row_key, col_num, direction):
+        row_num = self.convert_row_string_int(row_key)
+        opposite_dir = self.move_directions[self.opposite_direction[direction]]
+        processed_opposite_dir = (opposite_dir[0], self.calc_new_direction_coords(row_num, opposite_dir))
+
+        new_row_num = processed_opposite_dir[0] + row_num
+        new_row_key = self.convert_row_string_int(new_row_num)
+        new_col_num = processed_opposite_dir[1] + col_num
+
+        num_of_adj_pieces = 0
+        try:
+            if self.updated_game_board[new_row_key][new_col_num]["color"] == piece_color:
+                self.sumito_trailing_piece = self.translate_piece_value_for_output(new_row_num, new_col_num)
+                num_of_adj_pieces += 1
+
+                new_row_num = processed_opposite_dir[0] + new_row_num
+                new_row_key = self.convert_row_string_int(new_row_num)
+                new_col_num = self.calc_new_direction_coords(new_row_num, processed_opposite_dir) + new_col_num
+
+                if self.updated_game_board[new_row_key][new_col_num]["color"] == piece_color:
+                    self.sumito_trailing_piece = self.translate_piece_value_for_output(new_row_num, new_col_num)
+                    num_of_adj_pieces += 1
+        except IndexError:
+            print("Sumito check out of board area")
+            return num_of_adj_pieces
+
+        return num_of_adj_pieces
 
     def translate_piece_value_for_output(self, row_num, col_num):
         """
@@ -263,11 +330,18 @@ class StateSpaceGenerator:
             print("Adjacent 2nd piece out of board area")
             return False
 
-    def check_for_sumito_opponents(self):
-        # if group adjacent to opponents piece check if opponents pieces in line are >=
-        # else move on to next piece
-        # if not >= verify space behind opponent group is empty or not part of the board
-        # else move on to next piece
+    @staticmethod
+    def move(move_type, pieces, direction):
+        """
+        Outputs move in move notation.
+        :param move_type: i or s: char
+        :param pieces: tuple: front and end piece locations
+        :param direction:
+        :return:
+        """
+        # print(f"{move_type}-{pieces[0]}-{pieces[1]}-{direction}")
+        # if previous checks pass create move notation and output move
+        # call new board
         pass
 
     def create_piece_list_for_current_turn(self):
@@ -284,7 +358,7 @@ class StateSpaceGenerator:
 
     def update_board(self):
 
-      #  print("===== (Debug) 1-piece moves =====")
+        print("===== (Debug) 1-piece moves =====")
         for move in self.possible_moves_single:
             # only for single piece moves
             if move[0] == 'i':
@@ -298,7 +372,7 @@ class StateSpaceGenerator:
                 self.updated_game_board = deepcopy(self.game.game_board)
 
         # debug
-     #   print("===== (Debug) 2-piece moves =====")
+        print("===== (Debug) 2-piece moves =====")
         for move in self.possible_moves_double:
             # only for single piece moves
             if move[0] == 'i':
@@ -315,7 +389,7 @@ class StateSpaceGenerator:
                 self.updated_game_board = deepcopy(self.game.game_board)
 
         # debug
-      #  print("===== (Debug) 3-piece moves =====")
+        print("===== (Debug) 3-piece moves =====")
         for move in self.possible_moves_triple:
             # only for single piece moves
             if move[0] == 'i':
@@ -327,6 +401,41 @@ class StateSpaceGenerator:
                     trailing_piece_external_coords)
                 # remove old trailing piece
                 self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["color"] = None
+                self.output_board()
+                # resets board to before move
+                self.updated_game_board = deepcopy(self.game.game_board)
+
+        # debug
+        print("===== (Debug) Sumito 3 push-1-and-2 moves =====")
+        for move in self.possible_moves_sumito:
+            # only for single piece moves
+            if move[0] == 'i':
+
+                leading_piece_coords = self.translate_single_piece_to_board_notation(move[1][0])
+                second_place_piece_coords = self.translate_single_piece_to_board_notation(move[1][1])
+                trailing_piece_coords = self.translate_single_piece_to_board_notation(move[1][2])
+
+                opposing_color = self.get_opposite_color(self.turn)
+                color_of_second_piece = self.updated_game_board[second_place_piece_coords[0]][second_place_piece_coords[1]]["color"]
+
+                try:
+                    # push opposing piece
+                    self.updated_game_board[move[3]][move[4]]["color"] = opposing_color
+
+                except IndexError:
+                    # shift pieces as piece has been pushed off game board
+                    print(f"{opposing_color.title()} piece pushed off the board!")
+
+                else:
+                    self.updated_game_board[second_place_piece_coords[0]][second_place_piece_coords[1]]["color"] = self.turn
+
+                finally:
+                    # replaces leading piece with the color of the piece behind it
+                    self.updated_game_board[leading_piece_coords[0]][leading_piece_coords[1]]["color"] = color_of_second_piece
+
+                    # removes trailing piece
+                    self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["color"] = None
+
                 self.output_board()
                 # resets board to before move
                 self.updated_game_board = deepcopy(self.game.game_board)
