@@ -379,7 +379,6 @@ class StateSpaceGenerator:
 
     def update_board(self):
 
-        print("===== (Debug) 1-piece moves =====")
         for move in self.possible_moves_single:
             # only for single piece moves
             if move[0] == 'i':
@@ -392,8 +391,6 @@ class StateSpaceGenerator:
                 # resets board to before move
                 self.updated_game_board = deepcopy(self.game.game_board)
 
-        # debug
-        print("===== (Debug) 2-piece moves =====")
         for move in self.possible_moves_double:
             # only for single piece moves
             if move[0] == 'i':
@@ -409,8 +406,6 @@ class StateSpaceGenerator:
                 # resets board to before move
                 self.updated_game_board = deepcopy(self.game.game_board)
 
-        # debug
-        print("===== (Debug) 3-piece moves =====")
         for move in self.possible_moves_triple:
             # only for single piece moves
             if move[0] == 'i':
@@ -426,8 +421,6 @@ class StateSpaceGenerator:
                 # resets board to before move
                 self.updated_game_board = deepcopy(self.game.game_board)
 
-        # debug
-        print("===== (Debug) Sumito 3 push-1-and-2 moves =====")
         for move in self.possible_moves_sumito:
             # only for single piece moves
             if move[0] == 'i':
@@ -449,10 +442,8 @@ class StateSpaceGenerator:
                     # shift pieces as piece has been pushed off game board
                     print(f"{opposing_color.title()} piece pushed off the board!")
 
-                # else:
-                #     self.updated_game_board[leading_piece_coords[0]][leading_piece_coords[1]]["color"] = color_of_second_piece
-
                 finally:
+                    # leading piece replaced by color of piece directly behind it
                     self.updated_game_board[leading_piece_coords[0]][leading_piece_coords[1]]["color"] = color_of_second_piece
 
                     # replaces second place piece with piece of turn color
@@ -520,7 +511,6 @@ class StateSpaceGenerator:
             elif new_row_dir == 1 and row_num != MIDDLE_ROW:
                 if new_col_dir == -1:
                     new_col_dir = 0
-
 
         # checks for pieces in the bottom half of the game board
         else:
