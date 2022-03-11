@@ -851,7 +851,6 @@ class StateSpaceGenerator:
             self.turn = colors[input_file.readline().replace('\n', '')]
             self.board_text = input_file.readline()
 
-
     def output_board(self):
         """
         Given the current board state, it generates a list containing the positions of the black and white game pieces
