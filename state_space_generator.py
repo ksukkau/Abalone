@@ -342,45 +342,30 @@ class StateSpaceGenerator:
 
                     sumito_groupings = 2
                     while sumito_groupings < 4:
-                        num_of_adj_selected_pieces = self.get_sumito_num_of_adj_pieces(self.turn, row_key, col_num,
-                                                                                       direction, sumito_groupings)
+                        num_of_adj_selected_pieces = self.get_sumito_num_of_adj_pieces(self.turn, row_key, col_num, direction, sumito_groupings)
 
                         opposite_direction = self.opposite_direction[direction]
                         opposite_direction_tuple = self.move_directions[opposite_direction]
-                        num_of_adj_opposing_pieces = self.get_sumito_num_of_adj_pieces("white", new_row_key,
-                                                                                       new_col_num, opposite_direction,
-                                                                                       sumito_groupings)
+                        num_of_adj_opposing_pieces = self.get_sumito_num_of_adj_pieces("white", new_row_key, new_col_num, opposite_direction, sumito_groupings)
 
                         # if num of adjacent pieces of current color is greater than num of adjacent pieces of opposing
                         # color them sumito is performed
                         if num_of_adj_selected_pieces > num_of_adj_opposing_pieces:
                             # getting row and col of space where sumito'ed piece is going to end up
 
-                            leading_piece = self.get_leading_or_trailing_piece(new_row_num, new_col_num,
-                                                                               num_of_adj_opposing_pieces,
-                                                                               direction_tuple)
-                            piece_in_front_leading_piece = self.get_leading_or_trailing_piece(leading_piece[0],
-                                                                                              leading_piece[1], 1,
-                                                                                              direction_tuple)
+                            leading_piece = self.get_leading_or_trailing_piece(new_row_num, new_col_num, num_of_adj_opposing_pieces, direction_tuple)
+                            piece_in_front_leading_piece = self.get_leading_or_trailing_piece(leading_piece[0], leading_piece[1], 1, direction_tuple)
 
                             piece_in_front_row = piece_in_front_leading_piece[0]
                             piece_in_front_col = piece_in_front_leading_piece[1]
                             try:
                                 # checks if the space in front of the leading space is un-occupied
                                 if self.updated_game_board[piece_in_front_row][piece_in_front_col]["color"] is None:
-                                    self.add_valid_sumito_to_move_set(col_num, direction,
-                                                                                      direction_tuple, leading_piece,
-                                                                                      num_of_adj_selected_pieces,
-                                                                                      opposite_direction_tuple, piece,
-                                                                                      row_num)
+                                    self.add_valid_sumito_to_move_set(col_num, direction, direction_tuple, leading_piece, num_of_adj_selected_pieces, opposite_direction_tuple, piece, row_num)
 
                             # if an IndexError is raised, that means a piece is going to be pushed off the board
                             except IndexError:
-                                self.add_valid_sumito_to_move_set(col_num, direction,
-                                                                  direction_tuple, leading_piece,
-                                                                  num_of_adj_selected_pieces,
-                                                                  opposite_direction_tuple, piece,
-                                                                  row_num)
+                                self.add_valid_sumito_to_move_set(col_num, direction, direction_tuple, leading_piece, num_of_adj_selected_pieces, opposite_direction_tuple, piece, row_num)
 
                         sumito_groupings += 1
 
@@ -420,8 +405,7 @@ class StateSpaceGenerator:
             # ----------------------------------------------------------------------------------------------------
             adj_new_row_num = adj_new_row_num + opposite_dir_coords[0]
             adj_piece_row_key = self.convert_row_string_int(adj_new_row_num)
-            adj_piece_col_num = adj_piece_col_num + self.calc_new_direction_coords(selected_row_num,
-                                                                                   opposite_dir_coords)
+            adj_piece_col_num = adj_piece_col_num + self.calc_new_direction_coords(selected_row_num, opposite_dir_coords)
 
             if self.is_valid_adjacent_piece(adj_piece_row_key, adj_piece_col_num):
                 leading_piece_coords = self.translate_piece_value_for_output(selected_row_num, col_num)
@@ -450,17 +434,14 @@ class StateSpaceGenerator:
         """
         leading_piece_color = self.updated_game_board[leading_piece[0]][leading_piece[1]]["color"]
         if leading_piece_color != self.turn:
-            trailing_piece = self.get_leading_or_trailing_piece(row_num, col_num, num_of_adj_selected_pieces,
-                                                                opposite_direction_tuple)
+            trailing_piece = self.get_leading_or_trailing_piece(row_num, col_num, num_of_adj_selected_pieces, opposite_direction_tuple)
 
             leading_piece_row_num = self.convert_row_string_int(leading_piece[0])
             leading_piece_col_num = leading_piece[1]
-            empty_space_coords = self.get_piece_coords_movement(leading_piece_row_num, leading_piece_col_num,
-                                                                direction_tuple)
+            empty_space_coords = self.get_piece_coords_movement(leading_piece_row_num, leading_piece_col_num, direction_tuple)
 
             leading_piece = self.translate_piece_value_for_output(leading_piece[0], leading_piece[1])
-            second_place_piece = self.get_piece_coords_movement(leading_piece_row_num, leading_piece_col_num,
-                                                                opposite_direction_tuple)
+            second_place_piece = self.get_piece_coords_movement(leading_piece_row_num, leading_piece_col_num, opposite_direction_tuple)
             second_place_piece = self.translate_piece_value_for_output(second_place_piece[0], second_place_piece[1])
             trailing_piece = self.translate_piece_value_for_output(trailing_piece[0], trailing_piece[1])
             pieces = (leading_piece, second_place_piece, trailing_piece)
@@ -519,9 +500,7 @@ class StateSpaceGenerator:
                         # gets the complimentary sidesteps directions to check for
                         sidestep_dirs_to_check = self.sidestep_directions[direction]
                         for sidestep_complimentary_dir in sidestep_dirs_to_check:
-                            num_of_adj_pieces = self.get_sidestep_num_of_adj_pieces(self.turn, row_key, col_num,
-                                                                                    sidestep_complimentary_dir,
-                                                                                    sidestep_groupings)
+                            num_of_adj_pieces = self.get_sidestep_num_of_adj_pieces(self.turn, row_key, col_num, sidestep_complimentary_dir, sidestep_groupings)
 
                             if num_of_adj_pieces > 0:
                                 # gets the sidestep move direction coords
@@ -529,26 +508,22 @@ class StateSpaceGenerator:
 
                                 adj_piece_row = row_num
                                 adj_piece_col = col_num
-                                adj_piece_coords = self.get_piece_coords_movement(adj_piece_row, adj_piece_col,
-                                                                                  sidestep_complimentary_dir_tuple)
+                                adj_piece_coords = self.get_piece_coords_movement(adj_piece_row, adj_piece_col, sidestep_complimentary_dir_tuple)
 
                                 # checks all of the adjacent pieces to see if they are able to perform a sidestep
                                 for adj_piece in range(0, num_of_adj_pieces):
                                     # gets the coords of the adjacent piece
-                                    adj_piece_coords = self.get_piece_coords_movement(adj_piece_row, adj_piece_col,
-                                                                                      sidestep_complimentary_dir_tuple)
+                                    adj_piece_coords = self.get_piece_coords_movement(adj_piece_row, adj_piece_col, sidestep_complimentary_dir_tuple)
 
                                     adj_piece_row = adj_piece_coords[0]
                                     adj_piece_col = adj_piece_coords[1]
 
                                 # gets trailing piece and con
                                 # verts it to external board notation (e.g. H6)
-                                trailing_piece = self.translate_piece_value_for_output(adj_piece_coords[0],
-                                                                                       adj_piece_coords[1])
+                                trailing_piece = self.translate_piece_value_for_output(adj_piece_coords[0], adj_piece_coords[1])
 
                                 # checks if the adjacent piece can make a sidestep
-                                sidestep_space = self.get_piece_coords_movement(adj_piece_row, adj_piece_col,
-                                                                                direction_tuple)
+                                sidestep_space = self.get_piece_coords_movement(adj_piece_row, adj_piece_col, direction_tuple)
 
                                 # checks if the space that the adjacent piece wants to sidestep to is empty
                                 try:
@@ -557,20 +532,16 @@ class StateSpaceGenerator:
                                         # handles adding 3 group side steps to the move list
                                         if num_of_adj_pieces == 2:
                                             # gets middle piece and converts it to external board notation (e.g. H6)
-                                            middle_piece_tuple = self.get_piece_coords_movement(row_num, col_num,
-                                                                                                sidestep_complimentary_dir_tuple)
-                                            middle_piece = self.translate_piece_value_for_output(middle_piece_tuple[0],
-                                                                                                 middle_piece_tuple[1])
+                                            middle_piece_tuple = self.get_piece_coords_movement(row_num, col_num, sidestep_complimentary_dir_tuple)
+                                            middle_piece = self.translate_piece_value_for_output(middle_piece_tuple[0], middle_piece_tuple[1])
 
                                             # add pieces to a tuple and adds the move into the sidestep moves set
                                             pieces = (piece, middle_piece, trailing_piece)
-                                            self.possible_moves_sidestep.add(
-                                                ("s", pieces, direction, new_row_key, new_col_num))
+                                            self.possible_moves_sidestep.add(("s", pieces, direction, new_row_key, new_col_num))
 
                                             # adds pieces to the move notation set
                                             pieces_move_notation = (piece, trailing_piece)
-                                            self.possible_moves_sidestep_move_notation.add(
-                                                ("s", pieces_move_notation, direction, new_row_key, new_col_num))
+                                            self.possible_moves_sidestep_move_notation.add(("s", pieces_move_notation, direction, new_row_key, new_col_num))
 
                                         # handles adding 2 group side steps to the move list
                                         elif num_of_adj_pieces == 1:
