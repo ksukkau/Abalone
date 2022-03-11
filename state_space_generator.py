@@ -755,8 +755,7 @@ class StateSpaceGenerator:
                 sidestep_dir_tuple = (sidestep_row_dir_coord, sidestep_col_dir_coord)
 
                 # performs the sidestep
-                sidestep_piece = self.get_piece_coords_movement(piece_coords_tuple[0], piece_coords_tuple[1],
-                                                                sidestep_dir_tuple)
+                sidestep_piece = self.get_piece_coords_movement(piece_coords_tuple[0], piece_coords_tuple[1], sidestep_dir_tuple)
                 self.updated_game_board[sidestep_piece[0]][sidestep_piece[1]]["color"] = self.turn
 
             self.output_board()
