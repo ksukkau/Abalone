@@ -794,7 +794,8 @@ class StateSpaceGenerator:
         :return:
         """
         possible_moves = set().union(self.possible_moves_single).union(self.possible_moves_double)\
-            .union(self.possible_moves_triple).union(self.possible_moves_sumito_move_notation)
+            .union(self.possible_moves_triple).union(self.possible_moves_sumito_move_notation)\
+            .union(self.possible_moves_sidestep)
         with open(f"{self.file_name}.moves", "a") as file:
 
             for i in possible_moves:
