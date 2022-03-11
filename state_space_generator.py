@@ -432,7 +432,6 @@ class StateSpaceGenerator:
 
                 self.possible_moves_triple.add(("i", pieces, direction, new_row_key, new_column))
 
-
     def add_valid_sumito_to_move_set(self, col_num: int, direction: str, direction_tuple: tuple, leading_piece: tuple, num_of_adj_selected_pieces: int, opposite_direction_tuple: tuple, piece: str, row_num: int):
         """
         Helper method containing the logic to perform the sumito. Adds the type of move, the pieces involved in the
@@ -575,16 +574,13 @@ class StateSpaceGenerator:
 
                                         # handles adding 2 group side steps to the move list
                                         elif num_of_adj_pieces == 1:
-                                            adj_piece_board_notation = self.translate_piece_value_for_output(
-                                                adj_piece_row, adj_piece_col)
+                                            adj_piece_board_notation = self.translate_piece_value_for_output(adj_piece_row, adj_piece_col)
                                             pieces = (piece, adj_piece_board_notation)
-                                            self.possible_moves_sidestep.add(
-                                                ("s", pieces, direction, new_row_key, new_col_num))
+                                            self.possible_moves_sidestep.add(("s", pieces, direction, new_row_key, new_col_num))
 
                                             # adds the pieces to the move notation set
                                             pieces_move_notation = (piece, adj_piece_board_notation)
-                                            self.possible_moves_sidestep_move_notation.add(
-                                                ("s", pieces_move_notation, direction, new_row_key, new_col_num))
+                                            self.possible_moves_sidestep_move_notation.add(("s", pieces_move_notation, direction, new_row_key, new_col_num))
 
                                 except IndexError:
                                     # print("Sidestep check out of board area")
@@ -691,7 +687,6 @@ class StateSpaceGenerator:
         Contains for-loops to iterate over the sets of different types of moves, updates the board state for each move,
         and writes the board state to a .board file.
         """
-
         for move in self.possible_moves_single:
             # only for single piece moves
             if move[0] == 'i':
@@ -873,8 +868,6 @@ class StateSpaceGenerator:
                     new_col_dir = 0
 
         return new_col_dir
-
-
 
     def read_test_input(self):
         """
