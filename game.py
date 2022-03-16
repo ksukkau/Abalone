@@ -2,6 +2,7 @@ import math
 from settings import *
 from tkinter import *
 import tkinter as tk
+from state_space_generator import Converter
 
 
 class GameBoard(tk.Tk):
@@ -15,6 +16,7 @@ class GameBoard(tk.Tk):
         # default font and color
         self.font = "Montserrat", 15
         self.font_color = "White"
+
         # default background color
         self.bg = "#303b41"
 
@@ -49,11 +51,21 @@ class GameBoard(tk.Tk):
         self.white_pieces = None
         self.black_pieces = None
         self.settings = None
-        self.settings_selections = {'color': 0, 'mode_p1': "Human", 'mode_p2': "Human", 'config': 0, 'turns': 15,
-                                    'time1': 30, 'time2': 30}
+        self.settings_selections = {'color': 0, 'mode_p1': "Human", 'mode_p2': "Human", 'config': 0, 'turns': 15, 'time1': 30, 'time2': 30}
         self.spot_coords = {}
         self.board_screen_pos = None
         self.game_board = None
+        
+    @staticmethod
+    def get_row_key(row: int, offset=0) -> str:
+        """
+        Generates the key used for the game_board dictionary for denoting the rows of the game board. An offset
+        may be specified as the index starts at 0, otherwise the offset is default at 0.
+        :param row: an int
+        :param offset: an int
+        :return: a string
+        """
+        return "row" + str(row + offset)
 
     def click_event_listener_engine(self, event):
         """
@@ -68,7 +80,7 @@ class GameBoard(tk.Tk):
             row_key = self.get_row_key(row)
             selected_row = self.game_board.get(row_key)
 
-            for col in range(self.calculate_row_length(row)):
+            for col in range(Converter.calculate_row_length(row)):
                 piece_x_pos = selected_row[col].get("x_pos")
                 piece_y_pos = selected_row[col].get("y_pos")
 
@@ -128,7 +140,7 @@ class GameBoard(tk.Tk):
         TOP_ROW = 0
         UPPER_HALF = range(1, 4 + ZERO_INDEX_OFFSET)
 
-        num_of_cols = self.calculate_row_length(row)
+        num_of_cols = Converter.calculate_row_length(row)
 
         if row == TOP_ROW:
             col_coord = num_of_cols + col
@@ -169,7 +181,7 @@ class GameBoard(tk.Tk):
         for row in range(self.hexes_across):
             row_key = self.get_row_key(row)
             spot_y = (y_pos - radius * sin60) + (row * self.hex_size * sin60) + (self.hex_size * sin60 / 2)
-            row_length = self.calculate_row_length(row)
+            row_length = Converter.calculate_row_length(row)
             start_x = x_pos - (row_length * self.hex_size // 2) + (self.hex_size // 2)
             for col in range(row_length):
                 spot_x = start_x + col * self.hex_size
@@ -188,7 +200,7 @@ class GameBoard(tk.Tk):
         """
         for row in range(self.hexes_across):
             row_key = self.get_row_key(row)
-            row_length = self.calculate_row_length(row)
+            row_length = Converter.calculate_row_length(row)
 
             for col in range(row_length):
                 piece_color = self.game_board.get(row_key)[col].get("color")
@@ -207,7 +219,7 @@ class GameBoard(tk.Tk):
         for row in range(lines_to_fill):
             row_key = "row" + str(row)
 
-            for col in range(self.calculate_row_length(row)):
+            for col in range(Converter.calculate_row_length(row)):
                 self.game_board.get(row_key)[col].update({"color": "white"})
 
                 if row == 1:  # populates front 3 white pieces
@@ -220,7 +232,7 @@ class GameBoard(tk.Tk):
             if (row - 1) == 6:  # populates front 3 black pieces
                 for nested_col in range(2, 5):
                     self.game_board.get("row6")[nested_col].update({"color": "black"})
-            for col in range(self.calculate_row_length(row)):
+            for col in range(Converter.calculate_row_length(row)):
                 self.game_board.get(row_key)[col].update({"color": "black"})
 
     def initialize_game_board_array(self):
@@ -232,7 +244,7 @@ class GameBoard(tk.Tk):
         self.game_board = {}
 
         for col in range(self.hexes_across):
-            row_length = self.calculate_row_length(col)
+            row_length = Converter.calculate_row_length(col)
             row_key = "row" + str(col)
             self.game_board.update({row_key: []})
 
@@ -240,34 +252,10 @@ class GameBoard(tk.Tk):
                 self.game_board.get(row_key).append(
                     {"colNum": row, "color": None, "selected": False, "x_pos": None, "y_pos": None})
 
-    def calculate_row_length(self, row: int) -> int:
-        """
-        Calculates, and returns, the number of pieces on a given column within the game board.
-        :param row: an int
-        :return: an int
-        """
-        if self.hexes_per_side + row >= self.hexes_across:
-            row_length = self.hexes_per_side + (self.hexes_across - row) - 1
-        else:
-            row_length = self.hexes_per_side + row
-        return row_length
-
-    @staticmethod
-    def get_row_key(row: int, offset=0) -> str:
-        """
-        Generates the key used for the game_board dictionary for denoting the rows of the game board. An offset
-        may be specified as the index starts at 0, otherwise the offset is default at 0.
-        :param row: an int
-        :param offset: an int
-        :return: a string
-        """
-        return "row" + str(row + offset)
-
     def draw_timer_window(self):
         """
         Initializes and draws the window containing the turn timer for both the black and white team.
         """
-
         timer_white_label = Label(self, text="White Player", bg=self.bg, font=self.font, fg=self.font_color)
         self.white_timer_box = Listbox(self, height=25, width=20)
         timer_white_label.grid(row=1, column=5, padx=5, columnspan=2)
