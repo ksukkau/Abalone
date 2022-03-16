@@ -1,5 +1,6 @@
 from game import *
 from copy import deepcopy
+from converter import Converter
 import sys
 
 
@@ -77,7 +78,7 @@ class StateSpaceGenerator:
         :return: a tuple (str, int) where the string is the row key and the int is  the column number
         """
         row_dir = direction[0]
-        col_dir = Converter.calc_new_direction_coords(row_num, direction)
+        col_dir = Converter.calculate_adjusted_col_direction(row_num, direction)
 
         if type(row_num) != int:
             row_num = Converter.convert_row_to_string_or_int(row_num)
@@ -129,7 +130,6 @@ class StateSpaceGenerator:
                     self.generate_inline_moves(row_key, column_detail)
                     self.generate_sidestep_moves(row_key, column_detail)
 
-
     def get_sumito_num_of_adj_pieces(self, piece_color: str, row_key: str, col_num: int, direction: str, groupings=2) -> int:
         """
         Gets the number of adjacent pieces of the same color passed to this method. Checks the pieces adjacent to the
@@ -145,7 +145,7 @@ class StateSpaceGenerator:
         """
         row_num = Converter.convert_row_to_string_or_int(row_key)
         opposite_dir_coords = self.move_directions[self.opposite_direction[direction]]
-        processed_opposite_dir = (opposite_dir_coords[0], Converter.calc_new_direction_coords(row_num, opposite_dir_coords))
+        processed_opposite_dir = (opposite_dir_coords[0], Converter.calculate_adjusted_col_direction(row_num, opposite_dir_coords))
 
         new_row_num = processed_opposite_dir[0] + row_num
         new_row_key = Converter.convert_row_to_string_or_int(new_row_num)
@@ -158,7 +158,7 @@ class StateSpaceGenerator:
             if adj_space_piece_color == piece_color:
                 num_of_adj_pieces += 1
 
-            new_col_num = Converter.calc_new_direction_coords(new_row_num, opposite_dir_coords) + new_col_num
+            new_col_num = Converter.calculate_adjusted_col_direction(new_row_num, opposite_dir_coords) + new_col_num
             new_row_num = processed_opposite_dir[0] + new_row_num
 
             if new_row_num < 0:
@@ -176,36 +176,6 @@ class StateSpaceGenerator:
 
         return num_of_adj_pieces
 
-    def translate_piece_value_for_output(self, row_num, col_num: int) -> str:
-        """
-        Translates piece from internal coordinates to notation as required by game board coordinate system.
-
-        :param row_num: a string of the row key, or an int of the row number
-        :param col_num: an int of the column number
-        :return: a string of the specified piece conforming to external board notation (e.g. H5)
-        """
-        ASCII_ALPHABET_OFFSET = 8
-        ZERO_INDEX_OFFSET = 1
-
-        TOP_ROW = 0
-        UPPER_HALF = range(1, 4 + ZERO_INDEX_OFFSET)
-
-        # if the string row_key is passed, then it is converted to an int representing the row
-        if type(row_num) != int:
-            row_num = Converter.convert_row_to_string_or_int(row_num)
-
-        num_of_cols = Converter.calculate_row_length(row_num)
-
-        if row_num == TOP_ROW:
-            col_coord = num_of_cols + col_num
-        elif row_num in UPPER_HALF:
-            col_coord = (num_of_cols - (row_num * 2)) + col_num
-        else:
-            col_coord = col_num + ZERO_INDEX_OFFSET
-
-        row_coord = chr((ASCII_ALPHABET_OFFSET - row_num) + 65)
-        return row_coord + str(col_coord)
-
     def generate_inline_moves(self, row_key: str, column_detail: dict):
         """
         Runs the engine to find all of the possible inline moves for 2 and 3 groupings, as well as 2 and 3 grouped
@@ -216,13 +186,13 @@ class StateSpaceGenerator:
         """
         row_num = Converter.convert_row_to_string_or_int(row_key)
         col_num = column_detail['colNum']
-        piece = self.translate_piece_value_for_output(row_num, col_num)
+        piece = Converter.internal_notation_to_external(row_num, col_num)
 
         for direction in self.move_directions:
             direction_tuple = self.move_directions.get(direction)
 
             new_row_num = Converter.convert_row_to_string_or_int(row_key) + direction_tuple[0]
-            new_col_num = col_num + Converter.calc_new_direction_coords(row_num, direction_tuple)
+            new_col_num = col_num + Converter.calculate_adjusted_col_direction(row_num, direction_tuple)
             new_row_key = Converter.convert_row_to_string_or_int(new_row_num)
 
             try:
@@ -292,11 +262,11 @@ class StateSpaceGenerator:
 
         adj_new_row_num = selected_row_num + opposite_dir_coords[0]
         ajd_piece_row_key = Converter.convert_row_to_string_or_int(adj_new_row_num)
-        adj_piece_col_num = col_num + Converter.calc_new_direction_coords(selected_row_num, opposite_dir_coords)
+        adj_piece_col_num = col_num + Converter.calculate_adjusted_col_direction(selected_row_num, opposite_dir_coords)
 
         if self.is_valid_adjacent_piece(ajd_piece_row_key, adj_piece_col_num):
-            leading_piece_coords = self.translate_piece_value_for_output(selected_row_num, col_num)
-            trailing_piece_coords = self.translate_piece_value_for_output(adj_new_row_num, adj_piece_col_num)
+            leading_piece_coords = Converter.internal_notation_to_external(selected_row_num, col_num)
+            trailing_piece_coords = Converter.internal_notation_to_external(adj_new_row_num, adj_piece_col_num)
 
             pieces = (leading_piece_coords, trailing_piece_coords)
             new_row_key = Converter.convert_row_to_string_or_int(new_row)
@@ -307,11 +277,11 @@ class StateSpaceGenerator:
             # ----------------------------------------------------------------------------------------------------
             adj_new_row_num = adj_new_row_num + opposite_dir_coords[0]
             adj_piece_row_key = Converter.convert_row_to_string_or_int(adj_new_row_num)
-            adj_piece_col_num = adj_piece_col_num + Converter.calc_new_direction_coords(selected_row_num, opposite_dir_coords)
+            adj_piece_col_num = adj_piece_col_num + Converter.calculate_adjusted_col_direction(selected_row_num, opposite_dir_coords)
 
             if self.is_valid_adjacent_piece(adj_piece_row_key, adj_piece_col_num):
-                leading_piece_coords = self.translate_piece_value_for_output(selected_row_num, col_num)
-                trailing_piece_coords = self.translate_piece_value_for_output(adj_new_row_num, adj_piece_col_num)
+                leading_piece_coords = Converter.internal_notation_to_external(selected_row_num, col_num)
+                trailing_piece_coords = Converter.internal_notation_to_external(adj_new_row_num, adj_piece_col_num)
 
                 pieces = (leading_piece_coords, trailing_piece_coords)
                 new_row_key = Converter.convert_row_to_string_or_int(new_row)
@@ -342,10 +312,10 @@ class StateSpaceGenerator:
             leading_piece_col_num = leading_piece[1]
             empty_space_coords = self.simulate_game_piece_movement(leading_piece_row_num, leading_piece_col_num, direction_tuple)
 
-            leading_piece = self.translate_piece_value_for_output(leading_piece[0], leading_piece[1])
+            leading_piece = Converter.internal_notation_to_external(leading_piece[0], leading_piece[1])
             second_place_piece = self.simulate_game_piece_movement(leading_piece_row_num, leading_piece_col_num, opposite_direction_tuple)
-            second_place_piece = self.translate_piece_value_for_output(second_place_piece[0], second_place_piece[1])
-            trailing_piece = self.translate_piece_value_for_output(trailing_piece[0], trailing_piece[1])
+            second_place_piece = Converter.internal_notation_to_external(second_place_piece[0], second_place_piece[1])
+            trailing_piece = Converter.internal_notation_to_external(trailing_piece[0], trailing_piece[1])
             pieces = (leading_piece, second_place_piece, trailing_piece)
             self.possible_moves_sumito.add(("i", pieces, direction, empty_space_coords[0], empty_space_coords[1]))
 
@@ -382,13 +352,13 @@ class StateSpaceGenerator:
         """
         row_num = Converter.convert_row_to_string_or_int(row_key)
         col_num = column_detail['colNum']
-        piece = self.translate_piece_value_for_output(row_num, col_num)
+        piece = Converter.internal_notation_to_external(row_num, col_num)
 
         for direction in self.move_directions:
             direction_tuple = self.move_directions.get(direction)
 
             new_row_num = Converter.convert_row_to_string_or_int(row_key) + direction_tuple[0]
-            new_col_num = col_num + Converter.calc_new_direction_coords(row_num, direction_tuple)
+            new_col_num = col_num + Converter.calculate_adjusted_col_direction(row_num, direction_tuple)
             new_row_key = Converter.convert_row_to_string_or_int(new_row_num)
 
             try:
@@ -422,7 +392,7 @@ class StateSpaceGenerator:
 
                                 # gets trailing piece and con
                                 # verts it to external board notation (e.g. H6)
-                                trailing_piece = self.translate_piece_value_for_output(adj_piece_coords[0], adj_piece_coords[1])
+                                trailing_piece = Converter.internal_notation_to_external(adj_piece_coords[0], adj_piece_coords[1])
 
                                 # checks if the adjacent piece can make a sidestep
                                 sidestep_space = self.simulate_game_piece_movement(adj_piece_row, adj_piece_col, direction_tuple)
@@ -435,7 +405,7 @@ class StateSpaceGenerator:
                                         if num_of_adj_pieces == 2:
                                             # gets middle piece and converts it to external board notation (e.g. H6)
                                             middle_piece_tuple = self.simulate_game_piece_movement(row_num, col_num, sidestep_complimentary_dir_tuple)
-                                            middle_piece = self.translate_piece_value_for_output(middle_piece_tuple[0], middle_piece_tuple[1])
+                                            middle_piece = Converter.internal_notation_to_external(middle_piece_tuple[0], middle_piece_tuple[1])
 
                                             # add pieces to a tuple and adds the move into the sidestep moves set
                                             pieces = (piece, middle_piece, trailing_piece)
@@ -447,7 +417,7 @@ class StateSpaceGenerator:
 
                                         # handles adding 2 group side steps to the move list
                                         elif num_of_adj_pieces == 1:
-                                            adj_piece_board_notation = self.translate_piece_value_for_output(adj_piece_row, adj_piece_col)
+                                            adj_piece_board_notation = Converter.internal_notation_to_external(adj_piece_row, adj_piece_col)
                                             pieces = (piece, adj_piece_board_notation)
                                             self.possible_moves_sidestep.add(("s", pieces, direction, new_row_key, new_col_num))
 
@@ -482,11 +452,11 @@ class StateSpaceGenerator:
 
         adj_new_row_num = selected_row_num + opposite_dir_coords[0]
         ajd_piece_row_key = Converter.convert_row_to_string_or_int(adj_new_row_num)
-        adj_piece_col_num = col_num + Converter.calc_new_direction_coords(selected_row_num, opposite_dir_coords)
+        adj_piece_col_num = col_num + Converter.calculate_adjusted_col_direction(selected_row_num, opposite_dir_coords)
 
         if self.is_valid_adjacent_piece(ajd_piece_row_key, adj_piece_col_num):
-            leading_piece_coords = self.translate_piece_value_for_output(selected_row_num, col_num)
-            trailing_piece_coords = self.translate_piece_value_for_output(adj_new_row_num, adj_piece_col_num)
+            leading_piece_coords = Converter.internal_notation_to_external(selected_row_num, col_num)
+            trailing_piece_coords = Converter.internal_notation_to_external(adj_new_row_num, adj_piece_col_num)
 
             pieces = (leading_piece_coords, trailing_piece_coords)
             new_row_key = Converter.convert_row_to_string_or_int(new_row)
@@ -497,12 +467,12 @@ class StateSpaceGenerator:
             # ----------------------------------------------------------------------------------------------------
             adj_new_row_num = adj_new_row_num + opposite_dir_coords[0]
             adj_piece_row_key = Converter.convert_row_to_string_or_int(adj_new_row_num)
-            adj_piece_col_num = adj_piece_col_num + Converter.calc_new_direction_coords(selected_row_num,
-                                                                                   opposite_dir_coords)
+            adj_piece_col_num = adj_piece_col_num + Converter.calculate_adjusted_col_direction(selected_row_num,
+                                                                                               opposite_dir_coords)
 
             if self.is_valid_adjacent_piece(adj_piece_row_key, adj_piece_col_num):
-                leading_piece_coords = self.translate_piece_value_for_output(selected_row_num, col_num)
-                trailing_piece_coords = self.translate_piece_value_for_output(adj_new_row_num, adj_piece_col_num)
+                leading_piece_coords = Converter.internal_notation_to_external(selected_row_num, col_num)
+                trailing_piece_coords = Converter.internal_notation_to_external(adj_new_row_num, adj_piece_col_num)
 
                 pieces = (leading_piece_coords, trailing_piece_coords)
                 new_row_key = Converter.convert_row_to_string_or_int(new_row)
@@ -522,7 +492,7 @@ class StateSpaceGenerator:
         """
         row_num = Converter.convert_row_to_string_or_int(row_key)
         dir_coords = self.move_directions[direction]
-        processed_dir_coords = (dir_coords[0], Converter.calc_new_direction_coords(row_num, dir_coords))
+        processed_dir_coords = (dir_coords[0], Converter.calculate_adjusted_col_direction(row_num, dir_coords))
 
         new_row_num = processed_dir_coords[0] + row_num
         new_row_key = Converter.convert_row_to_string_or_int(new_row_num)
@@ -537,7 +507,7 @@ class StateSpaceGenerator:
             else:
                 return num_of_adj_pieces
 
-            new_col_num = Converter.calc_new_direction_coords(new_row_num, dir_coords) + new_col_num
+            new_col_num = Converter.calculate_adjusted_col_direction(new_row_num, dir_coords) + new_col_num
             new_row_num = processed_dir_coords[0] + new_row_num
 
             if new_row_num < 0:
@@ -566,7 +536,7 @@ class StateSpaceGenerator:
                 # move front piece up
                 self.updated_game_board[move[3]][move[4]]['color'] = self.turn
                 # remove back piece
-                location = Converter.translate_single_piece_to_board_notation(move[1][1])
+                location = Converter.external_notation_to_internal(move[1][1])
                 self.updated_game_board[location[0]][location[1]]['color'] = None
                 self.output_board()
                 # resets board to before move
@@ -606,9 +576,9 @@ class StateSpaceGenerator:
             # only for single piece moves
             if move[0] == 'i':
 
-                leading_piece_coords = Converter.translate_single_piece_to_board_notation(move[1][0])
-                second_place_piece_coords = Converter.translate_single_piece_to_board_notation(move[1][1])
-                trailing_piece_coords = Converter.translate_single_piece_to_board_notation(move[1][2])
+                leading_piece_coords = Converter.external_notation_to_internal(move[1][0])
+                second_place_piece_coords = Converter.external_notation_to_internal(move[1][1])
+                trailing_piece_coords = Converter.external_notation_to_internal(move[1][2])
 
                 opposing_color = Converter.get_opposite_color(self.turn)
                 color_of_second_piece = \
@@ -620,7 +590,7 @@ class StateSpaceGenerator:
 
                 except IndexError:
                     # shift pieces as piece has been pushed off game board
-                    sumitoed_piece = self.translate_piece_value_for_output(leading_piece_coords[0], leading_piece_coords[1])
+                    sumitoed_piece = Converter.internal_notation_to_external(leading_piece_coords[0], leading_piece_coords[1])
 
                     print(f"{sumitoed_piece + opposing_color[0]} pushed off the board!")
 
@@ -653,7 +623,7 @@ class StateSpaceGenerator:
 
                 # gets the direction of the side step and packs the direction into a tuple
                 sidestep_row_dir_coord = direction_tuple[0]
-                sidestep_col_dir_coord = Converter.calc_new_direction_coords(piece_coords_tuple[0], direction_tuple)
+                sidestep_col_dir_coord = Converter.calculate_adjusted_col_direction(piece_coords_tuple[0], direction_tuple)
                 sidestep_dir_tuple = (sidestep_row_dir_coord, sidestep_col_dir_coord)
 
                 # performs the sidestep
@@ -715,7 +685,7 @@ class StateSpaceGenerator:
 
                     row_num = Converter.convert_row_to_string_or_int(row)
                     col_num = piece["colNum"]
-                    piece_letter_coord = self.translate_piece_value_for_output(row_num, col_num)
+                    piece_letter_coord = Converter.internal_notation_to_external(row_num, col_num)
 
                     if piece["color"] == "black":
                         blacks.append(piece_letter_coord + 'b')
@@ -763,197 +733,6 @@ class StateSpaceGenerator:
         self.create_piece_list_for_current_turn()
         self.update_board()
         self.text_output_moves()
-
-
-class Converter:
-    """
-    Encapsulates helper methods for performing calculations and conversions.
-    """
-
-    @staticmethod
-    def calculate_row_length(row: int) -> int:
-        """
-        Calculates, and returns, the number of pieces on a given column within the game board.
-        :param row: an int
-        :return: an int
-        """
-        HEXES_PER_SIDE = 5
-        HEXES_ACROSS = 2 * HEXES_PER_SIDE - 1
-
-        if HEXES_PER_SIDE + row >= HEXES_ACROSS:
-            row_length = HEXES_PER_SIDE + (HEXES_ACROSS - row) - 1
-        else:
-            row_length = HEXES_PER_SIDE + row
-        return row_length
-
-    @staticmethod
-    def convert_row_to_string_or_int(row_val):
-        """
-        If provided a string representing the game board dictionary row key, then the value is converted to an int of
-        the row. Else if provided an int of the row of the game board, then the int is converted into a key for the game
-        board dictionary.
-
-        :precondition row_val: a string of a key from the game_board dictionary, or an int representing a row
-        :param row_val: either a string or an integer
-        :return: an int if passed a string, or a string if passed an int
-        """
-        if type(row_val) == str:
-            row_num = int(row_val.replace("row", ''))
-            return row_num
-        elif type(row_val) == int:
-            row_key = "row" + str(row_val)
-            return row_key
-        else:
-            print("Invalid value passed. Argument must be a string or an integer.")
-
-    @staticmethod
-    def get_opposite_color(color: str) -> str:
-        """
-        Gets the opposing color of the turn color.
-        :param color: a string
-        :return: a string
-        """
-        if color == "black":
-            return "white"
-        else:
-            return "black"
-        
-    @staticmethod
-    def calculate_column(row, col):
-        """
-        Calculates correct column number in game board array from given column number.
-
-        :param row: row number: int
-        :param col: column number as given: int
-        :return:
-        """
-        rows = {
-            0: 5,
-            1: 4,
-            2: 3,
-            3: 2
-        }
-
-        if row in rows:
-            col_coord = col - rows[row]
-        else:
-            col_coord = col - 1
-        return col_coord
-    
-    @staticmethod
-    def translate_single_piece_to_board_notation(piece: str) -> tuple:
-        """
-        Converts a piece from external board notation (e.g. H5) into the internal notation (e.g. '("row3, 4)).
-
-        :param piece: string containing the piece location conforming to external board notation (e.g. 'B3')
-        :return: a tuple (str, int) where the string is the row key and the int is  the column number
-        """
-        row_char_int_map = {
-            "I": 0,
-            "H": 1,
-            "G": 2,
-            "F": 3,
-            "E": 4,
-            "D": 5,
-            "C": 6,
-            "B": 7,
-            "A": 8
-        }
-
-        row = row_char_int_map[piece[0]]
-        row_key = "row" + str(row)
-
-        col = int(piece[1])
-        column = Converter.calculate_column(row, col)
-        return row_key, column
-    
-    @staticmethod
-    def calc_new_direction_coords(row_num, direction):
-        """
-        Calculate the coordinates of the new direction given the current row and column of the game piece, as well as
-        the direction of movement. Required due to the varying columns on each row on the game board because of the
-        hexagonal shaped game board.
-
-        :param row_num: an int, representing the row of the selected game piece
-        :param direction: a tuple, containing the new movement as (x,y) or (row, col)
-        :return: a int, containing the direction of the new movement along the column (west to east vector)
-        """
-        ZERO_INDEX_OFFSET = 1
-        UPPER_HALF = range(1, 4 + ZERO_INDEX_OFFSET)
-        MIDDLE_ROW = 4
-
-        new_row_dir = direction[0]
-        new_col_dir = direction[1]
-
-        # if the string row_key is passed, then it is converted to an int representing the row
-        if type(row_num) != int:
-            row_num = Converter.convert_row_to_string_or_int(row_num)
-
-        if row_num in UPPER_HALF:
-            # checks for SE movement for pieces in the middle row
-            if row_num == MIDDLE_ROW and new_row_dir == 1:
-                if new_col_dir == 1:
-                    new_col_dir = 0
-
-            if row_num == MIDDLE_ROW and new_row_dir == -1:
-                if new_col_dir == 1:
-                    new_col_dir = 0
-
-            # checks for NE movement
-            elif new_row_dir == -1 and row_num != MIDDLE_ROW:
-                if new_col_dir == 1:
-                    new_col_dir = 0
-
-            # checks for SW movement
-            elif new_row_dir == 1 and row_num != MIDDLE_ROW:
-                if new_col_dir == -1:
-                    new_col_dir = 0
-
-        # checks for pieces in the bottom half of the game board
-        else:
-            # checks for NW movement
-            if new_row_dir == -1:
-                if new_col_dir == -1:
-                    new_col_dir = 0
-
-            # checks for SE movement
-            elif new_row_dir == 1:
-                if new_col_dir == 1:
-                    new_col_dir = 0
-
-        return new_col_dir
-    
-    @staticmethod
-    def get_leading_or_trailing_piece(row_num, col_num: int, num_of_adj_pieces: int, direction: tuple) -> tuple:
-        """
-        Gets the first (leading) or last (trailing) piece when provided the location of a specific piece along with the
-        number of pieces adjacent to it, and the direction of the vector of the adjacent pieces.
-
-        :param row_num: a string of the row key, or an int of the row number
-        :param col_num: an int of the column number
-        :param num_of_adj_pieces: an int, the number of pieces adjacent to the provided piece
-        :param direction: a tuple containing the direction of movement
-        :return: a tuple (str, int) where the string is the row key and the int is  the column number
-        """
-        if num_of_adj_pieces > 0:
-
-            if type(row_num) != int:
-                row_num = Converter.convert_row_to_string_or_int(row_num)
-
-            row_dir = direction[0]
-            col_dir = Converter.calc_new_direction_coords(row_num, direction)
-            for pieces in range(0, num_of_adj_pieces):
-                row_num = row_num + row_dir
-                col_num = col_num + col_dir
-
-                col_dir = Converter.calc_new_direction_coords(row_num, direction)
-
-            row_key = Converter.convert_row_to_string_or_int(row_num)
-            return row_key, col_num
-
-        else:
-            row_key = Converter.convert_row_to_string_or_int(row_num)
-            return row_key, col_num
 
 
 def main():

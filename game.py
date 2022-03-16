@@ -2,7 +2,7 @@ import math
 from settings import *
 from tkinter import *
 import tkinter as tk
-from state_space_generator import Converter
+from converter import Converter
 
 
 class GameBoard(tk.Tk):
@@ -67,6 +67,20 @@ class GameBoard(tk.Tk):
         """
         return "row" + str(row + offset)
 
+    @staticmethod
+    def print_selected_piece_coord(row, col):
+        """
+        Translates the coordinates for the selected game piece according to the I-A and 1-9 game board
+        coordinate system, and prints it to the terminal.
+        :param row: an int
+        :param col: an int
+        """
+        coords = Converter.internal_notation_to_external(row, col)
+        row_coord = coords[0]
+        col_coord = coords[1]
+
+        print(f"Selected piece at: {row_coord}{col_coord}")
+
     def click_event_listener_engine(self, event):
         """
         Handles the user's on-screen click event, and determines if the player has clicked on a game piece. If a game
@@ -126,32 +140,6 @@ class GameBoard(tk.Tk):
                                 piece_y_pos - self.piece_radius,
                                 piece_x_pos + self.piece_radius,
                                 piece_y_pos + self.piece_radius, fill=selected_piece_color)
-
-    def print_selected_piece_coord(self, row, col):
-        """
-        Translates the coordinates for the selected game piece according to the I-A and 1-9 game board
-        coordinate system, and prints it to the terminal.
-        :param row: an int
-        :param col: an int
-        """
-        ASCII_ALPHABET_OFFSET = 8
-        ZERO_INDEX_OFFSET = 1
-
-        TOP_ROW = 0
-        UPPER_HALF = range(1, 4 + ZERO_INDEX_OFFSET)
-
-        num_of_cols = Converter.calculate_row_length(row)
-
-        if row == TOP_ROW:
-            col_coord = num_of_cols + col
-        elif row in UPPER_HALF:
-            col_coord = (num_of_cols - (row * 2)) + col
-        else:
-            col_coord = col + ZERO_INDEX_OFFSET
-
-        row_coord = chr((ASCII_ALPHABET_OFFSET - row) + 65)
-
-        print(f"Selected piece at: {row_coord}{col_coord}")
 
     def draw_game_board(self):
         """
