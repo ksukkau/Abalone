@@ -82,10 +82,10 @@ class Converter:
 
         :param row_num: an int, representing the row of the selected game piece
         :param direction: a tuple, containing the new movement as (x,y) or (row, col)
-        :return: a int, containing the direction of the new movement along the column (west to east vector)
+        :return: an int, containing the direction of the new movement along the column (west to east vector)
         """
         ZERO_INDEX_OFFSET = 1
-        UPPER_HALF = range(1, 4 + ZERO_INDEX_OFFSET)
+        UPPER_HALF = range(0, 4 + ZERO_INDEX_OFFSET)
         MIDDLE_ROW = 4
 
         new_row_dir = direction[0]
