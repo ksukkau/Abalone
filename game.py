@@ -34,7 +34,7 @@ class GameBoard(tk.Tk):
         self.selection_redraw_radius = 23 * self.board_width / 550
         self.turn_count_black = 0
         self.turn_count_white = 0
-        self.turn = "white"
+        self.turn = "black"     # black always goes first
         self.game_over = False
         self.selected_pieces = {}
         self.last_hex = None
@@ -105,41 +105,50 @@ class GameBoard(tk.Tk):
                     if piece_y_pos - RANGE <= event.y <= piece_y_pos + RANGE:
                         selected_piece_color = selected_row[col].get("color")
 
-                        # ensures that the piece clicked is a black or white piece, and not an empty spot on the board
-                        if selected_piece_color == "white" or selected_piece_color == "black":
+                        # ensures that the turn color can't select the opposing color's pieces for movement
+                        if selected_piece_color == self.turn:
                             self.print_selected_piece_coord(row, col)
 
                             # redraws the original piece color on the selected piece, enables pieces to be "unselected"
-                            self.draw_game_piece(selected_piece_color, piece_x_pos,
-                                                 piece_y_pos)
+                            self.draw_game_piece(piece_x_pos, piece_y_pos, self.turn)
 
                             # highlights selected piece green and toggles the "selected" dictionary key
                             if not selected_row[col].get("selected"):
                                 selected_row[col].update({"selected": True})
-                                self.canvas.create_oval(piece_x_pos - self.selection_radius,
-                                                        piece_y_pos - self.selection_radius,
-                                                        piece_x_pos + self.selection_radius,
-                                                        piece_y_pos + self.selection_radius, fill="green")
+                                self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn)
 
-                                self.canvas.create_oval(piece_x_pos - self.selection_redraw_radius,
-                                                        piece_y_pos - self.selection_redraw_radius,
-                                                        piece_x_pos + self.selection_redraw_radius,
-                                                        piece_y_pos + self.selection_redraw_radius,
-                                                        fill=selected_piece_color)
                             else:
                                 selected_row[col].update({"selected": False})
 
-    def draw_game_piece(self, selected_piece_color, piece_x_pos, piece_y_pos):
+    def draw_game_piece(self, piece_x_pos: float, piece_y_pos: float, piece_color: str):
         """
         Draws the specified color game piece at the specified x and y coordinates.
-        :param selected_piece_color: a string, either 'white' or 'black'
         :param piece_x_pos: a float
         :param piece_y_pos: a float
+        :param piece_color: a string, either 'white' or 'black'
         """
         self.canvas.create_oval(piece_x_pos - self.piece_radius,
                                 piece_y_pos - self.piece_radius,
                                 piece_x_pos + self.piece_radius,
-                                piece_y_pos + self.piece_radius, fill=selected_piece_color)
+                                piece_y_pos + self.piece_radius, fill=piece_color)
+
+    def draw_game_piece_selection(self, piece_x_pos: float, piece_y_pos: float, piece_color: str):
+        """
+        Draws the green circle on the game piece that the player has clicked on to select for movement.
+        :param piece_x_pos: a float
+        :param piece_y_pos: a float
+        :param piece_color: a string, either 'white' or 'black'
+        """
+        self.canvas.create_oval(piece_x_pos - self.selection_radius,
+                                piece_y_pos - self.selection_radius,
+                                piece_x_pos + self.selection_radius,
+                                piece_y_pos + self.selection_radius, fill="green")
+
+        self.canvas.create_oval(piece_x_pos - self.selection_redraw_radius,
+                                piece_y_pos - self.selection_redraw_radius,
+                                piece_x_pos + self.selection_redraw_radius,
+                                piece_y_pos + self.selection_redraw_radius,
+                                fill=piece_color)
 
     def draw_game_board(self):
         """
@@ -195,9 +204,9 @@ class GameBoard(tk.Tk):
                 piece_x = self.game_board.get(row_key)[col].get("x_pos")  # x coordinates of the selected piece
                 piece_y = self.game_board.get(row_key)[col].get("y_pos")  # y coordinates of the selected piece
 
-                self.draw_game_piece(piece_color, piece_x, piece_y)
+                self.draw_game_piece(piece_x, piece_y, piece_color)
 
-    def setup_default_game_board_pieces(self):
+    def initialize_default_layout(self):
         """
         Initializes the game board array representing the game board with the game pieces of each color in the standard,
         default, layout.
@@ -222,6 +231,132 @@ class GameBoard(tk.Tk):
                     self.game_board.get("row6")[nested_col].update({"color": "black"})
             for col in range(Converter.calculate_row_length(row)):
                 self.game_board.get(row_key)[col].update({"color": "black"})
+
+    def initialize_german_layout(self):
+        """
+        Initializes the game board array representing the game board with the game pieces of each color in the German
+        daisy layout.
+        """
+        ZERO_INDEX_OFFSET = 1
+        lines_to_fill = 2 + ZERO_INDEX_OFFSET
+
+        # populates top half of the game board (rows I to F)
+        for row in range(lines_to_fill):
+            row_key = "row" + str(row)
+
+            for col in range(Converter.calculate_row_length(row)):
+
+                if row == 0:    # populates game pieces on the second row (row H)
+                    if col in range(0, 1 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on second row (row H)
+                        self.game_board[row_key][col].update({"color": "white"})
+
+                    if col in range(3, 4 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on second row (row H)
+                        self.game_board[row_key][col].update({"color": "black"})
+
+                if row == 1:    # populates game pieces on the third row (row G)
+                    if col in range(0, 2 + ZERO_INDEX_OFFSET):  # populates 3 white pieces on second row (row HG)
+                        self.game_board[row_key][col].update({"color": "white"})
+
+                    if col in range(3, 5 + ZERO_INDEX_OFFSET):  # populates 3 black pieces on second row (row G)
+                        self.game_board[row_key][col].update({"color": "black"})
+
+                if row == 2:    # populates game pieces on the fourth row (row F)
+                    if col in range(1, 2 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on second row (row F)
+                        self.game_board[row_key][col].update({"color": "white"})
+
+                    if col in range(4, 5 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on second row (row F)
+                        self.game_board[row_key][col].update({"color": "black"})
+
+        # populates lower half of the game board (rows C to D)
+        for row in range(6, 8 + ZERO_INDEX_OFFSET):
+            row_key = "row" + str(row)
+
+            for col in range(Converter.calculate_row_length(row)):
+
+                if row == 6:    # populates game pieces on the sixth row (row D)
+                    if col in range(1, 2 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on second row (row D)
+                        self.game_board[row_key][col].update({"color": "black"})
+
+                    if col in range(4, 5 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on second row (row D)
+                        self.game_board[row_key][col].update({"color": "white"})
+
+                if row == 7: # populates game pieces on the seventh row (row C)
+                    if col in range(0, 2 + ZERO_INDEX_OFFSET):  # populates 3 black pieces on second row (row C)
+                        self.game_board[row_key][col].update({"color": "black"})
+
+                    if col in range(3, 5 + ZERO_INDEX_OFFSET):  # populates 3 white pieces on second row (row C)
+                        self.game_board[row_key][col].update({"color": "white"})
+
+                if row == 8: # populates game pieces on the eighth row (row B)
+                    if col in range(0, 1 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on second row (row B)
+                        self.game_board[row_key][col].update({"color": "black"})
+
+                    if col in range(3, 4 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on second row (row B)
+                        self.game_board[row_key][col].update({"color": "white"})
+
+    def initialize_belgian_layout(self):
+        """
+        Initializes the game board array representing the game board with the game pieces of each color in the Belgian
+        daisy layout.
+        """
+        ZERO_INDEX_OFFSET = 1
+        lines_to_fill = 4
+
+        # populates top half of the game board (rows I to F)
+        for row in range(1, lines_to_fill):
+            row_key = "row" + str(row)
+
+            for col in range(Converter.calculate_row_length(row)):
+
+                if row == 1:    # populates game pieces on the second row (row H)
+                    if col in range(0, 1 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on second row (row H)
+                        self.game_board[row_key][col].update({"color": "white"})
+
+                    if col in range(4, 5 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on second row (row H)
+                        self.game_board[row_key][col].update({"color": "black"})
+
+                if row == 2:    # populates game pieces on the third row (row G)
+                    if col in range(0, 2 + ZERO_INDEX_OFFSET):  # populates 3 white pieces on second row (row HG)
+                        self.game_board[row_key][col].update({"color": "white"})
+
+                    if col in range(4, 6 + ZERO_INDEX_OFFSET):  # populates 3 black pieces on second row (row G)
+                        self.game_board[row_key][col].update({"color": "black"})
+
+                if row == 3:    # populates game pieces on the fourth row (row F)
+                    if col in range(1, 2 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on second row (row F)
+                        self.game_board[row_key][col].update({"color": "white"})
+
+                    if col in range(5, 6 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on second row (row F)
+                        self.game_board[row_key][col].update({"color": "black"})
+
+        # populates lower half of the game board (rows C to D)
+        for row in range(5, 7 + ZERO_INDEX_OFFSET):
+            row_key = "row" + str(row)
+
+            for col in range(Converter.calculate_row_length(row)):
+
+                if row == 5:    # populates game pieces on the sixth row (row D)
+                    if col in range(1, 2 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on second row (row D)
+                        self.game_board[row_key][col].update({"color": "black"})
+
+                    if col in range(5, 6 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on second row (row D)
+                        self.game_board[row_key][col].update({"color": "white"})
+
+                if row == 6: # populates game pieces on the seventh row (row C)
+                    if col in range(0, 2 + ZERO_INDEX_OFFSET):  # populates 3 black pieces on second row (row C)
+                        self.game_board[row_key][col].update({"color": "black"})
+
+                    if col in range(4, 6 + ZERO_INDEX_OFFSET):  # populates 3 white pieces on second row (row C)
+                        self.game_board[row_key][col].update({"color": "white"})
+
+                if row == 7: # populates game pieces on the eighth row (row B)
+                    if col in range(0, 1 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on second row (row B)
+                        self.game_board[row_key][col].update({"color": "black"})
+
+                    if col in range(4, 5 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on second row (row B)
+                        self.game_board[row_key][col].update({"color": "white"})
+
+
 
     def initialize_game_board_array(self):
         """
@@ -381,7 +516,9 @@ class GameBoard(tk.Tk):
         self.create_controls()
 
         self.initialize_game_board_array()
-        self.setup_default_game_board_pieces()
+        # self.initialize_default_layout()
+        # self.initialize_belgian_layout()
+        self.initialize_german_layout()
         self.draw_game_board()
         self.initialize_game_board_pieces()
 
