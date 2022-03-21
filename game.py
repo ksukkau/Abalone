@@ -356,8 +356,6 @@ class GameBoard(tk.Tk):
                     if col in range(4, 5 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on second row (row B)
                         self.game_board[row_key][col].update({"color": "white"})
 
-
-
     def initialize_game_board_array(self):
         """
         Initializes the dictionary representing the game board containing arrays of dictionaries that contain the
@@ -374,6 +372,20 @@ class GameBoard(tk.Tk):
             for row in range(row_length):
                 self.game_board.get(row_key).append(
                     {"colNum": row, "color": None, "selected": False, "x_pos": None, "y_pos": None})
+
+    def apply_draw_game_board_layout(self):
+        self.initialize_game_board_array()
+
+        game_layout = self.settings_selections["config"]
+        if game_layout == 2:
+            self.initialize_german_layout()
+        elif game_layout == 3:
+            self.initialize_belgian_layout()
+        else:
+            self.initialize_default_layout()
+
+        self.draw_game_board()
+        self.initialize_game_board_pieces()
 
     def draw_timer_window(self):
         """
@@ -507,6 +519,8 @@ class GameBoard(tk.Tk):
         self.settings_selections = self.settings.selections
         print(self.settings_selections)
 
+        self.apply_draw_game_board_layout()
+
     def new_game_window(self):
         """
         Performs the method calls for running the Abalone game.
@@ -515,10 +529,7 @@ class GameBoard(tk.Tk):
         self.set_move_counter()
         self.create_controls()
 
-        self.initialize_game_board_array()
-        self.initialize_default_layout()
-        self.draw_game_board()
-        self.initialize_game_board_pieces()
+        self.apply_draw_game_board_layout()
 
         self.draw_timer_window()
         self.show_timer()
