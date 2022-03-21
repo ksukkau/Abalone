@@ -130,6 +130,62 @@ class Converter:
         return new_col_dir
 
     @staticmethod
+    def calculate_adjusted_direction_tuple(row_num, direction):
+        """
+        Calculate the coordinates of the new direction given the current row and column of the game piece, as well as
+        the direction of movement. Required due to the varying columns on each row on the game board because of the
+        hexagonal shaped game board.
+
+        :param row_num: an int, representing the row of the selected game piece
+        :param direction: a tuple, containing the new movement as (x,y) or (row, col)
+        :return: a tuple, of the direction coordinates with the adjusted column direction
+        """
+        ZERO_INDEX_OFFSET = 1
+        UPPER_HALF = range(0, 4 + ZERO_INDEX_OFFSET)
+        MIDDLE_ROW = 4
+
+        new_row_dir = direction[0]
+        new_col_dir = direction[1]
+
+        # if the string row_key is passed, then it is converted to an int representing the row
+        if type(row_num) != int:
+            row_num = Converter.convert_row_to_string_or_int(row_num)
+
+        if row_num in UPPER_HALF:
+            # checks for SE movement for pieces in the middle row
+            if row_num == MIDDLE_ROW and new_row_dir == 1:
+                if new_col_dir == 1:
+                    new_col_dir = 0
+
+            if row_num == MIDDLE_ROW and new_row_dir == -1:
+                if new_col_dir == 1:
+                    new_col_dir = 0
+
+            # checks for NE movement
+            elif new_row_dir == -1 and row_num != MIDDLE_ROW:
+                if new_col_dir == 1:
+                    new_col_dir = 0
+
+            # checks for SW movement
+            elif new_row_dir == 1 and row_num != MIDDLE_ROW:
+                if new_col_dir == -1:
+                    new_col_dir = 0
+
+        # checks for pieces in the bottom half of the game board
+        else:
+            # checks for NW movement
+            if new_row_dir == -1:
+                if new_col_dir == -1:
+                    new_col_dir = 0
+
+            # checks for SE movement
+            elif new_row_dir == 1:
+                if new_col_dir == 1:
+                    new_col_dir = 0
+
+        return new_row_dir, new_col_dir
+
+    @staticmethod
     def get_leading_or_trailing_piece(row_num, col_num: int, num_of_adj_pieces: int, direction: tuple) -> tuple:
         """
         Gets the first (leading) or last (trailing) piece when provided the location of a specific piece along with the
