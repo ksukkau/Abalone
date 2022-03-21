@@ -3,6 +3,7 @@ from settings import *
 from tkinter import *
 import tkinter as tk
 from converter import Converter
+from move import Move
 
 
 class GameBoard(tk.Tk):
@@ -34,7 +35,7 @@ class GameBoard(tk.Tk):
         self.selection_redraw_radius = 23 * self.board_width / 550
         self.turn_count_black = 0
         self.turn_count_white = 0
-        self.turn = "black"     # black always goes first
+        self.turn = "black"  # black always goes first
         self.game_over = False
         self.selected_pieces = {}
         self.last_hex = None
@@ -51,11 +52,12 @@ class GameBoard(tk.Tk):
         self.white_pieces = None
         self.black_pieces = None
         self.settings = None
-        self.settings_selections = {'color': 0, 'mode_p1': "Human", 'mode_p2': "Human", 'config': 0, 'turns': 15, 'time1': 30, 'time2': 30}
+        self.settings_selections = {'color': 0, 'mode_p1': "Human", 'mode_p2': "Human", 'config': 0, 'turns': 15,
+                                    'time1': 30, 'time2': 30}
         self.spot_coords = {}
         self.board_screen_pos = None
         self.game_board = None
-        
+
     @staticmethod
     def get_row_key(row: int, offset=0) -> str:
         """
@@ -108,6 +110,7 @@ class GameBoard(tk.Tk):
                         # ensures that the turn color can't select the opposing color's pieces for movement
                         if selected_piece_color == self.turn:
                             self.print_selected_piece_coord(row, col)
+                            Move.get_adj_game_spaces(row, col)
 
                             # redraws the original piece color on the selected piece, enables pieces to be "unselected"
                             self.draw_game_piece(piece_x_pos, piece_y_pos, self.turn)
@@ -246,21 +249,21 @@ class GameBoard(tk.Tk):
 
             for col in range(Converter.calculate_row_length(row)):
 
-                if row == 0:    # populates game pieces on the first row (row I)
+                if row == 0:  # populates game pieces on the first row (row I)
                     if col in range(0, 1 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on first row (row I)
                         self.game_board[row_key][col].update({"color": "white"})
 
                     if col in range(3, 4 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on first row (row I)
                         self.game_board[row_key][col].update({"color": "black"})
 
-                if row == 1:    # populates game pieces on the second row (row H)
+                if row == 1:  # populates game pieces on the second row (row H)
                     if col in range(0, 2 + ZERO_INDEX_OFFSET):  # populates 3 white pieces on second row (row H)
                         self.game_board[row_key][col].update({"color": "white"})
 
                     if col in range(3, 5 + ZERO_INDEX_OFFSET):  # populates 3 black pieces on second row (row H)
                         self.game_board[row_key][col].update({"color": "black"})
 
-                if row == 2:    # populates game pieces on the third row (row G)
+                if row == 2:  # populates game pieces on the third row (row G)
                     if col in range(1, 2 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on third row (row G)
                         self.game_board[row_key][col].update({"color": "white"})
 
@@ -273,21 +276,21 @@ class GameBoard(tk.Tk):
 
             for col in range(Converter.calculate_row_length(row)):
 
-                if row == 6:    # populates game pieces on the seventh row (row C)
+                if row == 6:  # populates game pieces on the seventh row (row C)
                     if col in range(1, 2 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on seventh row (row C)
                         self.game_board[row_key][col].update({"color": "black"})
 
                     if col in range(4, 5 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on seventh row (row C)
                         self.game_board[row_key][col].update({"color": "white"})
 
-                if row == 7: # populates game pieces on the eighth row (row B)
+                if row == 7:  # populates game pieces on the eighth row (row B)
                     if col in range(0, 2 + ZERO_INDEX_OFFSET):  # populates 3 black pieces on eighth row (row B)
                         self.game_board[row_key][col].update({"color": "black"})
 
                     if col in range(3, 5 + ZERO_INDEX_OFFSET):  # populates 3 white pieces on eighth row (row B)
                         self.game_board[row_key][col].update({"color": "white"})
 
-                if row == 8: # populates game pieces on the ninth row (row A)
+                if row == 8:  # populates game pieces on the ninth row (row A)
                     if col in range(0, 1 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on ninth row (row A)
                         self.game_board[row_key][col].update({"color": "black"})
 
@@ -308,21 +311,21 @@ class GameBoard(tk.Tk):
 
             for col in range(Converter.calculate_row_length(row)):
 
-                if row == 1:    # populates game pieces on the second row (row H)
+                if row == 1:  # populates game pieces on the second row (row H)
                     if col in range(0, 1 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on second row (row H)
                         self.game_board[row_key][col].update({"color": "white"})
 
                     if col in range(4, 5 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on second row (row H)
                         self.game_board[row_key][col].update({"color": "black"})
 
-                if row == 2:    # populates game pieces on the third row (row G)
+                if row == 2:  # populates game pieces on the third row (row G)
                     if col in range(0, 2 + ZERO_INDEX_OFFSET):  # populates 3 white pieces on second row (row HG)
                         self.game_board[row_key][col].update({"color": "white"})
 
                     if col in range(4, 6 + ZERO_INDEX_OFFSET):  # populates 3 black pieces on second row (row G)
                         self.game_board[row_key][col].update({"color": "black"})
 
-                if row == 3:    # populates game pieces on the fourth row (row F)
+                if row == 3:  # populates game pieces on the fourth row (row F)
                     if col in range(1, 2 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on second row (row F)
                         self.game_board[row_key][col].update({"color": "white"})
 
@@ -335,21 +338,21 @@ class GameBoard(tk.Tk):
 
             for col in range(Converter.calculate_row_length(row)):
 
-                if row == 5:    # populates game pieces on the sixth row (row D)
+                if row == 5:  # populates game pieces on the sixth row (row D)
                     if col in range(1, 2 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on second row (row D)
                         self.game_board[row_key][col].update({"color": "black"})
 
                     if col in range(5, 6 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on second row (row D)
                         self.game_board[row_key][col].update({"color": "white"})
 
-                if row == 6: # populates game pieces on the seventh row (row C)
+                if row == 6:  # populates game pieces on the seventh row (row C)
                     if col in range(0, 2 + ZERO_INDEX_OFFSET):  # populates 3 black pieces on second row (row C)
                         self.game_board[row_key][col].update({"color": "black"})
 
                     if col in range(4, 6 + ZERO_INDEX_OFFSET):  # populates 3 white pieces on second row (row C)
                         self.game_board[row_key][col].update({"color": "white"})
 
-                if row == 7: # populates game pieces on the eighth row (row B)
+                if row == 7:  # populates game pieces on the eighth row (row B)
                     if col in range(0, 1 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on second row (row B)
                         self.game_board[row_key][col].update({"color": "black"})
 
@@ -432,9 +435,11 @@ class GameBoard(tk.Tk):
         self.set_pieces_count()
         player_one = Label(self, text="White", bg=self.bg, font=font, fg=self.font_color)
         player_one.grid(column=2, padx=3, row=1)
-        player_one_moves_label = Label(self, text=f"Moves\n{self.white_move_count}", bg=self.bg, font=self.font, fg=self.font_color)
+        player_one_moves_label = Label(self, text=f"Moves\n{self.white_move_count}", bg=self.bg, font=self.font,
+                                       fg=self.font_color)
         player_one_moves_label.grid(column=2, row=2)
-        player_one_pieces_label = Label(self, text=f"Pieces lost\n{self.white_pieces}", bg=self.bg, font=self.font, fg=self.font_color)
+        player_one_pieces_label = Label(self, text=f"Pieces lost\n{self.white_pieces}", bg=self.bg, font=self.font,
+                                        fg=self.font_color)
         player_one_pieces_label.grid(column=2, row=3)
 
         self.current_move_timer()
