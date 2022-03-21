@@ -58,6 +58,10 @@ class GameBoard(tk.Tk):
         self.board_screen_pos = None
         self.game_board = None
 
+        # ----- For Movement ----- #
+        self.adjacent_spaces = set()
+        self.pieces_selected = 0
+
     @staticmethod
     def get_row_key(row: int, offset=0) -> str:
         """
@@ -110,7 +114,8 @@ class GameBoard(tk.Tk):
                         # ensures that the turn color can't select the opposing color's pieces for movement
                         if selected_piece_color == self.turn:
                             self.print_selected_piece_coord(row, col)
-                            Move.get_adj_game_spaces(row, col)
+
+                            self.adjacent_spaces = Move.get_adj_game_spaces(row, col)
 
                             # redraws the original piece color on the selected piece, enables pieces to be "unselected"
                             self.draw_game_piece(piece_x_pos, piece_y_pos, self.turn)
