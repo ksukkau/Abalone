@@ -76,13 +76,13 @@ class Converter:
     @staticmethod
     def calculate_adjusted_col_direction(row_num, direction):
         """
-        Calculate the coordinates of the new direction given the current row and column of the game piece, as well as
-        the direction of movement. Required due to the varying columns on each row on the game board because of the
+        Calculate the coordinates of the new adjusted_direction_tuple given the current row and column of the game piece, as well as
+        the adjusted_direction_tuple of movement. Required due to the varying columns on each row on the game board because of the
         hexagonal shaped game board.
 
         :param row_num: an int, representing the row of the selected game piece
         :param direction: a tuple, containing the new movement as (x,y) or (row, col)
-        :return: an int, containing the direction of the new movement along the column (west to east vector)
+        :return: an int, containing the adjusted_direction_tuple of the new movement along the column (west to east vector)
         """
         ZERO_INDEX_OFFSET = 1
         UPPER_HALF = range(0, 4 + ZERO_INDEX_OFFSET)
@@ -132,13 +132,13 @@ class Converter:
     @staticmethod
     def calculate_adjusted_direction_tuple(row_num, direction):
         """
-        Calculate the coordinates of the new direction given the current row and column of the game piece, as well as
-        the direction of movement. Required due to the varying columns on each row on the game board because of the
+        Calculate the coordinates of the new adjusted_direction_tuple given the current row and column of the game piece, as well as
+        the adjusted_direction_tuple of movement. Required due to the varying columns on each row on the game board because of the
         hexagonal shaped game board.
 
         :param row_num: an int, representing the row of the selected game piece
         :param direction: a tuple, containing the new movement as (x,y) or (row, col)
-        :return: a tuple, of the direction coordinates with the adjusted column direction
+        :return: a tuple, of the adjusted_direction_tuple coordinates with the adjusted column adjusted_direction_tuple
         """
         ZERO_INDEX_OFFSET = 1
         UPPER_HALF = range(0, 4 + ZERO_INDEX_OFFSET)
@@ -189,12 +189,12 @@ class Converter:
     def get_leading_or_trailing_piece(row_num, col_num: int, num_of_adj_pieces: int, direction: tuple) -> tuple:
         """
         Gets the first (leading) or last (trailing) piece when provided the location of a specific piece along with the
-        number of pieces adjacent to it, and the direction of the vector of the adjacent pieces.
+        number of pieces adjacent to it, and the adjusted_direction_tuple of the vector of the adjacent pieces.
 
         :param row_num: a string of the row key, or an int of the row number
         :param col_num: an int of the column number
         :param num_of_adj_pieces: an int, the number of pieces adjacent to the provided piece
-        :param direction: a tuple containing the direction of movement
+        :param direction: a tuple containing the adjusted_direction_tuple of movement
         :return: a tuple (str, int) where the string is the row key and the int is  the column number
         """
         if num_of_adj_pieces > 0:
@@ -216,6 +216,29 @@ class Converter:
         else:
             row_key = Converter.convert_row_to_string_or_int(row_num)
             return row_key, col_num
+
+    @staticmethod
+    def simulate_game_piece_movement(row_num, col_num: int, adjusted_direction_tuple: tuple) -> tuple:
+        """
+        Simulates moving the specified game piece in the specified direction, and then returns the new coordinates
+        of the game piece.
+
+        :param row_num: a string of the row key, or an int of the row number
+        :param col_num: an int of the column number
+        :param adjusted_direction_tuple: a tuple containing the direction of movement
+        :return: a tuple (str, int) where the string is the row key and the int is  the column number
+        """
+        row_dir = adjusted_direction_tuple[0]
+        col_dir = Converter.calculate_adjusted_col_direction(row_num, adjusted_direction_tuple)
+
+        if type(row_num) != int:
+            row_num = Converter.convert_row_to_string_or_int(row_num)
+
+        new_row_num = row_num + row_dir
+        new_col_num = col_num + col_dir
+
+        new_row_key = Converter.convert_row_to_string_or_int(new_row_num)
+        return new_row_key, new_col_num
 
     @staticmethod
     def external_notation_to_internal(piece: str) -> tuple:

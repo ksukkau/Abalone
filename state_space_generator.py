@@ -69,12 +69,12 @@ class StateSpaceGenerator:
     @staticmethod
     def simulate_game_piece_movement(row_num, col_num: int, direction: tuple) -> tuple:
         """
-        Simulates moving the specified game piece in the specified direction, and then returns the new coordinates
+        Simulates moving the specified game piece in the specified adjusted_direction_tuple, and then returns the new coordinates
         of the game piece.
 
         :param row_num: a string of the row key, or an int of the row number
         :param col_num: an int of the column number
-        :param direction: a tuple containing the direction of movement
+        :param direction: a tuple containing the adjusted_direction_tuple of movement
         :return: a tuple (str, int) where the string is the row key and the int is  the column number
         """
         row_dir = direction[0]
@@ -134,22 +134,22 @@ class StateSpaceGenerator:
                                      groupings=2) -> int:
         """
         Gets the number of adjacent pieces of the same color passed to this method. Checks the pieces adjacent to the
-        specified piece in the specified vector of direction. The number of groups can be specified to determine if the
+        specified piece in the specified vector of adjusted_direction_tuple. The number of groups can be specified to determine if the
         method searches for 2 or 3 piece groupings.
 
         :param piece_color: a string, the color of the adjacent pieces to get
         :param row_key: a string, containing the row of the piece to find adjacent pieces for
         :param col_num: an int, containing the column of the piece to find adjacent pieces for
-        :param direction: a string of the raw cardinal direction of movement (e.g. 'NE' or 'S')
+        :param direction: a string of the raw cardinal adjusted_direction_tuple of movement (e.g. 'NE' or 'S')
         :param groupings: an int, the number of grouped pieces to perform a sumito, set to 2 by default
         :return: an int, the number of pieces adjacent to the groupings
         """
         row_num = Converter.convert_row_to_string_or_int(row_key)   # converts the row key to a number
 
-        # gets the opposite direction tuple to check for adjacent game pieces
+        # gets the opposite adjusted_direction_tuple tuple to check for adjacent game pieces
         opposite_dir_tuple = self.move_directions[self.opposite_direction[direction]]
 
-        # adjusts the direction tuple
+        # adjusts the adjusted_direction_tuple tuple
         adjusted_opposite_dir_tuple = (
             opposite_dir_tuple[0], Converter.calculate_adjusted_col_direction(row_num, opposite_dir_tuple))
 
@@ -243,7 +243,7 @@ class StateSpaceGenerator:
                         num_of_adj_selected_pieces = self.get_sumito_num_of_adj_pieces(self.turn, row_key, col_num,
                                                                                        direction, sumito_groupings)
 
-                        # gets the opposite direction to check for adjacent pieces of the opposite color
+                        # gets the opposite adjusted_direction_tuple to check for adjacent pieces of the opposite color
                         opposite_direction = self.opposite_direction[direction]
                         opposite_direction_tuple = self.move_directions[opposite_direction]
                         num_of_adj_opposing_pieces = self.get_sumito_num_of_adj_pieces("white", new_row_key,
@@ -296,7 +296,7 @@ class StateSpaceGenerator:
         """
         Finds the possible valid moves for inline moves with 2 and 3 piece groupings.
 
-        :param direction: a string of the raw cardinal direction of movement (e.g. 'NE' or 'S')
+        :param direction: a string of the raw cardinal adjusted_direction_tuple of movement (e.g. 'NE' or 'S')
         :param row_key: a string of the row key
         :param col_num: an int of the column number
         :param new_row: an int of the row of the desired space to move to
@@ -304,7 +304,7 @@ class StateSpaceGenerator:
         """
         selected_row_num = Converter.convert_row_to_string_or_int(row_key) # converts the row key to a number
 
-        # gets the tuple of the opposite direction
+        # gets the tuple of the opposite adjusted_direction_tuple
         opposite_dir = self.opposite_direction.get(direction)
         opposite_dir_tuple = self.move_directions[opposite_dir]
 
@@ -344,15 +344,15 @@ class StateSpaceGenerator:
                                      row_num: int):
         """
         Helper method containing the logic to perform the sumito. Adds the type of move, the pieces involved in the
-        sumito, the direction of movement, as well as the internal board coordinates of game board space the movement
+        sumito, the adjusted_direction_tuple of movement, as well as the internal board coordinates of game board space the movement
         is going to occur. Also generates the move notation for sumitos.
 
         :param col_num: a int, of the column number of the selected piece
-        :param direction: a string of the raw cardinal direction (e.g. 'NE', 'W')
-        :param direction_tuple: a tuple containing the coordinates of the direction of movement (e.g. '(-1, 1)')
+        :param direction: a string of the raw cardinal adjusted_direction_tuple (e.g. 'NE', 'W')
+        :param direction_tuple: a tuple containing the coordinates of the adjusted_direction_tuple of movement (e.g. '(-1, 1)')
         :param leading_piece: a tuple containing the internal coordinates of the leading piece
         :param num_of_adj_selected_pieces: an int of the number of pieces adjacent to the selected piece
-        :param opposite_direction_tuple: a tuple containing the coordinates of the opposite direction of movement
+        :param opposite_direction_tuple: a tuple containing the coordinates of the opposite adjusted_direction_tuple of movement
         :param piece: a str of the selected piece in external board notatation (e.g. 'G3')
         :param row_num: an int
         :return:
@@ -404,7 +404,7 @@ class StateSpaceGenerator:
         :return: a boolean
         """
 
-        # checks if the adjacent piece in the opposing direction of movement is the same color as the select piece
+        # checks if the adjacent piece in the opposing adjusted_direction_tuple of movement is the same color as the select piece
         try:
             if self.updated_game_board[opposite_adj_row_key][opposite_adj_col_num]["color"] == self.turn:
                 return True
@@ -449,7 +449,7 @@ class StateSpaceGenerator:
                                                                                     sidestep_groupings)
 
                             if num_of_adj_pieces > 0:
-                                # gets the sidestep move direction coords
+                                # gets the sidestep move adjusted_direction_tuple coords
                                 sidestep_complimentary_dir_tuple = self.move_directions[sidestep_complimentary_dir]
 
                                 adj_piece_row = row_num
@@ -526,14 +526,14 @@ class StateSpaceGenerator:
         :param piece_color: a string, the color of the adjacent pieces to get
         :param row_key: a string, containing the row key (e.g. 'row3')
         :param col_num: an int, containing the column number
-        :param direction: a string of the raw caridnal direction (e.g. 'NE' or 'W')
+        :param direction: a string of the raw caridnal adjusted_direction_tuple (e.g. 'NE' or 'W')
         :param groupings: an int, the number of grouped pieces to search for, set to 2 by default
         :return: an int, the number of pieces adjacent to the specified piece
         """
         row_num = Converter.convert_row_to_string_or_int(row_key)   # converts row key to a number
-        dir_tuple = self.move_directions[direction]    # gets the tuple of direction
+        dir_tuple = self.move_directions[direction]    # gets the tuple of adjusted_direction_tuple
 
-        # adjusts the direction tuple
+        # adjusts the adjusted_direction_tuple tuple
         adjusted_dir_tuple = (dir_tuple[0], Converter.calculate_adjusted_col_direction(row_num, dir_tuple))
 
         # gets the row key and column number of the adjacent piece
@@ -671,7 +671,7 @@ class StateSpaceGenerator:
                 # removes where the piece used to be
                 self.updated_game_board[piece_coords_tuple[0]][piece_coords_tuple[1]]["color"] = None
 
-                # gets the direction of the side step and packs the direction into a tuple
+                # gets the adjusted_direction_tuple of the side step and packs the adjusted_direction_tuple into a tuple
                 sidestep_row_dir_coord = direction_tuple[0]
                 sidestep_col_dir_coord = Converter.calculate_adjusted_col_direction(piece_coords_tuple[0],
                                                                                     direction_tuple)
