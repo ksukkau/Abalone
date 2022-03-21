@@ -1,26 +1,10 @@
 from converter import Converter
 
+
 class Move:
     """
     Encapsulates methods related to selected valid game pieces, moving selected game piece(s), or performing sumitos.
     """
-
-    directions = [
-        "NE",
-        "E",
-        "SE",
-        "SW",
-        "W",
-        "NW"
-    ]
-    move_directions = {
-        "NE": (-1, 1),
-        "E": (0, 1),
-        "SE": (1, 1),
-        "SW": (1, -1),
-        "W": (0, -1),
-        "NW": (-1, -1)
-    }
 
     @staticmethod
     def get_adj_game_spaces(row: int, col: int):
