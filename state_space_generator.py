@@ -791,9 +791,12 @@ def main():
     Main function for the statespace generator tests.
     """
     s = StateSpaceGenerator()
-    s.file_name = sys.argv[1].split('.')[0]
-    s.run_tests()
+    # TODO need to make this take a real game board and or call from game rather than in this main function
+    # for input file testing
+    # s.file_name = sys.argv[1].split('.')[0]
+    # s.run_tests()
 
 
 if __name__ == '__main__':
     main()
+
