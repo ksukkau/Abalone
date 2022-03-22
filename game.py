@@ -138,7 +138,7 @@ class GameBoard(tk.Tk):
                                 if self.num_pieces_selected == 0:
                                     self.num_pieces_selected += 1  # increments number of pieces selected to 1
 
-                                    self.adjacent_spaces = self.Move.get_adj_game_spaces(row, col)   # gets adjacent spaces
+                                    self.adjacent_spaces = self.Move.get_adj_game_spaces_and_direction(row, col)   # gets adjacent spaces
 
                                     self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn)  # draws game piece selection
                                     self.toggle_selected_flag(row_key, col)  # toggles selected flag
@@ -151,7 +151,7 @@ class GameBoard(tk.Tk):
                                     if piece_clicked in self.adjacent_spaces:
                                         self.num_pieces_selected += 1  # increments number of pieces selected to 1
 
-                                        self.adjacent_spaces = self.Move.get_adj_game_spaces(row, col)  # gets adjacent spaces
+                                        self.adjacent_spaces = self.Move.get_adj_game_spaces_and_direction(row, col)  # gets adjacent spaces
 
                                         self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn)  # draws game piece selection
                                         self.toggle_selected_flag(row_key, col)  # toggles selected flag
@@ -164,7 +164,7 @@ class GameBoard(tk.Tk):
                                     if piece_clicked in self.adjacent_spaces:
                                         self.num_pieces_selected += 1  # increments number of pieces selected to 1
 
-                                        self.adjacent_spaces = self.Move.get_adj_game_spaces(row, col)  # gets adjacent spaces
+                                        self.adjacent_spaces = self.Move.get_adj_game_spaces_and_direction(row, col)  # gets adjacent spaces
 
                                         self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn)  # draws game piece selection
                                         self.toggle_selected_flag(row_key, col)  # toggles selected flag
@@ -202,7 +202,7 @@ class GameBoard(tk.Tk):
 
             # gets the internal coordinates of the selected piece and gets the adjacent spaces to it
             first_piece_internal = self.selected_pieces[0]  # gets the 1st selected piece
-            self.adjacent_spaces = self.Move.get_adj_game_spaces(first_piece_internal[0], first_piece_internal[1])
+            self.adjacent_spaces = self.Move.get_adj_game_spaces_and_direction(first_piece_internal[0], first_piece_internal[1])
 
         # handles logic when 3rd selected piece is selected again
         elif index_of_selected_piece == 2:
@@ -210,8 +210,8 @@ class GameBoard(tk.Tk):
             # gets the internal coordinates of the 2nd selected piece and gets the adjacent spaces to it
             second_piece_internal_coords = self.selected_pieces[
                 1]  # 2nd selected piece is always index 1 within self.selected_pieces
-            self.adjacent_spaces = self.Move.get_adj_game_spaces(second_piece_internal_coords[0],
-                                                                 second_piece_internal_coords[1])
+            self.adjacent_spaces = self.Move.get_adj_game_spaces_and_direction(second_piece_internal_coords[0],
+                                                                               second_piece_internal_coords[1])
 
             # removes coords of 3rd piece from the list and toggles its 'selected' flag
             deselected_piece_internal_coords = self.selected_pieces.pop()  # removes the 3rd, selected piece from the list
