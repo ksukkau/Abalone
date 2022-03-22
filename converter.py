@@ -228,11 +228,11 @@ class Converter:
         :param adjusted_direction_tuple: a tuple containing the direction of movement
         :return: a tuple (str, int) where the string is the row key and the int is  the column number
         """
-        row_dir = adjusted_direction_tuple[0]
-        col_dir = Converter.calculate_adjusted_col_direction(row_num, adjusted_direction_tuple)
-
         if type(row_num) != int:
             row_num = Converter.convert_row_to_string_or_int(row_num)
+
+        row_dir = adjusted_direction_tuple[0]
+        col_dir = Converter.calculate_adjusted_col_direction(row_num, adjusted_direction_tuple)
 
         new_row_num = row_num + row_dir
         new_col_num = col_num + col_dir
@@ -259,8 +259,11 @@ class Converter:
             "B": 7,
             "A": 8
         }
+        try:
+            row = row_char_int_map[piece[0]]
+        except KeyError:
+            return
 
-        row = row_char_int_map[piece[0]]
         row_key = "row" + str(row)
 
         col = int(piece[1])

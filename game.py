@@ -116,7 +116,7 @@ class GameBoard(tk.Tk):
                         selected_piece_color = selected_row[col].get("color")
 
                         piece_clicked = Converter.internal_notation_to_external(row, col)
-                        print(f"Selected piece at: {piece_clicked}")  # prints clicked piece
+                        print(f"Selected piece at: {piece_clicked}" + f" - Color: {self.game_board[row_key][col]['color']} - Selected: {self.game_board[row_key][col]['selected']}")  # prints clicked piece
 
                         # ensures that the turn color can't select the opposing color's pieces for movement
                         if selected_piece_color == self.turn:
@@ -167,39 +167,88 @@ class GameBoard(tk.Tk):
                                         self.selected_pieces_xy_coords.append((piece_x_pos, piece_y_pos))  # adds xy coords to list
 
                             print("\n--- Debug ---")
-                            print(self.adjacent_spaces)
-                            print(self.num_pieces_selected)
-                            print(self.selected_pieces_xy_coords)
-                            print(self.selected_pieces)
+                            print(f"Adj spaces: {self.adjacent_spaces}")
+                            print(f"Num selected: {self.num_pieces_selected}")
+                            print(f"Selected pieces: {self.selected_pieces}")
+                            print(f"XY Coords: {self.selected_pieces_xy_coords}")
                             print("-------------\n")
 
                         elif self.num_pieces_selected > 0:
 
                             if self.num_pieces_selected == 1:
                                 # gets the possible moves for single piece movement
-                                self.possible_moves = self.Move.get_possible_moves(self.num_pieces_selected, self.selected_pieces, self.game_board, self.turn)
+                                self.possible_moves = self.Move.get_possible_single_moves(self.selected_pieces,
+                                                                                          self.num_pieces_selected,
+                                                                                          self.game_board)
 
+                                # checks if new space clicked is unoccupied, if so then performs single piece move
                                 if piece_clicked in self.possible_moves:
-                                    selected_piece_internal_coords = self.selected_pieces.pop()
-                                    selected_piece_xy_coords = self.selected_pieces_xy_coords.pop()
+
+                                    self.move_piece(row, col, piece_x_pos, piece_y_pos)
 
                                     self.num_pieces_selected = 0
                                     self.adjacent_spaces = set()
                                     self.possible_moves = set()
+                                    self.selected_pieces = []
+                                    self.selected_pieces_xy_coords = []
 
-                                    self.move_piece(selected_piece_internal_coords, selected_piece_xy_coords, row, col, piece_x_pos, piece_y_pos)
 
-    def move_piece(self, selected_piece_internal_coords: tuple, selected_piece_xy_coords: tuple, new_row_num: int, new_col_num: int, new_x_pos: int, new_y_pos: int):
+                            # performs 2 or 3 group piece movements
+                            elif self.num_pieces_selected > 1:
+                                vector_of_dir = self.Move.get_dir_of_selected_pieces(self.selected_pieces)
+                                self.possible_moves = self.Move.get_possible_grouped_moves(self.selected_pieces,
+                                                                                           self.num_pieces_selected,
+                                                                                           self.game_board, self.turn,
+                                                                                           vector_of_dir)
+                                print(f"Possible inline {self.possible_moves}")
+
+
+                                if piece_clicked in self.possible_moves.keys():
+
+                                    if self.possible_moves[piece_clicked] == "inline":
+
+                                        self.adjacent_spaces = self.Move.get_adj_game_spaces(self.selected_pieces[0][0], self.selected_pieces[0][1])
+
+                                        # if the clicked piece is adjacent to the 1st selected game piece
+                                        if piece_clicked in self.adjacent_spaces:
+                                            self.move_piece(row, col, piece_x_pos, piece_y_pos)
+
+
+                                        else:
+                                            self.move_piece(row, col, piece_x_pos, piece_y_pos, index=0)
+
+                                        self.deselect_pieces()
+
+                                        self.num_pieces_selected = 0
+                                        self.adjacent_spaces = set()
+                                        self.possible_moves = set()
+                                        self.selected_pieces = []
+                                        self.selected_pieces_xy_coords = []
+
+
+                                """
+                                if 2 pieces selected
+                                    - get vector of selected game pieces
+                                    - 
+                                """
+
+
+
+
+    def move_piece(self, new_row_num: int, new_col_num: int, new_x_pos: int, new_y_pos: int, index=-1):
         """
-        moves the game piece. The method draws the new game pieces, removes the old game piece, toggles the "selected"
+        Moves the game piece. The method draws the new game pieces, removes the old game piece, toggles the "selected"
         flag, and then updates the game board "color" value for both the new space and old space.
-        :param selected_piece_internal_coords: a tuple, of the internal coordinates of the selected game piece
-        :param selected_piece_xy_coords: a tuple, of the x and y coordinates of the selected game piece
         :param new_row_num: an int, the new row number to move to
         :param new_col_num: an int, the new column number to move to
         :param new_x_pos: an int, the x coordinates of the new space
         :param new_y_pos: an int, the y coordinates of the new space
+        :param index: an int, the index of the piece to be moved
         """
+        selected_piece_internal_coords = self.selected_pieces.pop(index)
+        selected_piece_xy_coords = self.selected_pieces_xy_coords.pop(index)
+        self.num_pieces_selected -= 1
+
         self.draw_game_piece(selected_piece_xy_coords[0], selected_piece_xy_coords[1], "slate grey")
         self.draw_game_piece(new_x_pos, new_y_pos, self.turn)
 
@@ -238,8 +287,7 @@ class GameBoard(tk.Tk):
         elif index_of_selected_piece == 2:
 
             # gets the internal coordinates of the 2nd selected piece and gets the adjacent spaces to it
-            second_piece_internal_coords = self.selected_pieces[
-                1]  # 2nd selected piece is always index 1 within self.selected_pieces
+            second_piece_internal_coords = self.selected_pieces[1]  # 2nd selected piece is always index 1 within self.selected_pieces
             self.adjacent_spaces = self.Move.get_adj_game_spaces_and_direction(second_piece_internal_coords[0],
                                                                                second_piece_internal_coords[1])
 
@@ -255,7 +303,7 @@ class GameBoard(tk.Tk):
             # decrements number of pieces selected
             self.num_pieces_selected -= 1
 
-    def deselect_pieces(self, lower_bound=0):
+    def deselect_pieces(self, lower_bound=0, piece_color=None):
         """
         Unselects all the selected game pieces within the provided range. The lower bound is specified when the second
         selected piece is clicked again to deselect all pieces but the first selected piece.
@@ -266,13 +314,15 @@ class GameBoard(tk.Tk):
         # iterates over the number of selected pieces and de-selects them if the second selected piece is clicked again
         for iteration in range(lower_bound, self.num_pieces_selected):
             # removes coords from piece in the last position of list and toggles its flag
-            deselected_piece_internal_coords = self.selected_pieces.pop()  # removes the 3rd, selected piece from the list
+            deselected_piece_internal_coords = self.selected_pieces.pop()  # removes the last, selected piece from the list
             self.toggle_selected_flag(deselected_piece_internal_coords[0],
                                       deselected_piece_internal_coords[1])  # toggles selected flag
 
-            # gets the x and y coords of the last piece in the list and "unselects" it
+            # gets the x and y coords of the last piece in the list and "unselects" it, or draws over it entirely
             deselected_piece_xy_coords = self.selected_pieces_xy_coords.pop()
-            self.draw_game_piece(deselected_piece_xy_coords[0], deselected_piece_xy_coords[1], self.turn)
+            if piece_color == None:
+                piece_color = self.turn
+            self.draw_game_piece(deselected_piece_xy_coords[0], deselected_piece_xy_coords[1], piece_color)
 
             # decrements number of pieces selected
             self.num_pieces_selected -= 1
