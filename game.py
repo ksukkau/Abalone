@@ -58,7 +58,7 @@ class GameBoard(tk.Tk):
         self.board_screen_pos = None
         self.game_board = None
 
-        # ----- For self.Move.ent ----- #
+        # ----- For Piece Movement ----- #
         self.Move = Move()  # initializes the self.Move.object
         self.adjacent_spaces = set()
         self.selected_pieces = []
@@ -121,8 +121,7 @@ class GameBoard(tk.Tk):
                             if selected_row[col]["selected"]:
 
                                 # gets the index of the selected game piece and calls a helper method
-                                index_of_selected_piece = self.selected_piece_xy_coords.index(
-                                    (piece_x_pos, piece_y_pos))
+                                index_of_selected_piece = self.selected_piece_xy_coords.index((piece_x_pos, piece_y_pos))
                                 self.handle_selecting_selected_piece(index_of_selected_piece)
 
                                 """ 
@@ -140,15 +139,12 @@ class GameBoard(tk.Tk):
                                 if self.num_pieces_selected == 0:
                                     self.num_pieces_selected += 1  # increments number of pieces selected to 1
 
-                                    self.adjacent_spaces = self.Move.get_adj_game_spaces(row,
-                                                                                         col)  # gets adjacent spaces
+                                    self.adjacent_spaces = self.Move.get_adj_game_spaces(row, col)   # gets adjacent spaces
 
-                                    self.draw_game_piece_selection(piece_x_pos, piece_y_pos,
-                                                                   self.turn)  # draws game piece selection
+                                    self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn)  # draws game piece selection
                                     self.toggle_selected_flag(row_key, col)  # toggles selected flag
                                     self.selected_pieces.append((row_key, col))  # adds selected piece to a list
-                                    self.selected_piece_xy_coords.append(
-                                        (piece_x_pos, piece_y_pos))  # adds xy coords to list
+                                    self.selected_piece_xy_coords.append((piece_x_pos, piece_y_pos))  # adds xy coords to list
 
                                 # handles logic for the second piece to be selected
                                 if self.num_pieces_selected == 1:
@@ -156,15 +152,12 @@ class GameBoard(tk.Tk):
                                     if piece_clicked in self.adjacent_spaces:
                                         self.num_pieces_selected += 1  # increments number of pieces selected to 1
 
-                                        self.adjacent_spaces = self.Move.get_adj_game_spaces(row,
-                                                                                             col)  # gets adjacent spaces
+                                        self.adjacent_spaces = self.Move.get_adj_game_spaces(row, col)  # gets adjacent spaces
 
-                                        self.draw_game_piece_selection(piece_x_pos, piece_y_pos,
-                                                                       self.turn)  # draws game piece selection
+                                        self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn)  # draws game piece selection
                                         self.toggle_selected_flag(row_key, col)  # toggles selected flag
                                         self.selected_pieces.append((row_key, col))  # adds selected piece to a list
-                                        self.selected_piece_xy_coords.append(
-                                            (piece_x_pos, piece_y_pos))  # adds xy coords to list
+                                        self.selected_piece_xy_coords.append((piece_x_pos, piece_y_pos))  # adds xy coords to list
 
                                 # handles logic for the second piece to be selected
                                 if self.num_pieces_selected == 2:
@@ -172,15 +165,12 @@ class GameBoard(tk.Tk):
                                     if piece_clicked in self.adjacent_spaces:
                                         self.num_pieces_selected += 1  # increments number of pieces selected to 1
 
-                                        self.adjacent_spaces = self.Move.get_adj_game_spaces(row,
-                                                                                             col)  # gets adjacent spaces
+                                        self.adjacent_spaces = self.Move.get_adj_game_spaces(row, col)  # gets adjacent spaces
 
-                                        self.draw_game_piece_selection(piece_x_pos, piece_y_pos,
-                                                                       self.turn)  # draws game piece selection
+                                        self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn)  # draws game piece selection
                                         self.toggle_selected_flag(row_key, col)  # toggles selected flag
                                         self.selected_pieces.append((row_key, col))  # adds selected piece to a list
-                                        self.selected_piece_xy_coords.append(
-                                            (piece_x_pos, piece_y_pos))  # adds xy coords to list
+                                        self.selected_piece_xy_coords.append((piece_x_pos, piece_y_pos))  # adds xy coords to list
 
                             print("\n--- Debug ---")
                             print(self.adjacent_spaces)
@@ -576,8 +566,8 @@ class GameBoard(tk.Tk):
         """
         Initializes the move history window within the GUI for both black and white teams.
         """
-        self.white_moves_box.insert(END, "self.Move.:")
-        self.black_moves_box.insert(END, "self.Move.:")
+        self.white_moves_box.insert(END, "Moves:")
+        self.black_moves_box.insert(END, "Moves:")
 
     def player_info(self):
         """
@@ -587,7 +577,7 @@ class GameBoard(tk.Tk):
         self.set_pieces_count()
         player_one = Label(self, text="White", bg=self.bg, font=font, fg=self.font_color)
         player_one.grid(column=2, padx=3, row=1)
-        player_one_moves_label = Label(self, text=f"self.Move.\n{self.white_move_count}", bg=self.bg, font=self.font,
+        player_one_moves_label = Label(self, text=f"Moves\n{self.white_move_count}", bg=self.bg, font=self.font,
                                        fg=self.font_color)
         player_one_moves_label.grid(column=2, row=2)
         player_one_pieces_label = Label(self, text=f"Pieces lost\n{self.white_pieces}", bg=self.bg, font=self.font,
@@ -598,7 +588,7 @@ class GameBoard(tk.Tk):
 
         player_two = Label(self, text="Black", bg=self.bg, font=font, fg=self.font_color)
         player_two.grid(column=4, padx=3, row=1)
-        player_two_moves_label = Label(self, text=f"self.Move.\n{self.black_move_count}", bg=self.bg, font=self.font,
+        player_two_moves_label = Label(self, text=f"Moves\n{self.black_move_count}", bg=self.bg, font=self.font,
                                        fg=self.font_color)
         player_two_moves_label.grid(column=4, row=2)
         player_two_pieces_label = Label(self, text=f"Pieces lost\n{self.black_pieces}", bg=self.bg, font=self.font,
