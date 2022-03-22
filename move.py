@@ -45,3 +45,6 @@ class Move:
             adjacent_spaces.add(adjacent_space_external)
 
         return adjacent_spaces
+
+    def get_valid_moves(self, selected_pieces: list, selected_pieces_xy_coords):
+        pass
