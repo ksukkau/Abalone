@@ -59,10 +59,10 @@ class GameBoard(tk.Tk):
         self.game_board = None
 
         # ----- For Piece Movement ----- #
-        self.Move = Move()  # initializes the self.Move.object
+        self.Move = Move()  # initializes the Move object
         self.adjacent_spaces = set()
         self.selected_pieces = []
-        self.selected_piece_xy_coords = []
+        self.selected_pieces_xy_coords = []
         self.num_pieces_selected = 0
 
     @staticmethod
@@ -96,7 +96,6 @@ class GameBoard(tk.Tk):
         piece has been clicked, it is highlighted and the selected game piece is colored green.
         :param event: an Event object containing various data attributes including the x and y coords of the click event
         """
-        ZERO_INDEX_OFFSET = 1
         RANGE = 20
         print(f"Clicked at {event.x}, {event.y}")
 
@@ -121,7 +120,7 @@ class GameBoard(tk.Tk):
                             if selected_row[col]["selected"]:
 
                                 # gets the index of the selected game piece and calls a helper method
-                                index_of_selected_piece = self.selected_piece_xy_coords.index((piece_x_pos, piece_y_pos))
+                                index_of_selected_piece = self.selected_pieces_xy_coords.index((piece_x_pos, piece_y_pos))
                                 self.handle_selecting_selected_piece(index_of_selected_piece)
 
                                 """ 
@@ -144,7 +143,7 @@ class GameBoard(tk.Tk):
                                     self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn)  # draws game piece selection
                                     self.toggle_selected_flag(row_key, col)  # toggles selected flag
                                     self.selected_pieces.append((row_key, col))  # adds selected piece to a list
-                                    self.selected_piece_xy_coords.append((piece_x_pos, piece_y_pos))  # adds xy coords to list
+                                    self.selected_pieces_xy_coords.append((piece_x_pos, piece_y_pos))  # adds xy coords to list
 
                                 # handles logic for the second piece to be selected
                                 if self.num_pieces_selected == 1:
@@ -157,7 +156,7 @@ class GameBoard(tk.Tk):
                                         self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn)  # draws game piece selection
                                         self.toggle_selected_flag(row_key, col)  # toggles selected flag
                                         self.selected_pieces.append((row_key, col))  # adds selected piece to a list
-                                        self.selected_piece_xy_coords.append((piece_x_pos, piece_y_pos))  # adds xy coords to list
+                                        self.selected_pieces_xy_coords.append((piece_x_pos, piece_y_pos))  # adds xy coords to list
 
                                 # handles logic for the second piece to be selected
                                 if self.num_pieces_selected == 2:
@@ -170,12 +169,12 @@ class GameBoard(tk.Tk):
                                         self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn)  # draws game piece selection
                                         self.toggle_selected_flag(row_key, col)  # toggles selected flag
                                         self.selected_pieces.append((row_key, col))  # adds selected piece to a list
-                                        self.selected_piece_xy_coords.append((piece_x_pos, piece_y_pos))  # adds xy coords to list
+                                        self.selected_pieces_xy_coords.append((piece_x_pos, piece_y_pos))  # adds xy coords to list
 
                             print("\n--- Debug ---")
                             print(self.adjacent_spaces)
                             print(self.num_pieces_selected)
-                            print(self.selected_piece_xy_coords)
+                            print(self.selected_pieces_xy_coords)
                             print(self.selected_pieces)
                             print("-------------\n")
 
@@ -220,7 +219,7 @@ class GameBoard(tk.Tk):
                                       deselected_piece_internal_coords[1])  # toggles selected flag
 
             # gets the x and y coords of the 3rd selected piece and "unselects" it
-            deselected_piece_xy_coords = self.selected_piece_xy_coords.pop()
+            deselected_piece_xy_coords = self.selected_pieces_xy_coords.pop()
             self.draw_game_piece(deselected_piece_xy_coords[0], deselected_piece_xy_coords[1], self.turn)
 
             # decrements number of pieces selected
@@ -242,7 +241,7 @@ class GameBoard(tk.Tk):
                                       deselected_piece_internal_coords[1])  # toggles selected flag
 
             # gets the x and y coords of the last piece in the list and "unselects" it
-            deselected_piece_xy_coords = self.selected_piece_xy_coords.pop()
+            deselected_piece_xy_coords = self.selected_pieces_xy_coords.pop()
             self.draw_game_piece(deselected_piece_xy_coords[0], deselected_piece_xy_coords[1], self.turn)
 
             # decrements number of pieces selected
