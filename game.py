@@ -58,9 +58,12 @@ class GameBoard(tk.Tk):
         self.board_screen_pos = None
         self.game_board = None
 
-        # ----- For Movement ----- #
+        # ----- For self.Move.ent ----- #
+        self.Move = Move()  # initializes the self.Move.object
         self.adjacent_spaces = set()
-        self.pieces_selected = 0
+        self.selected_pieces = []
+        self.selected_piece_xy_coords = []
+        self.num_pieces_selected = 0
 
     @staticmethod
     def get_row_key(row: int, offset=0) -> str:
@@ -93,6 +96,7 @@ class GameBoard(tk.Tk):
         piece has been clicked, it is highlighted and the selected game piece is colored green.
         :param event: an Event object containing various data attributes including the x and y coords of the click event
         """
+        ZERO_INDEX_OFFSET = 1
         RANGE = 20
         print(f"Clicked at {event.x}, {event.y}")
 
@@ -104,29 +108,159 @@ class GameBoard(tk.Tk):
                 piece_x_pos = selected_row[col].get("x_pos")
                 piece_y_pos = selected_row[col].get("y_pos")
 
-                # ensures clicked area is within the drawn board piece
+                # ensures clicked area is within the drawn board piece along the x-axis
                 if piece_x_pos - RANGE <= event.x <= piece_x_pos + RANGE:
 
-                    # ensures clicked area is within the drawn board piece
+                    # ensures clicked area is within the drawn board piece along the y-axis
                     if piece_y_pos - RANGE <= event.y <= piece_y_pos + RANGE:
                         selected_piece_color = selected_row[col].get("color")
 
                         # ensures that the turn color can't select the opposing color's pieces for movement
                         if selected_piece_color == self.turn:
-                            self.print_selected_piece_coord(row, col)
 
-                            self.adjacent_spaces = Move.get_adj_game_spaces(row, col)
+                            if selected_row[col]["selected"]:
+                                index_of_selected_piece = self.selected_piece_xy_coords.index(
+                                    (piece_x_pos, piece_y_pos))
 
-                            # redraws the original piece color on the selected piece, enables pieces to be "unselected"
-                            self.draw_game_piece(piece_x_pos, piece_y_pos, self.turn)
+                                # handles logic when 1st selected piece is selected again
+                                if index_of_selected_piece == 0:
+                                    self.deselect_pieces()  # 0 means all currently selected pieces are deselected
+                                    self.adjacent_spaces = set()  # empties the adjacent spaces set
 
-                            # highlights selected piece green and toggles the "selected" dictionary key
-                            if not selected_row[col].get("selected"):
-                                selected_row[col].update({"selected": True})
-                                self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn)
+                                # handles logic when 2nd selected piece is selected again
+                                elif index_of_selected_piece == 1:
+                                    self.deselect_pieces(1)  # 1 here deselects all pieces but the 1st selected piece
 
-                            else:
-                                selected_row[col].update({"selected": False})
+                                    # gets the internal coordinates of the selected piece and gets the adjacent spaces to it
+                                    first_piece_internal = self.selected_pieces[0]  # gets the 1st selected piece
+                                    self.adjacent_spaces = self.Move.get_adj_game_spaces(first_piece_internal[0],
+                                                                                         first_piece_internal[1])
+
+                                # handles logic when 3rd selected piece is selected again
+                                elif index_of_selected_piece == 2:
+
+                                    # gets the internal coordinates of the 2nd selected piece and gets the adjacent spaces to it
+                                    second_piece_internal_coords = self.selected_pieces[
+                                        1]  # 2nd selected piece is always index 1 within self.selected_pieces
+                                    self.adjacent_spaces = self.Move.get_adj_game_spaces(
+                                        second_piece_internal_coords[0], second_piece_internal_coords[1])
+
+                                    # removes coords of 3rd piece from the list and toggles its 'selected' flag
+                                    deselected_piece_internal_coords = self.selected_pieces.pop()  # removes the 3rd, selected piece from the list
+                                    self.toggle_selected_flag(deselected_piece_internal_coords[0],
+                                                              deselected_piece_internal_coords[
+                                                                  1])  # toggles selected flag
+
+                                    # gets the x and y coords of the 3rd selected piece and "unselects" it
+                                    deselected_piece_xy_coords = self.selected_piece_xy_coords.pop()
+                                    self.draw_game_piece(deselected_piece_xy_coords[0], deselected_piece_xy_coords[1],
+                                                         self.turn)
+
+                                    # decrements number of pieces selected
+                                    self.num_pieces_selected -= 1
+
+                                """ 
+                                add additional logic to determine which selected piece has been clicked (get index using self.selected_pieces)
+                                    - if 1st selected piece has been clicked, then unselect everything
+                                    - if 2nd or 3rd piece has been clicked, deselect everything after it, including itself
+                                        - will have to remove it from both self lists and recreate adjacent spaces for latest selected piece
+                                """
+
+                            elif self.num_pieces_selected <= 3:
+                                piece_clicked = Converter.internal_notation_to_external(row, col)
+                                print(f"Selected piece at: {piece_clicked}")  # prints clicked piece
+
+                                # handles logic for the first piece to be selected
+                                if self.num_pieces_selected == 0:
+                                    self.num_pieces_selected += 1  # increments number of pieces selected to 1
+
+                                    self.adjacent_spaces = self.Move.get_adj_game_spaces(row,
+                                                                                         col)  # gets adjacent spaces
+
+                                    self.draw_game_piece_selection(piece_x_pos, piece_y_pos,
+                                                                   self.turn)  # draws game piece selection
+                                    self.toggle_selected_flag(row_key, col)  # toggles selected flag
+                                    self.selected_pieces.append((row_key, col))  # adds selected piece to a list
+                                    self.selected_piece_xy_coords.append(
+                                        (piece_x_pos, piece_y_pos))  # adds xy coords to list
+
+                                # handles logic for the second piece to be selected
+                                if self.num_pieces_selected == 1:
+                                    # checks if the second piece clicked is adjacent to the first
+                                    if piece_clicked in self.adjacent_spaces:
+                                        self.num_pieces_selected += 1  # increments number of pieces selected to 1
+
+                                        self.adjacent_spaces = self.Move.get_adj_game_spaces(row,
+                                                                                             col)  # gets adjacent spaces
+
+                                        self.draw_game_piece_selection(piece_x_pos, piece_y_pos,
+                                                                       self.turn)  # draws game piece selection
+                                        self.toggle_selected_flag(row_key, col)  # toggles selected flag
+                                        self.selected_pieces.append((row_key, col))  # adds selected piece to a list
+                                        self.selected_piece_xy_coords.append(
+                                            (piece_x_pos, piece_y_pos))  # adds xy coords to list
+
+                                # handles logic for the second piece to be selected
+                                if self.num_pieces_selected == 2:
+                                    # checks if the second piece clicked is adjacent to the first
+                                    if piece_clicked in self.adjacent_spaces:
+                                        self.num_pieces_selected += 1  # increments number of pieces selected to 1
+
+                                        self.adjacent_spaces = self.Move.get_adj_game_spaces(row,
+                                                                                             col)  # gets adjacent spaces
+
+                                        self.draw_game_piece_selection(piece_x_pos, piece_y_pos,
+                                                                       self.turn)  # draws game piece selection
+                                        self.toggle_selected_flag(row_key, col)  # toggles selected flag
+                                        self.selected_pieces.append((row_key, col))  # adds selected piece to a list
+                                        self.selected_piece_xy_coords.append(
+                                            (piece_x_pos, piece_y_pos))  # adds xy coords to list
+
+                            print("\n--- Debug ---")
+                            print(self.adjacent_spaces)
+                            print(self.num_pieces_selected)
+                            print(self.selected_piece_xy_coords)
+                            print(self.selected_pieces)
+                            print("-------------\n")
+
+    def deselect_pieces(self, lower_bound=0):
+        """
+        Unselects all the selected game pieces within the provided range. The lower bound is specified when the second
+        selected piece is clicked again to deselect all pieces but the first selected piece.
+        :param lower_bound: an int, either 0 by default or 1.
+        """
+        ZERO_INDEX_OFFSET = 1
+
+        # iterates over the number of selected pieces and de-selects them if the second selected piece is clicked again
+        for iteration in range(lower_bound, self.num_pieces_selected):
+            # removes coords from piece in the last position of list and toggles its flag
+            deselected_piece_internal_coords = self.selected_pieces.pop()  # removes the 3rd, selected piece from the list
+            self.toggle_selected_flag(deselected_piece_internal_coords[0],
+                                      deselected_piece_internal_coords[1])  # toggles selected flag
+
+            # gets the x and y coords of the last piece in the list and "unselects" it
+            deselected_piece_xy_coords = self.selected_piece_xy_coords.pop()
+            self.draw_game_piece(deselected_piece_xy_coords[0], deselected_piece_xy_coords[1], self.turn)
+
+            # decrements number of pieces selected
+            self.num_pieces_selected -= 1
+
+    def toggle_selected_flag(self, row_key, col_num: int):
+        """
+        Toggles the "selected" flag for the provided game piece.
+        :param row_key: a string, or an int, of the row of the selected piece
+        :param col_num: an int, of the column of the selected piece
+        """
+
+        # if the row passed is an int, it is converted to a string so it can be used as a key within the game board dict
+        if type(row_key) != str:
+            row_key = Converter.convert_row_to_string_or_int(row_key)
+
+        selected_piece = self.game_board.get(row_key)[col_num]
+        if not selected_piece["selected"]:
+            selected_piece["selected"] = True
+        else:
+            selected_piece["selected"] = False
 
     def draw_game_piece(self, piece_x_pos: float, piece_y_pos: float, piece_color: str):
         """
@@ -429,8 +563,8 @@ class GameBoard(tk.Tk):
         """
         Initializes the move history window within the GUI for both black and white teams.
         """
-        self.white_moves_box.insert(END, "Moves:")
-        self.black_moves_box.insert(END, "Moves:")
+        self.white_moves_box.insert(END, "self.Move.:")
+        self.black_moves_box.insert(END, "self.Move.:")
 
     def player_info(self):
         """
@@ -440,7 +574,7 @@ class GameBoard(tk.Tk):
         self.set_pieces_count()
         player_one = Label(self, text="White", bg=self.bg, font=font, fg=self.font_color)
         player_one.grid(column=2, padx=3, row=1)
-        player_one_moves_label = Label(self, text=f"Moves\n{self.white_move_count}", bg=self.bg, font=self.font,
+        player_one_moves_label = Label(self, text=f"self.Move.\n{self.white_move_count}", bg=self.bg, font=self.font,
                                        fg=self.font_color)
         player_one_moves_label.grid(column=2, row=2)
         player_one_pieces_label = Label(self, text=f"Pieces lost\n{self.white_pieces}", bg=self.bg, font=self.font,
@@ -451,7 +585,7 @@ class GameBoard(tk.Tk):
 
         player_two = Label(self, text="Black", bg=self.bg, font=font, fg=self.font_color)
         player_two.grid(column=4, padx=3, row=1)
-        player_two_moves_label = Label(self, text=f"Moves\n{self.black_move_count}", bg=self.bg, font=self.font,
+        player_two_moves_label = Label(self, text=f"self.Move.\n{self.black_move_count}", bg=self.bg, font=self.font,
                                        fg=self.font_color)
         player_two_moves_label.grid(column=4, row=2)
         player_two_pieces_label = Label(self, text=f"Pieces lost\n{self.black_pieces}", bg=self.bg, font=self.font,
