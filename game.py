@@ -119,45 +119,11 @@ class GameBoard(tk.Tk):
                         if selected_piece_color == self.turn:
 
                             if selected_row[col]["selected"]:
+
+                                # gets the index of the selected game piece and calls a helper method
                                 index_of_selected_piece = self.selected_piece_xy_coords.index(
                                     (piece_x_pos, piece_y_pos))
-
-                                # handles logic when 1st selected piece is selected again
-                                if index_of_selected_piece == 0:
-                                    self.deselect_pieces()  # 0 means all currently selected pieces are deselected
-                                    self.adjacent_spaces = set()  # empties the adjacent spaces set
-
-                                # handles logic when 2nd selected piece is selected again
-                                elif index_of_selected_piece == 1:
-                                    self.deselect_pieces(1)  # 1 here deselects all pieces but the 1st selected piece
-
-                                    # gets the internal coordinates of the selected piece and gets the adjacent spaces to it
-                                    first_piece_internal = self.selected_pieces[0]  # gets the 1st selected piece
-                                    self.adjacent_spaces = self.Move.get_adj_game_spaces(first_piece_internal[0],
-                                                                                         first_piece_internal[1])
-
-                                # handles logic when 3rd selected piece is selected again
-                                elif index_of_selected_piece == 2:
-
-                                    # gets the internal coordinates of the 2nd selected piece and gets the adjacent spaces to it
-                                    second_piece_internal_coords = self.selected_pieces[
-                                        1]  # 2nd selected piece is always index 1 within self.selected_pieces
-                                    self.adjacent_spaces = self.Move.get_adj_game_spaces(
-                                        second_piece_internal_coords[0], second_piece_internal_coords[1])
-
-                                    # removes coords of 3rd piece from the list and toggles its 'selected' flag
-                                    deselected_piece_internal_coords = self.selected_pieces.pop()  # removes the 3rd, selected piece from the list
-                                    self.toggle_selected_flag(deselected_piece_internal_coords[0],
-                                                              deselected_piece_internal_coords[
-                                                                  1])  # toggles selected flag
-
-                                    # gets the x and y coords of the 3rd selected piece and "unselects" it
-                                    deselected_piece_xy_coords = self.selected_piece_xy_coords.pop()
-                                    self.draw_game_piece(deselected_piece_xy_coords[0], deselected_piece_xy_coords[1],
-                                                         self.turn)
-
-                                    # decrements number of pieces selected
-                                    self.num_pieces_selected -= 1
+                                self.handle_selecting_selected_piece(index_of_selected_piece)
 
                                 """ 
                                 add additional logic to determine which selected piece has been clicked (get index using self.selected_pieces)
@@ -222,6 +188,53 @@ class GameBoard(tk.Tk):
                             print(self.selected_piece_xy_coords)
                             print(self.selected_pieces)
                             print("-------------\n")
+
+    def handle_selecting_selected_piece(self, index_of_selected_piece: int):
+        """
+        Handles the logic for when an already-selected game piece is selected again. The following occurs when an
+        already selected game piece is clicked on again:
+
+            - If 1, 2, or 3 game pieces are currently selected and the 1st selected game piece is clicked, all selected
+              pieces are deselected
+            - If 2 or 3 game pieces are selected and the 2nd selected game piece is elected then all pieces but the 1st
+              selected game piece is deselected
+
+        :param index_of_selected_piece: an int, of the selected game piece
+        """
+
+        # handles logic when 1st selected piece is selected again
+        if index_of_selected_piece == 0:
+            self.deselect_pieces()  # 0 means all currently selected pieces are deselected
+            self.adjacent_spaces = set()  # empties the adjacent spaces set
+
+        # handles logic when 2nd selected piece is selected again
+        elif index_of_selected_piece == 1:
+            self.deselect_pieces(1)  # 1 here deselects all pieces but the 1st selected piece
+
+            # gets the internal coordinates of the selected piece and gets the adjacent spaces to it
+            first_piece_internal = self.selected_pieces[0]  # gets the 1st selected piece
+            self.adjacent_spaces = self.Move.get_adj_game_spaces(first_piece_internal[0], first_piece_internal[1])
+
+        # handles logic when 3rd selected piece is selected again
+        elif index_of_selected_piece == 2:
+
+            # gets the internal coordinates of the 2nd selected piece and gets the adjacent spaces to it
+            second_piece_internal_coords = self.selected_pieces[
+                1]  # 2nd selected piece is always index 1 within self.selected_pieces
+            self.adjacent_spaces = self.Move.get_adj_game_spaces(second_piece_internal_coords[0],
+                                                                 second_piece_internal_coords[1])
+
+            # removes coords of 3rd piece from the list and toggles its 'selected' flag
+            deselected_piece_internal_coords = self.selected_pieces.pop()  # removes the 3rd, selected piece from the list
+            self.toggle_selected_flag(deselected_piece_internal_coords[0],
+                                      deselected_piece_internal_coords[1])  # toggles selected flag
+
+            # gets the x and y coords of the 3rd selected piece and "unselects" it
+            deselected_piece_xy_coords = self.selected_piece_xy_coords.pop()
+            self.draw_game_piece(deselected_piece_xy_coords[0], deselected_piece_xy_coords[1], self.turn)
+
+            # decrements number of pieces selected
+            self.num_pieces_selected -= 1
 
     def deselect_pieces(self, lower_bound=0):
         """
