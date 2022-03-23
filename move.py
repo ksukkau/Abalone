@@ -95,6 +95,26 @@ class Move:
         row_difference = first_piece_row_num - second_piece_row_num
         col_difference = first_piece_col_num - second_piece_col_num
 
+        # adjusts for NW movement when the 1st selected piece is North of the 2nd
+        if row_difference == -1 and col_difference == 0:
+            if first_piece_row_num == 4:
+                col_difference = -1
+
+        # adjusts for NE movement when the 1st selected piece is North of the 2nd
+        elif row_difference == -1 and col_difference == 1:
+            if first_piece_row_num == 4:
+                col_difference = 0
+
+        # adjusts for SW movement
+        elif row_difference == 1 and col_difference == 0:
+            if first_piece_row_num == 4:
+                col_difference = -1
+
+        # adjusts for SE movement
+        elif row_difference == 1 and col_difference == 1:
+            if first_piece_row_num == 4:
+                col_difference = 0
+
         # gets the vector of direction from the direction tuple map by indexing the difference in row and column and
         # extracting the index, and getting the direction at that index
         direction_cardinal = self.get_adjusted_tuple_or_cardinal_dir(first_piece_row_num, dir_tuple=(row_difference, col_difference))
