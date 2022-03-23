@@ -97,6 +97,7 @@ class StateSpaceGenerator:
         """
         self.game.initialize_game_board_array()
 
+
         piece_list = self.board_text.split(',')
         for item in piece_list:
             row = self.rows[item[0]]
@@ -120,6 +121,7 @@ class StateSpaceGenerator:
         """
         # create an image of board before changes
         self.updated_game_board = deepcopy(self.game.game_board)
+        print(self.updated_game_board)
 
         for row_key in self.game.game_board:
             row = self.game.game_board[row_key]
@@ -792,9 +794,9 @@ def main():
     """
     s = StateSpaceGenerator()
     # TODO need to make this take a real game board and or call from game rather than in this main function
-    # for input file testing
-    # s.file_name = sys.argv[1].split('.')[0]
-    # s.run_tests()
+    #for input file testing
+    s.file_name = sys.argv[1].split('.')[0]
+    s.run_tests()
 
 
 if __name__ == '__main__':
