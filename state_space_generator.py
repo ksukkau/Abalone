@@ -97,7 +97,6 @@ class StateSpaceGenerator:
         """
         self.game.initialize_game_board_array()
 
-
         piece_list = self.board_text.split(',')
         for item in piece_list:
             row = self.rows[item[0]]
@@ -121,7 +120,6 @@ class StateSpaceGenerator:
         """
         # create an image of board before changes
         self.updated_game_board = deepcopy(self.game.game_board)
-        print(self.updated_game_board)
 
         for row_key in self.game.game_board:
             row = self.game.game_board[row_key]
@@ -161,38 +159,40 @@ class StateSpaceGenerator:
         new_col_num = adjusted_opposite_dir_tuple[1] + col_num
 
         num_of_adj_pieces = 0
-        try:
-            # gets the color of the adjacent game piece
-            adj_space_piece_color = self.updated_game_board[new_row_key][new_col_num]["color"]
+        # ensures column number isn't off the game board
+        if new_col_num >= 0:
+            try:
+                # gets the color of the adjacent game piece
+                adj_space_piece_color = self.updated_game_board[new_row_key][new_col_num]["color"]
 
-            # checks if the adjacent game piece is the same color, or else it returns 0
-            if adj_space_piece_color == piece_color:
-                num_of_adj_pieces += 1
-            else:
-                return num_of_adj_pieces
-
-            # checks for the second adjacent game piece
-            if groupings == 3:
-
-                # gets the new row and column of the second adjacent game piece
-                new_col_num = Converter.calculate_adjusted_col_direction(new_row_num, opposite_dir_tuple) + new_col_num
-                new_row_num = adjusted_opposite_dir_tuple[0] + new_row_num
-
-                # checks if the row is out of bounds, and if so it means there isn't a second adjacent game piece
-                if new_row_num < 0:
+                # checks if the adjacent game piece is the same color, or else it returns 0
+                if adj_space_piece_color == piece_color:
+                    num_of_adj_pieces += 1
+                else:
                     return num_of_adj_pieces
 
-                # gets the new row key of the second adjacent game piece
-                new_row_key = Converter.convert_row_to_string_or_int(new_row_num)
+                # checks for the second adjacent game piece
+                if groupings == 3:
 
-                # checks if second adjacent game piece is the same color
-                adj_space_piece_color = self.updated_game_board[new_row_key][new_col_num]["color"]
-                if (adj_space_piece_color == piece_color):
-                    num_of_adj_pieces += 1
+                    # gets the new row and column of the second adjacent game piece
+                    new_col_num = Converter.calculate_adjusted_col_direction(new_row_num, opposite_dir_tuple) + new_col_num
+                    new_row_num = adjusted_opposite_dir_tuple[0] + new_row_num
 
-        except (IndexError, KeyError):
-            # print("Adjacent piece check out of board area")
-            return num_of_adj_pieces
+                    # checks if the row is out of bounds, and if so it means there isn't a second adjacent game piece
+                    if new_row_num < 0:
+                        return num_of_adj_pieces
+
+                    # gets the new row key of the second adjacent game piece
+                    new_row_key = Converter.convert_row_to_string_or_int(new_row_num)
+
+                    # checks if second adjacent game piece is the same color
+                    adj_space_piece_color = self.updated_game_board[new_row_key][new_col_num]["color"]
+                    if (adj_space_piece_color == piece_color):
+                        num_of_adj_pieces += 1
+
+            except (IndexError, KeyError):
+                # print("Adjacent piece check out of board area")
+                return num_of_adj_pieces
 
         return num_of_adj_pieces
 
@@ -271,6 +271,7 @@ class StateSpaceGenerator:
                             # the leading piece will be sumito'ed
                             space_in_front_row_key = piece_in_front_leading_piece[0]
                             piece_in_front_col_num = piece_in_front_leading_piece[1]
+
                             try:
                                 # checks if the space in front of the leading space is un-occupied
                                 if self.updated_game_board[space_in_front_row_key][piece_in_front_col_num]["color"] is None:
@@ -327,10 +328,10 @@ class StateSpaceGenerator:
 
             # Checks for 3-piece move groups
             # ----------------------------------------------------------------------------------------------------
+            adjusted_piece_col_num = adjusted_piece_col_num + Converter.calculate_adjusted_col_direction(adjusted_new_row_num, opposite_dir_tuple)
+
             adjusted_new_row_num = adjusted_new_row_num + opposite_dir_tuple[0]
             adj_piece_row_key = Converter.convert_row_to_string_or_int(adjusted_new_row_num)
-            adjusted_piece_col_num = adjusted_piece_col_num + Converter.calculate_adjusted_col_direction(selected_row_num,
-                                                                                               opposite_dir_tuple)
 
             if self.is_valid_adjacent_piece(adj_piece_row_key, adjusted_piece_col_num):
                 leading_piece_coords = Converter.internal_notation_to_external(selected_row_num, col_num)
@@ -794,7 +795,7 @@ def main():
     """
     s = StateSpaceGenerator()
     # TODO need to make this take a real game board and or call from game rather than in this main function
-    #for input file testing
+    # for input file testing
     s.file_name = sys.argv[1].split('.')[0]
     s.run_tests()
 

@@ -27,7 +27,7 @@ class Move:
         "SE": "NW",
         "SW": "NE",
         "W": "E",
-        "NW": "SW"
+        "NW": "SE"
     }
     direction_tuple_map = [
         {"NE": (-1, 0), "E": (0, 1), "SE": (1, 1), "SW": (1, 0), "W": (0, -1), "NW": (-1, -1)},
@@ -44,7 +44,7 @@ class Move:
     def __init__(self):
         self.direction_of_selected_pieces = None  # stores vector of selected game pieces
 
-    def get_adj_game_spaces(self, row: int, col: int) -> set:
+    def get_adj_game_spaces(self, row, col: int) -> set:
         """
         Gets all the game spaces adjacent to the selected game piece.
         :param row: an int, the number of the row
@@ -74,15 +74,14 @@ class Move:
 
         return adjacent_spaces
 
-    def get_dir_of_selected_pieces(self, selected_pieces: list, num_pieces_selected: int) -> list:
+    def get_dir_of_selected_pieces(self, selected_pieces: list) -> list:
         """
         Gets the vector of direction of the selected game pieces
         :param selected_pieces: a list, containing the external coordinates of the selected game piece(s)
-        :param num_pieces_selected: an int, of the number of game pieces currently selected
         :return: a list, containing the direction of the selected game pieces
         """
         first_piece = selected_pieces[0]
-        other_piece = selected_pieces[num_pieces_selected - 2]  # always indexes the 2nd last piece
+        other_piece = selected_pieces[1]  # always indexes the 2nd last piece
 
         # gets the row num and column number of the 1st piece
         first_piece_row_num = Converter.convert_row_to_string_or_int(first_piece[0])
@@ -98,11 +97,13 @@ class Move:
 
         # gets the vector of direction from the direction tuple map by indexing the difference in row and column and
         # extracting the index, and getting the direction at that index
-        selected_row_keys = list(self.direction_tuple_map[first_piece_row_num].keys())  # gets the dir keys for the specified row
-        selected_row_values = list(self.direction_tuple_map[first_piece_row_num].values())  # gets the dir values for the specified row
+        direction_cardinal = self.get_adjusted_tuple_or_cardinal_dir(first_piece_row_num, dir_tuple=(row_difference, col_difference))
 
-        index = selected_row_values.index((row_difference, col_difference))  # gets the index of the difference in row and column
-        direction_cardinal = selected_row_keys[index]  # gets the cardinal direction through indexing the row and col difference
+        # selected_row_keys = list(self.direction_tuple_map[first_piece_row_num].keys())  # gets the dir keys for the specified row
+        # selected_row_values = list(self.direction_tuple_map[first_piece_row_num].values())  # gets the dir values for the specified row
+        #
+        # index = selected_row_values.index((row_difference, col_difference))  # gets the index of the difference in row and column
+        # direction_cardinal = selected_row_keys[index]  # gets the cardinal direction through indexing the row and col difference
 
         return [direction_cardinal, self.opposite_directions[direction_cardinal]]
 
@@ -134,20 +135,16 @@ class Move:
 
         return adjacent_spaces
 
-    def get_possible_moves(self, num_pieces_selected: int, selected_pieces: list, game_board: dict, turn_color: str, vector_of_dir=None) -> set:
+    def get_possible_single_moves(self, selected_pieces: list, num_pieces_selected: int, game_board: dict) -> set:
         """
-        Gets the valid spaces for where the currently selected game piece(s) can move to. A tuple of 2 sets is returned.
-        The first set contains the valid empty game spaces to make a move to, the second set contains adjacent spaces
-        occupied by the opposing color
+        Gets the valid spaces for where a single selected game piece can move to. A set containing the external coords
+        (e.g. H5) of valid moves to make is return.
         :param num_pieces_selected: a int, the number of currently selected game pieces
         :param selected_pieces: a list, containing the external coordinates of the selected game pieces, in order
         :param game_board: the current game board
-        :param: turn_color: the color of the current turn
-        :param vector_of_dir: the vector of direction for when 2 or 3 pieces are selected
         :return: a tuple of sets, a tuple of 2 sets.
         """
         unoccupied_game_spaces = set()
-        occupied_game_spaces = set()
 
         if num_pieces_selected == 1:
 
@@ -162,11 +159,11 @@ class Move:
                 # converts external notation of current space on game board to internal notation
                 space_internal_tuple = Converter.external_notation_to_internal(space)
 
-                # extracts the row key and column number from the tuple
-                row_key = space_internal_tuple[0]
-                col_num = space_internal_tuple[1]
-
                 try:
+                    # extracts the row key and column number from the tuple
+                    row_key = space_internal_tuple[0]
+                    col_num = space_internal_tuple[1]
+
                     adjacent_space_color = game_board[row_key][col_num]["color"]
 
                     # means the adjacent space is unoccupied, if column number is < 0 then it is off the game board
@@ -174,16 +171,132 @@ class Move:
                         unoccupied_game_spaces.add(space)
 
                 # means the adjacent space is off the game board
-                except (IndexError, KeyError):
+                except (IndexError, KeyError, TypeError):
                     pass
 
-        elif num_pieces_selected > 0:
-            adjacent_spaces = set()
+        return unoccupied_game_spaces
 
-            # gets all adjacent spaces for all of the selected pieces
-            for selected_piece in selected_pieces:
-                selected_piece = Converter.external_notation_to_internal(selected_piece)
+    def get_possible_grouped_moves(self, selected_pieces: list, num_pieces_selected: int, game_board: dict,
+                                   turn_color: str, vector_of_dir: list) -> dict:
+        """
+        Gets the valid spaces for where 2 or 3 selected game pieces can move to. A dictionary containing the external
+        coords (e.g. H7) of the valid spaces as the key, with the value containing the type of move (inline, sidestep,
+        or sumito)
+        :param num_pieces_selected: a int, the number of currently selected game pieces
+        :param selected_pieces: a list, containing the external coordinates of the selected game pieces, in order
+        :param game_board: the current game board
+        :param turn_color: a string, the current turn color
+        :param vector_of_dir: a list, containing the vector of direction of the selected game pieces
+        :return: a dictionary
+        """
+        unoccupied_game_spaces = {}
 
-                adjacent_spaces.update(self.get_adj_game_spaces_and_direction(selected_piece[0], selected_piece[1]))
+        # gets the first and last selected piece internal coords (e.g. ('row3', 4))
+        first_selected = selected_pieces[0]
+        last_selected = selected_pieces[-1]
+
+        # adds any valid or sumito moves found
+        unoccupied_game_spaces.update(self.get_valid_inline_moves(first_selected, last_selected, game_board, turn_color, vector_of_dir))
 
         return unoccupied_game_spaces
+
+    def get_valid_inline_moves(self, first_selected: tuple, last_selected: tuple, game_board: dict, turn_color: str, vector_of_dir: list):
+        """
+        Gets the two possible inline moves for 2 and 3 group pieces.
+        :param first_selected: a tuple, internal coords for the first selected piece
+        :param last_selected: a tuple, internal coords for the last selected piece
+        :param game_board: a dictionary, of the game board
+        :param turn_color: a string, of the current turn's color
+        :param vector_of_dir: a list, of the vector of direction of the selected game pieces
+        :return: a dictionary, of the valid spaces to move inline, or perform a sumito
+        """
+        unoccupied_game_spaces = {}
+
+        # gets the row and column number, and direction tuple for both the first and last selected game piece
+        first_selected_row_num = Converter.convert_row_to_string_or_int(first_selected[0])
+        first_selected_col_num = first_selected[1]
+        last_selected_row_num = Converter.convert_row_to_string_or_int(last_selected[0])
+        last_selected_col_num = last_selected[1]
+
+        # get the space in front of the first and last selected piece
+        first_dir_tuple = self.get_adjusted_tuple_or_cardinal_dir(first_selected_row_num, cardinal_dir=vector_of_dir[0])
+
+        space_infront_first = Converter.simulate_game_piece_movement(first_selected_row_num, first_selected_col_num, first_dir_tuple)
+        space_infront_first_row_key = space_infront_first[0]
+        space_infront_first_col_num = space_infront_first[1]
+        # ensures column number isn't off the game board
+        if space_infront_first_col_num >= 0:
+
+            # if IndexError or KeyError is raised, then space is off the game board
+            try:
+                # gets the value of the space to move to
+                infront_first_val = game_board[space_infront_first_row_key][space_infront_first_col_num]["color"]
+
+                # ensures that the space isn't occupied by piece of current turn color
+                if infront_first_val != turn_color:
+                    valid_piece = Converter.internal_notation_to_external(space_infront_first_row_key,
+                                                                          space_infront_first_col_num)
+
+                    # if space is unoccupied, then it is added as an inline move
+                    if infront_first_val == None:
+                        unoccupied_game_spaces.update({valid_piece: "inline"})
+                    # if space is occupied by opposing color, then it is added as a sumito
+                    elif infront_first_val == Converter.get_opposite_color(turn_color):
+                        unoccupied_game_spaces.update({valid_piece: "sumito"})
+            except (IndexError, KeyError):
+                pass
+        last_dir_tuple = self.get_adjusted_tuple_or_cardinal_dir(last_selected_row_num, cardinal_dir=vector_of_dir[1])
+        space_infront_last = Converter.simulate_game_piece_movement(last_selected_row_num, last_selected_col_num,
+                                                                    last_dir_tuple)
+        space_infront_last_row_key = space_infront_last[0]
+        space_infront_last_col_num = space_infront_last[1]
+        # ensures column number isn't off the game board
+        if space_infront_last_col_num >= 0:
+            # if IndexError or KeyError is raised, then space is off the game board
+            try:
+                # gets the value of the space to move to
+                infront_last_val = game_board[space_infront_last_row_key][space_infront_last_col_num]["color"]
+
+                # ensures that the space isn't occupied by piece of current turn color
+                if infront_last_val != turn_color:
+                    valid_piece = Converter.internal_notation_to_external(space_infront_last_row_key,
+                                                                          space_infront_last_col_num)
+
+                    # if space is unoccupied, then it is added as an inline move
+                    if infront_last_val == None:
+                        unoccupied_game_spaces.update({valid_piece: "inline"})
+                    # if space is occupied by opposing color, then it is added as a sumito
+                    elif infront_last_val == Converter.get_opposite_color(turn_color):
+                        unoccupied_game_spaces.update({valid_piece: "sumito"})
+            except (IndexError, KeyError):
+                pass
+
+        return unoccupied_game_spaces
+
+    def get_adjusted_tuple_or_cardinal_dir(self, row_num: int, cardinal_dir=None, dir_tuple=None):
+        """
+        Gets either the cardinal direction if a direction tuple is passed, or the direction tuple if the cardinal
+        direction is passed. Provides the adjusted direction if the direction tuple is return.
+        :param row_num:
+        :param cardinal_dir:
+        :param dir_tuple:
+        """
+        row_dir_keys = list(self.direction_tuple_map[row_num].keys())
+        row_dir_values = list(self.direction_tuple_map[row_num].values())
+        dir = None
+
+        # gets the direction tuple
+        if cardinal_dir == None:
+            index = row_dir_values.index(dir_tuple)
+            dir = row_dir_keys[index]
+
+        # gets the cardinal direction
+        elif dir_tuple == None:
+            index = row_dir_keys.index(cardinal_dir)
+            dir = row_dir_values[index]
+
+        return dir
+
+
+
+
