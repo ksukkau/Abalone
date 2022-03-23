@@ -153,18 +153,33 @@ class GameBoard(tk.Tk):
                                         self.selected_pieces.append((row_key, col))  # adds selected piece to a list
                                         self.selected_pieces_xy_coords.append((piece_x_pos, piece_y_pos))  # adds xy coords to list
 
-                                # handles logic for the second piece to be selected
+                                # handles logic for the third piece to be selected
                                 if self.num_pieces_selected == 2:
-                                    # checks if the second piece clicked is adjacent to the first
+                                    # checks if the third piece clicked is adjacent to the second
                                     if piece_clicked in self.adjacent_spaces:
-                                        self.num_pieces_selected += 1  # increments number of pieces selected to 1
 
-                                        self.adjacent_spaces = self.Move.get_adj_game_spaces_and_direction(row, col)  # gets adjacent spaces
+                                        inline_row = 0
+                                        inline_col = 0
+                                        if self.selected_pieces[0][0] == self.selected_pieces[1][0]:
+                                            inline_row += 1
+                                        if self.selected_pieces[0][1] == self.selected_pieces[1][1]:
+                                            inline_col += 1
+                                        for piece in self.selected_pieces:
+                                            if piece[0] == row_key:
+                                                inline_row += 1
+                                            if piece[1] == col:
+                                                inline_col += 1
+                                        # checks if the selected pieces are inline
+                                        if inline_row != len(self.selected_pieces) - 1 and inline_col != len(
+                                                self.selected_pieces) - 1:
+                                            self.num_pieces_selected += 1  # increments number of pieces selected to 1
 
-                                        self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn)  # draws game piece selection
-                                        self.toggle_selected_flag(row_key, col)  # toggles selected flag
-                                        self.selected_pieces.append((row_key, col))  # adds selected piece to a list
-                                        self.selected_pieces_xy_coords.append((piece_x_pos, piece_y_pos))  # adds xy coords to list
+                                            self.adjacent_spaces = self.Move.get_adj_game_spaces_and_direction(row, col)  # gets adjacent spaces
+
+                                            self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn)  # draws game piece selection
+                                            self.toggle_selected_flag(row_key, col)  # toggles selected flag
+                                            self.selected_pieces.append((row_key, col))  # adds selected piece to a list
+                                            self.selected_pieces_xy_coords.append((piece_x_pos, piece_y_pos))  # adds xy coords to list
 
                             print("\n--- Debug ---")
                             print(f"Adj spaces: {self.adjacent_spaces}")
@@ -202,7 +217,6 @@ class GameBoard(tk.Tk):
                                                                                            vector_of_dir)
                                 print(f"Possible inline {self.possible_moves}")
 
-
                                 if piece_clicked in self.possible_moves.keys():
 
                                     if self.possible_moves[piece_clicked] == "inline":
@@ -212,7 +226,6 @@ class GameBoard(tk.Tk):
                                         # if the clicked piece is adjacent to the 1st selected game piece
                                         if piece_clicked in self.adjacent_spaces:
                                             self.move_piece(row, col, piece_x_pos, piece_y_pos)
-
 
                                         else:
                                             self.move_piece(row, col, piece_x_pos, piece_y_pos, index=0)
@@ -224,6 +237,27 @@ class GameBoard(tk.Tk):
                                         self.possible_moves = set()
                                         self.selected_pieces = []
                                         self.selected_pieces_xy_coords = []
+
+                                    # For some reason this is never called
+                                    else:
+                                        self.adjacent_spaces = self.Move.get_adj_game_spaces(self.selected_pieces[0][0], self.selected_pieces[0][1])
+                                        if piece_clicked in self.adjacent_spaces:
+                                            occupied = False
+                                            for piece in self.selected_pieces:
+                                                if piece not in self.possible_moves:
+                                                    occupied = True
+
+                                            if not occupied:
+                                                self.move_piece(row, col, piece_x_pos, piece_y_pos)
+
+                                                self.deselect_pieces()
+                                                self.num_pieces_selected = 0
+                                                self.adjacent_spaces = set()
+                                                self.possible_moves = set()
+                                                self.selected_pieces = []
+                                                self.selected_pieces_xy_coords = []
+
+
 
 
                                 """
