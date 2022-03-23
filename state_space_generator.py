@@ -178,6 +178,10 @@ class StateSpaceGenerator:
                     new_col_num = Converter.calculate_adjusted_col_direction(new_row_num, opposite_dir_tuple) + new_col_num
                     new_row_num = adjusted_opposite_dir_tuple[0] + new_row_num
 
+                    # ensures column number isn't out of bounds
+                    if new_col_num < 0:
+                        raise KeyError
+
                     # checks if the row is out of bounds, and if so it means there isn't a second adjacent game piece
                     if new_row_num < 0:
                         return num_of_adj_pieces
@@ -221,9 +225,13 @@ class StateSpaceGenerator:
             new_row_key = Converter.convert_row_to_string_or_int(new_row_num)
 
             try:
+                # ensures column number isn't out of bounds
+                if new_col_num < 0:
+                    raise KeyError
+
                 # checks if the space we want to move to is unoccupied or if it's within the game board
                 space_value = self.game.game_board[new_row_key][new_col_num]['color']
-                if space_value is None and new_col_num >= 0:
+                if space_value is None:
                     # piece can move
                     pieces = (piece, piece)
 
@@ -273,6 +281,10 @@ class StateSpaceGenerator:
                             piece_in_front_col_num = piece_in_front_leading_piece[1]
 
                             try:
+                                # ensures column isn't out of bounds
+                                if piece_in_front_col_num < 0:
+                                    raise KeyError
+
                                 # checks if the space in front of the leading space is un-occupied
                                 if self.updated_game_board[space_in_front_row_key][piece_in_front_col_num]["color"] is None:
                                     self.add_valid_sumito_to_move_set(col_num, direction, direction_tuple,
@@ -284,9 +296,6 @@ class StateSpaceGenerator:
                                 self.add_valid_sumito_to_move_set(col_num, direction, direction_tuple, leading_piece,
                                                                   num_of_adj_selected_pieces, opposite_direction_tuple,
                                                                   piece, row_num)
-
-                            # except KeyError:
-                            #     pass
 
                         sumito_groupings += 1
 
@@ -409,12 +418,16 @@ class StateSpaceGenerator:
 
         # checks if the adjacent piece in the opposing adjusted_direction_tuple of movement is the same color as the select piece
         try:
+            # ensures column isn't out of bounds
+            if opposite_adj_col_num < 0:
+                raise KeyError
+
             if self.updated_game_board[opposite_adj_row_key][opposite_adj_col_num]["color"] == self.turn:
                 return True
             else:
                 return False
 
-        except IndexError:
+        except (IndexError, KeyError):
             # print("Adjacent 2nd piece out of board area")
             return False
 
@@ -436,7 +449,15 @@ class StateSpaceGenerator:
             new_col_num = col_num + Converter.calculate_adjusted_col_direction(row_num, direction_tuple)
             new_row_key = Converter.convert_row_to_string_or_int(new_row_num)
 
+            # if there isn't a valid 2 group sidestep, then skip_dir tells the method
+            # to skip checking for a 3 piece sidestep for the same direction
+            skip_dir = None
+
             try:
+                # ensures column isn't out of boudns
+                if new_col_num < 0:
+                    raise KeyError
+
                 space_value = self.game.game_board[new_row_key][new_col_num]['color']
                 if space_value is None and new_col_num >= 0:
 
@@ -479,7 +500,12 @@ class StateSpaceGenerator:
 
                                 # checks if the space that the adjacent piece wants to sidestep to is empty, and that the space to move to is within the game board
                                 try:
-                                    if self.updated_game_board[sidestep_space[0]][sidestep_space[1]]["color"] is None and sidestep_space[1] >= 0:
+
+                                    # ensures column isn't out of bounds
+                                    if sidestep_space[1] < 0:
+                                        raise KeyError
+
+                                    if self.updated_game_board[sidestep_space[0]][sidestep_space[1]]["color"] is None and sidestep_complimentary_dir != skip_dir:
 
                                         # handles adding 3 group side steps to the move list
                                         if num_of_adj_pieces == 2:
@@ -511,15 +537,17 @@ class StateSpaceGenerator:
                                             pieces_move_notation = (piece, adj_piece_board_notation)
                                             self.possible_moves_sidestep_move_notation.add(
                                                 ("s", pieces_move_notation, direction, new_row_key, new_col_num))
+                                    else:
+                                        # if there isn't a valid 2 group sidestep, then skip_dir tells the method
+                                        # to skip checking for a 3 piece sidestep for the same direction
+                                        skip_dir = sidestep_complimentary_dir
 
-                                except IndexError:
-                                    # print("Sidestep check out of board area")
+                                except (IndexError, KeyError):
                                     pass
 
                         sidestep_groupings += 1
 
             except (IndexError, KeyError):
-                # print("outside board area")
                 pass
 
     def get_sidestep_num_of_adj_pieces(self, piece_color: str, row_key: str, col_num: int, direction: str, groupings=2):
@@ -546,6 +574,11 @@ class StateSpaceGenerator:
 
         num_of_adj_pieces = 0
         try:
+
+            # ensures column isn't out of bounds
+            if new_col_num < 0:
+                raise KeyError
+
             # gets the color of the adjacent piece
             adj_space_piece_color = self.updated_game_board[new_row_key][new_col_num]["color"]
 
@@ -637,6 +670,10 @@ class StateSpaceGenerator:
                     self.updated_game_board[second_place_piece_coords[0]][second_place_piece_coords[1]]["color"]
 
                 try:
+                    # ensures column number isn't out of bounds
+                    if move[4] < 0:
+                        raise KeyError
+
                     # push opposing piece
                     self.updated_game_board[move[3]][move[4]]["color"] = opposing_color
 
