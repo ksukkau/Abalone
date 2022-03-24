@@ -8,7 +8,6 @@ from converter import Converter
 from move import Move
 
 
-
 class GameBoard(tk.Tk):
     """
     Encapsulates the methods related to drawing, initializing, and creating the game board for Abalone.
@@ -126,7 +125,8 @@ class GameBoard(tk.Tk):
                         selected_piece_color = selected_row[col].get("color")
 
                         piece_clicked = Converter.internal_notation_to_external(row, col)
-                        print(f"Selected piece at: {piece_clicked}{selected_piece_color[0].lower()}")  # prints clicked piece
+                        # print(f"Selected piece at: {piece_clicked}{selected_piece_color[0].lower()}")  # prints clicked piece
+                        print(f"Selected piece at: {piece_clicked}")  # prints clicked piece
 
                         # ensures that the turn color can't select the opposing color's pieces for movement
                         if selected_piece_color == self.turn:
@@ -221,9 +221,13 @@ class GameBoard(tk.Tk):
                                     # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
                                     self.increment_turn_count()  # increments turn count of current turn color
                                     self.turn = Converter.get_opposite_color(self.turn)  # turn color change
-                                    self.game_board = self.Minimax.alpha_beta(["move", self.game_board, self.turn,
-                                                                               0])  # gets move generated from AI and updates game board
+                                    result = self.Minimax.alpha_beta(
+                                        ["move", self.game_board, self.turn, 0])  # gets move and board from ai choice
 
+                                    self.game_board = result[1]  # ai selected board
+                                    selected_move = result[
+                                        0]  # the move needs to print to the game console and show highlighted ai pieces
+                                    print("Ai selected move" + str(selected_move))
                                     # redraws new game board generated from AI within ai.py from line above
                                     self.draw_game_board()
                                     self.initialize_game_board_pieces()
@@ -646,7 +650,7 @@ class GameBoard(tk.Tk):
                                         spot_x + self.spot_radius, spot_y + self.spot_radius, fill="slate grey")
 
                 # populates game_board dictionary with coordinates of each game piece based on the specified game layout
-                if not self.game_board.get(row_key)[col].get("x_pos"):
+                if not self.game_board.get(row_key)[col]["x_pos"]:
                     self.game_board.get(row_key)[col].update({"x_pos": int(spot_x)})
                     self.game_board.get(row_key)[col].update({"y_pos": int(spot_y)})
 
