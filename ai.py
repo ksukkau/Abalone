@@ -105,6 +105,21 @@ class Minimax:
     #     move = next_states[next_states.index(choice)][0]
     #
     #     return move
+    def alpha_beta(self, state):
+        a, b, value = float('-inf'), float('inf'), float('-inf')
+        next_states = self.get_next_states(state)
+        next_states_values_dict = {}
+        for next_state in next_states:
+            next_depth_state = next_state[0], next_state[1], self.get_opposite_color(state[2]), state[3] + 1
+            value = max(value, self.min_value(next_depth_state, a, b))
+            a = max(a, value)
+            next_states_values_dict.update({value: next_depth_state})
+
+        max_val = max([x for x in next_states_values_dict.keys()])
+        options = [x for x in next_states_values_dict.items() if x[0] == max_val]
+        choice = self.random_choice(options)
+        return choice[1], choice[2]
+
 
     def max_value(self, depth_state, a, b):
         if self.is_terminal(depth_state):  # if depth is equal to max depth
@@ -154,6 +169,12 @@ class Minimax:
     def get_value(board, current_turn):
         return KatsHeuristic.heuristic(board, current_turn)
 
+    @staticmethod
+    def random_choice(list):
+        choice_index = Random.randint(Random(), 0, len(list) - 1)
+        return list[choice_index]
+
+
     # def alpha_beta(self, state, depth, a, b, maximizer):
     #     if depth == 0:
     #         return self.get_value(state, maximizer)
@@ -176,17 +197,7 @@ class Minimax:
     #             b = min(b, value)
     #         return value
 
-    def alpha_beta(self, state):
-        a, b, value = float('-inf'), float('inf'), float('-inf')
-        next_states = self.get_next_states(state)
-        next_states_values_dict = {}
-        for next_state in next_states:
-            next_depth_state = next_state[0], next_state[1], self.get_opposite_color(state[2]), state[3] + 1
-            value = max(value, self.min_value(next_depth_state, a, b))
-            a = max(a, value)
-            next_states_values_dict.update({value: next_depth_state})
-        for i in next_states_values_dict.items():
-            print(i)
+
 
     @staticmethod
     def get_next_states(state):
@@ -202,6 +213,7 @@ depth = 2
 state = ["move", test_board, turn, 0]
 
 m.alpha_beta(state)
+print(m.pruned)
 #m.alpha_beta(state)
 #print(m.alpha_beta(state, depth, float('-inf'), float('inf'), True))
 
