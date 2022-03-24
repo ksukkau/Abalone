@@ -1,9 +1,12 @@
 import math
-from settings import *
-from tkinter import *
 import tkinter as tk
+from tkinter import *
+
+from ai import *
+from settings import *
 from converter import Converter
 from move import Move
+
 
 
 class GameBoard(tk.Tk):
@@ -58,7 +61,10 @@ class GameBoard(tk.Tk):
         self.board_screen_pos = None
         self.game_board = None
 
-        # ----- For Piece Movement ----- #
+        # ----- AI ----- #
+        self.Minimax = Minimax()
+
+        # ----- Piece Movement ----- #
         self.Move = Move()  # initializes the Move object
         self.adjacent_spaces = set()
         self.possible_moves = set()
@@ -201,11 +207,11 @@ class GameBoard(tk.Tk):
 
                                     self.move_piece(row, col, piece_x_pos, piece_y_pos)
 
-                                    self.num_pieces_selected = 0
-                                    self.adjacent_spaces = set()
-                                    self.possible_moves = set()
-                                    self.selected_pieces = []
-                                    self.selected_pieces_xy_coords = []
+                                    self.num_pieces_selected = 0    # resets num of pieces selected
+                                    self.adjacent_spaces = set()    # resets set
+                                    self.possible_moves = set()     # resets set
+                                    self.selected_pieces = []       # resets list
+                                    self.selected_pieces_xy_coords = []     # resets list
 
 
                             # performs 2 or 3 group piece movements
@@ -230,13 +236,24 @@ class GameBoard(tk.Tk):
                                         else:
                                             self.move_piece(row, col, piece_x_pos, piece_y_pos, index=0)
 
-                                        self.deselect_pieces()
+                                        self.deselect_pieces()  # deselects and toggles "selected" flag on pieces
 
-                                        self.num_pieces_selected = 0
-                                        self.adjacent_spaces = set()
-                                        self.possible_moves = set()
-                                        self.selected_pieces = []
-                                        self.selected_pieces_xy_coords = []
+                                        self.num_pieces_selected = 0    # resets num of pieces selected
+                                        self.adjacent_spaces = set()    # resets set
+                                        self.possible_moves = set()     # resets set
+                                        self.selected_pieces = []       # resets list
+                                        self.selected_pieces_xy_coords = []     # resets list
+
+                                        self.increment_turn_count()  # increments turn count of current turn color
+                                        self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+                                        self.game_board = self.Minimax.alpha_beta(["move", self.game_board, self.turn, 0])  # gets move generated from AI and updates game board
+
+                                        # redraws new game board generated from AI within ai.py
+                                        self.draw_game_board()
+                                        self.initialize_game_board_pieces()
+
+                                        self.increment_turn_count()  # increments turn count of current turn color
+                                        self.turn = Converter.get_opposite_color(self.turn)  # turn color change
 
                                     # checks if the player is trying to perform a sumito
                                     elif self.possible_moves[piece_clicked] == "sumito":
@@ -245,7 +262,6 @@ class GameBoard(tk.Tk):
                                         # if valid sumito then check last piece of opposing color to see if piece will be pushed off board
                                         # draw pieces, update self.game_board accordingly
                                             # also update piece count, num of turns, etc...
-
 
                                         pass
 
@@ -268,12 +284,14 @@ class GameBoard(tk.Tk):
                                                 self.selected_pieces = []
                                                 self.selected_pieces_xy_coords = []
 
-                                """
-                                if 2 pieces selected
-                                    - get vector of selected game pieces
-                                    - 
-                                """
-
+    def increment_turn_count(self):
+        """
+        Increments the turn count for the current turn's color.
+        """
+        if self.turn == "black":
+            self.turn_count_black += 1
+        else:
+            self.turn_count_white += 1
 
     def move_piece(self, new_row_num: int, new_col_num: int, new_x_pos: int, new_y_pos: int, index=-1):
         """
