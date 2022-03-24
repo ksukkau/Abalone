@@ -8,6 +8,7 @@ test_board = {'row0': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': 
 
 move = Move()
 
+
 def center(board, color):
     """
     gets average of distance from center of all pieces of provided color

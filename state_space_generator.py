@@ -9,10 +9,11 @@ class StateSpaceGenerator:
     Encapsulates the methods required to generate the state space at any given game state.
     """
 
-    def __init__(self):
+    def __init__(self, board, turn):
         self.file_name = ''
-        self.turn = ""
+        self.turn = turn
         self.board_text = ""
+        self.possible_moves = set()
         self.possible_moves_single = set()
         self.possible_moves_double = set()
         self.possible_moves_triple = set()
@@ -23,7 +24,7 @@ class StateSpaceGenerator:
         self.sumito_trailing_piece_turn_color = None
         self.sumito_leading_piece_opposing_color = None
         self.group = None
-        self.game = GameBoard()
+        self.game = board
         self.reset_board = None
         self.rows = {
             "I": 0,
@@ -65,6 +66,19 @@ class StateSpaceGenerator:
             "NW": ["E", "NE"]
         }
         self.updated_game_board = None  # contains the working game board
+        self.states = []
+
+    def set_player_turn(self, turn):
+        """
+        sets current turn
+        """
+        self.turn = turn
+
+    def set_board(self, board):
+        """
+        sets board
+        """
+        self.game = board
 
     @staticmethod
     def simulate_game_piece_movement(row_num, col_num: int, direction: tuple) -> tuple:
@@ -104,31 +118,23 @@ class StateSpaceGenerator:
             col = int(item[1])
             color = self.colors[item[2]]
             column = Converter.calculate_column(row, col)
-            row_list = self.game.game_board[row_key]
+            row_list = self.game[row_key]
             row_list[column]['color'] = color
-
-    def get_player_turn(self):
-        """
-        Gets current turn from game
-        """
-        self.turn = self.game.turn
-        # for reading from our actual board not applicable for test input
 
     def create_piece_list_for_current_turn(self):
         """
         Iterates through the game board and calls helper methods to all possible moves given a specific board state.
         """
         # create an image of board before changes
-        self.updated_game_board = deepcopy(self.game.game_board)
+        self.updated_game_board = deepcopy(self.game)
 
-        for row_key in self.game.game_board:
-            row = self.game.game_board[row_key]
-            for column_detail in row:
+        for item in self.game.items():
+            row_key = item[0]
+            for column_detail in item[1]:
                 # if "white" in column_detail.values():
                 #     print(column_detail)
                 if self.turn in column_detail.values():
-                    self.generate_inline_moves(row_key, column_detail)
-                    self.generate_sidestep_moves(row_key, column_detail)
+                    self.generate_all_moves(row_key, column_detail)
 
     def get_sumito_num_of_adj_pieces(self, piece_color: str, row_key: str, col_num: int, direction: str,
                                      groupings=2) -> int:
@@ -230,7 +236,7 @@ class StateSpaceGenerator:
                     raise KeyError
 
                 # checks if the space we want to move to is unoccupied or if it's within the game board
-                space_value = self.game.game_board[new_row_key][new_col_num]['color']
+                space_value = self.game[new_row_key][new_col_num]['color']
                 if space_value is None:
                     # piece can move
                     pieces = (piece, piece)
@@ -431,6 +437,13 @@ class StateSpaceGenerator:
             # print("Adjacent 2nd piece out of board area")
             return False
 
+    def generate_all_moves(self, row_key: str, column_detail: dict):
+        self.generate_inline_moves(row_key, column_detail)
+        self.generate_sidestep_moves(row_key, column_detail)
+        self.possible_moves.union(self.possible_moves_single).union(self.possible_moves_double) \
+            .union(self.possible_moves_triple).union(self.possible_moves_sumito_move_notation) \
+            .union(self.possible_moves_sidestep)
+
     def generate_sidestep_moves(self, row_key: str, column_detail: dict):
         """
         Generates and finds all legal sidestep moves for a given board state.
@@ -458,7 +471,7 @@ class StateSpaceGenerator:
                 if new_col_num < 0:
                     raise KeyError
 
-                space_value = self.game.game_board[new_row_key][new_col_num]['color']
+                space_value = self.game[new_row_key][new_col_num]['color']
                 if space_value is None and new_col_num >= 0:
 
                     # sets the grouping of sidesteps to find possible moves for
@@ -625,7 +638,8 @@ class StateSpaceGenerator:
                 self.updated_game_board[location[0]][location[1]]['color'] = None
                 self.output_board()
                 # resets board to before move
-                self.updated_game_board = deepcopy(self.game.game_board)
+                self.states.append((move, self.updated_game_board))
+                self.updated_game_board = deepcopy(self.game)
 
         for move in self.possible_moves_double:
             # only for single piece moves
@@ -640,7 +654,8 @@ class StateSpaceGenerator:
                 self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["color"] = None
                 self.output_board()
                 # resets board to before move
-                self.updated_game_board = deepcopy(self.game.game_board)
+                self.states.append((move, self.updated_game_board))
+                self.updated_game_board = deepcopy(self.game)
 
         for move in self.possible_moves_triple:
             # only for single piece moves
@@ -655,7 +670,8 @@ class StateSpaceGenerator:
                 self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["color"] = None
                 self.output_board()
                 # resets board to before move
-                self.updated_game_board = deepcopy(self.game.game_board)
+                self.states.append((move, self.updated_game_board))
+                self.updated_game_board = deepcopy(self.game)
 
         for move in self.possible_moves_sumito:
             # only for single piece moves
@@ -682,7 +698,7 @@ class StateSpaceGenerator:
                     sumitoed_piece = Converter.internal_notation_to_external(leading_piece_coords[0],
                                                                              leading_piece_coords[1])
 
-                    print(f"{sumitoed_piece + opposing_color[0]} pushed off the board!")
+                    #print(f"{sumitoed_piece + opposing_color[0]} pushed off the board!")
 
                 finally:
                     # leading piece replaced by color of piece directly behind it
@@ -697,8 +713,9 @@ class StateSpaceGenerator:
                     self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["color"] = None
 
                 self.output_board()
+                self.states.append((move, self.updated_game_board))
                 # resets board to before move
-                self.updated_game_board = deepcopy(self.game.game_board)
+                self.updated_game_board = deepcopy(self.game)
 
         for move in self.possible_moves_sidestep:
 
@@ -723,8 +740,9 @@ class StateSpaceGenerator:
                 self.updated_game_board[sidestep_piece[0]][sidestep_piece[1]]["color"] = self.turn
 
             self.output_board()
+            self.states.append((move, self.updated_game_board))
             # resets board to before move
-            self.updated_game_board = deepcopy(self.game.game_board)
+            self.updated_game_board = deepcopy(self.game)
 
     def translate_external_coords_to_internal_coords(self, piece_coord: str) -> tuple:
         """
@@ -789,11 +807,8 @@ class StateSpaceGenerator:
         """
         Outputs move in move notation conforming to the move notation provided.
         """
-        possible_moves = set().union(self.possible_moves_single).union(self.possible_moves_double) \
-            .union(self.possible_moves_triple).union(self.possible_moves_sumito_move_notation) \
-            .union(self.possible_moves_sidestep)
         with open(f"{self.file_name}.moves", "a") as file:
-            for i in possible_moves:
+            for i in self.possible_moves:
                 move_type = i[0]
                 pieces = i[1]
                 direction = i[2]
@@ -825,18 +840,23 @@ class StateSpaceGenerator:
         self.update_board()
         self.text_output_moves()
 
-
-def main():
-    """
-    Main function for the statespace generator tests.
-    """
-    s = StateSpaceGenerator()
-    # TODO need to make this take a real game board and or call from game rather than in this main function
-    # for input file testing
-    s.file_name = sys.argv[1].split('.')[0]
-    s.run_tests()
+    def run_generation(self):
+        self.create_piece_list_for_current_turn()
+        self.update_board()
+        return self.states
 
 
-if __name__ == '__main__':
-    main()
-
+# def main():
+#     """
+#     Main function for the statespace generator tests.
+#     """
+#     s = StateSpaceGenerator()
+#     # TODO need to make this take a real game board and or call from game rather than in this main function
+#     # for input file testing
+#     s.file_name = sys.argv[1].split('.')[0]
+#     s.run_tests()
+#
+#
+# if __name__ == '__main__':
+#     main()
+#
