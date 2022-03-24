@@ -32,6 +32,7 @@ def center(board, color):
     proximity_counter = proximity_counter/pieces
     return proximity_counter
 
+
 def get_opposite_color(color):
     if color == 'black':
         return 'white'
@@ -115,16 +116,18 @@ turn = "black"
 # minmax needs to be called when turn is completed
 class Minimax:
 
-    def __init__(self, max_depth=2):
+    def __init__(self, max_depth=3):
         self.max_depth = max_depth
         self.pruned = 0
-        # trans table goes here too if we can get it to work
 
     def alpha_beta(self, state):
+        start = time.perf_counter()
         a, b, value = float('-inf'), float('inf'), float('-inf')
-        next_states = self.get_next_states(state)
+        generator = StateSpaceGenerator(state[1], state[2])
+        next_states = generator.run_generation()
         next_states_values_dict = {}
         for next_state in next_states:
+            print(next_state[0])
             next_depth_state = next_state[0], next_state[1], self.get_opposite_color(state[2]), state[3] + 1
             value = max(value, self.min_value(next_depth_state, a, b))
             a = max(a, value)
@@ -132,8 +135,10 @@ class Minimax:
 
         max_val = max([x for x in next_states_values_dict.keys()])
         options = [x for x in next_states_values_dict.items() if x[0] == max_val]
+
         choice = self.random_choice(options)
-        print(choice)
+        print(time.perf_counter() - start)
+        print(self.pruned)
         return choice[1][0], choice[1][1]    # returns updated game board to game.py on line 249 within game.py
 
     def max_value(self, depth_state, a, b):
@@ -167,6 +172,7 @@ class Minimax:
                 return v
             b = min(b, v)
         return v
+
 
     @staticmethod
     def get_opposite_color(color):
