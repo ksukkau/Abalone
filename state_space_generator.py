@@ -628,50 +628,6 @@ class StateSpaceGenerator:
         Contains for-loops to iterate over the sets of different types of moves, updates the board state for each move,
         and writes the board state to a .board file.
         """
-        for move in self.possible_moves_single:
-            # only for single piece moves
-            if move[0] == 'i':
-                # move front piece up
-                self.updated_game_board[move[3]][move[4]]['color'] = self.turn
-                # remove back piece
-                location = Converter.external_notation_to_internal(move[1][1])
-                self.updated_game_board[location[0]][location[1]]['color'] = None
-                #self.output_board()
-                # resets board to before move
-                self.states.append([move, self.updated_game_board])
-                self.updated_game_board = deepcopy(self.game)
-
-        for move in self.possible_moves_double:
-            # only for single piece moves
-            if move[0] == 'i':
-                # move trailing piece up front
-                self.updated_game_board[move[3]][move[4]]["color"] = self.turn
-
-                trailing_piece_external_coords = move[1][1]
-                trailing_piece_coords = self.translate_external_coords_to_internal_coords(
-                    trailing_piece_external_coords)
-                # remove old trailing piece
-                self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["color"] = None
-                #self.output_board()
-                # resets board to before move
-                self.states.append([move, self.updated_game_board])
-                self.updated_game_board = deepcopy(self.game)
-
-        for move in self.possible_moves_triple:
-            # only for single piece moves
-            if move[0] == 'i':
-                # move trailing piece up front
-                self.updated_game_board[move[3]][move[4]]["color"] = self.turn
-
-                trailing_piece_external_coords = move[1][1]
-                trailing_piece_coords = self.translate_external_coords_to_internal_coords(
-                    trailing_piece_external_coords)
-                # remove old trailing piece
-                self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["color"] = None
-                #self.output_board()
-                # resets board to before move
-                self.states.append([move, self.updated_game_board])
-                self.updated_game_board = deepcopy(self.game)
 
         for move in self.possible_moves_sumito:
             # only for single piece moves
@@ -698,7 +654,7 @@ class StateSpaceGenerator:
                     sumitoed_piece = Converter.internal_notation_to_external(leading_piece_coords[0],
                                                                              leading_piece_coords[1])
 
-                    #print(f"{sumitoed_piece + opposing_color[0]} pushed off the board!")
+                    # print(f"{sumitoed_piece + opposing_color[0]} pushed off the board!")
 
                 finally:
                     # leading piece replaced by color of piece directly behind it
@@ -712,9 +668,41 @@ class StateSpaceGenerator:
                     # removes trailing piece
                     self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["color"] = None
 
-                #self.output_board()
+                # self.output_board()
                 self.states.append([move, self.updated_game_board])
                 # resets board to before move
+                self.updated_game_board = deepcopy(self.game)
+
+        for move in self.possible_moves_triple:
+            # only for single piece moves
+            if move[0] == 'i':
+                # move trailing piece up front
+                self.updated_game_board[move[3]][move[4]]["color"] = self.turn
+
+                trailing_piece_external_coords = move[1][1]
+                trailing_piece_coords = self.translate_external_coords_to_internal_coords(
+                    trailing_piece_external_coords)
+                # remove old trailing piece
+                self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["color"] = None
+                #self.output_board()
+                # resets board to before move
+                self.states.append([move, self.updated_game_board])
+                self.updated_game_board = deepcopy(self.game)
+
+        for move in self.possible_moves_double:
+            # only for single piece moves
+            if move[0] == 'i':
+                # move trailing piece up front
+                self.updated_game_board[move[3]][move[4]]["color"] = self.turn
+
+                trailing_piece_external_coords = move[1][1]
+                trailing_piece_coords = self.translate_external_coords_to_internal_coords(
+                    trailing_piece_external_coords)
+                # remove old trailing piece
+                self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["color"] = None
+                #self.output_board()
+                # resets board to before move
+                self.states.append([move, self.updated_game_board])
                 self.updated_game_board = deepcopy(self.game)
 
         for move in self.possible_moves_sidestep:
@@ -743,6 +731,20 @@ class StateSpaceGenerator:
             self.states.append([move, self.updated_game_board])
             # resets board to before move
             self.updated_game_board = deepcopy(self.game)
+
+        for move in self.possible_moves_single:
+            # only for single piece moves
+            if move[0] == 'i':
+                # move front piece up
+                self.updated_game_board[move[3]][move[4]]['color'] = self.turn
+                # remove back piece
+                location = Converter.external_notation_to_internal(move[1][1])
+                self.updated_game_board[location[0]][location[1]]['color'] = None
+                #self.output_board()
+                # resets board to before move
+                self.states.append([move, self.updated_game_board])
+                self.updated_game_board = deepcopy(self.game)
+
 
     def translate_external_coords_to_internal_coords(self, piece_coord: str) -> tuple:
         """

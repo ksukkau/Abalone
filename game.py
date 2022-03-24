@@ -266,8 +266,11 @@ class GameBoard(tk.Tk):
                                         # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
                                         self.increment_turn_count()  # increments turn count of current turn color
                                         self.turn = Converter.get_opposite_color(self.turn)  # turn color change
-                                        self.game_board = self.Minimax.alpha_beta(["move", self.game_board, self.turn, 0])  # gets move generated from AI and updates game board
+                                        result = self.Minimax.alpha_beta(["move", self.game_board, self.turn, 0])  # gets move and board from ai choice
 
+                                        self.game_board = result[1]  # ai selected board
+                                        selected_move = result[0]  # the move needs to print to the game console and show highlighted ai pieces
+                                        print("Ai selected move" + str(selected_move))
                                         # redraws new game board generated from AI within ai.py from line above
                                         self.draw_game_board()
                                         self.initialize_game_board_pieces()
