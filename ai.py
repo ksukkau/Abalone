@@ -1,11 +1,48 @@
 import time
 from random import Random
-from heuristics import *
+# from heuristics import KatsHeuristic
+import board_query
+from move import *
+from converter import *
+
 
 from state_space_generator import *
 
-# TODO minimax
-# TODO Alpha beta pruning
+
+def center(board, color):
+    """
+    gets average of distance from center of all pieces of provided color
+    :param board: gameboard array
+    :param color: player whose turn it is color
+    :return: float
+    """
+    proximity_counter = 0
+    pieces = 0
+    # 9 rows 9 columns center is E5 or board notation row 4 column 4
+    for row in board.items():
+        row_number = Converter.convert_row_to_string_or_int(row[0])
+        row = row[1]
+        for place in row:
+            if place['color'] == color:
+                pieces += 1
+                col_dist = abs(place['colNum'] - 4)
+                row_dist = abs(int(row_number) - 4)
+                total= col_dist + row_dist
+                proximity_counter += total
+    proximity_counter = proximity_counter/pieces
+    return proximity_counter
+
+def get_opposite_color(color):
+    if color == 'black':
+        return 'white'
+    else:
+        return 'black'
+
+
+def heuristic(board, turn):
+    center_value = center(board, turn) - center(board, get_opposite_color(turn))
+    return center_value
+
 # TODO transposition table
 # TODO heuristics
 
@@ -80,31 +117,9 @@ class Minimax:
 
     def __init__(self, max_depth=2):
         self.max_depth = max_depth
-        self.turn = ''
         self.pruned = 0
-        # trans table goes here too
+        # trans table goes here too if we can get it to work
 
-    # def set_maximizer_turn_color(self, turn_color):
-    #     self.turn = turn_color
-
-    # def minimax_decision(self, board, turn_color):
-    #     depth_state = board, turn_color, 0
-    #     generator = StateSpaceGenerator(depth_state[0], depth_state[1])
-    #     next_states = generator.run_generation()
-    #     min_values = {}
-    #
-    #     for state in next_states:
-    #         next_depth_state = state[0], self.get_opposite_color(depth_state[1]), depth_state[2] + 1
-    #         min_values.update({self.min_value(next_depth_state): state})
-    #
-    #     #print(min_values)
-    #     max_val = max(min_values.keys())
-    #
-    #     max_states = [k for k, v in min_values.items() if k == max_val]
-    #     choice = max_states[Random.randint(Random(), 0, len(max_states) - 1)]
-    #     move = next_states[next_states.index(choice)][0]
-    #
-    #     return move
     def alpha_beta(self, state):
         a, b, value = float('-inf'), float('inf'), float('-inf')
         next_states = self.get_next_states(state)
@@ -118,8 +133,8 @@ class Minimax:
         max_val = max([x for x in next_states_values_dict.keys()])
         options = [x for x in next_states_values_dict.items() if x[0] == max_val]
         choice = self.random_choice(options)
-        return choice[1], choice[2]
-
+        print(choice)
+        return choice[1][0], choice[1][1]    # returns updated game board to game.py on line 249 within game.py
 
     def max_value(self, depth_state, a, b):
         if self.is_terminal(depth_state):  # if depth is equal to max depth
@@ -141,12 +156,12 @@ class Minimax:
         if self.is_terminal(depth_state):  # if depth is equal to max depth
             return self.get_value(depth_state[1], depth_state[2])
 
-        v = float('-inf')
+        v = float('inf')
 
         next_states = self.get_next_states(depth_state)
         for next_state in next_states:
             next_depth_state = next_state[0], next_state[1], self.get_opposite_color(depth_state[2]), depth_state[3] + 1
-            v = min(v, self.min_value(next_depth_state, a, b))
+            v = min(v, self.max_value(next_depth_state, a, b))
             if v <= a:
                 self.pruned += 1
                 return v
@@ -167,7 +182,7 @@ class Minimax:
 
     @staticmethod
     def get_value(board, current_turn):
-        return KatsHeuristic.heuristic(board, current_turn)
+        return heuristic(board, current_turn)
 
     @staticmethod
     def random_choice(list):
@@ -175,51 +190,10 @@ class Minimax:
         return list[choice_index]
 
 
-    # def alpha_beta(self, state, depth, a, b, maximizer):
-    #     if depth == 0:
-    #         return self.get_value(state, maximizer)
-    #     if maximizer:
-    #         value = float('-inf')
-    #         next_states = self.get_next_states(state)
-    #         for state in next_states:
-    #             value = max(value, self.alpha_beta(state, depth - 1, a, b, False))
-    #             if value >= b:
-    #                 break
-    #             a = max(a, value)
-    #         return value
-    #     else:
-    #         value = float('inf')
-    #         next_states = self.get_next_states(state)
-    #         for state in next_states:
-    #             value = min(value, self.alpha_beta(state, depth - 1, a, b, True))
-    #             if value <= a:
-    #                 break
-    #             b = min(b, value)
-    #         return value
-
-
-
-        return next_states_values_dict[value][1]  # returns updated game board to game.py on line 249 within game.py
-
     @staticmethod
     def get_next_states(state):
         generator = StateSpaceGenerator(state[1], state[2])
         next_states = generator.run_generation()
         return next_states
 
-# commented out for integration testing with game.py
-"""
-m = Minimax()
-depth = 2
-# m.minimax_decision(test_board, turn)
-# m.set_maximizer_turn_color(turn)
-state = ["move", test_board, turn, 0]
 
-m.alpha_beta(state)
-print(m.pruned)
-#m.alpha_beta(state)
-#print(m.alpha_beta(state, depth, float('-inf'), float('inf'), True))
-
-
-#print(m.minimax_decision(test_board, turn))
-"""
