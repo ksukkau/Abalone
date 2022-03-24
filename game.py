@@ -71,6 +71,7 @@ class GameBoard(tk.Tk):
         self.selected_pieces = []
         self.selected_pieces_xy_coords = []
         self.num_pieces_selected = 0
+        self.piece_to_be_sumitoed = []
 
     @staticmethod
     def get_row_key(row: int, offset=0) -> str:
@@ -122,7 +123,7 @@ class GameBoard(tk.Tk):
                         selected_piece_color = selected_row[col].get("color")
 
                         piece_clicked = Converter.internal_notation_to_external(row, col)
-                        print(f"Selected piece at: {piece_clicked}")  # prints clicked piece
+                        print(f"Selected piece at: {piece_clicked} + Color: {selected_piece_color}")  # prints clicked piece
 
                         # ensures that the turn color can't select the opposing color's pieces for movement
                         if selected_piece_color == self.turn:
@@ -213,6 +214,22 @@ class GameBoard(tk.Tk):
                                     self.selected_pieces = []       # resets list
                                     self.selected_pieces_xy_coords = []     # resets list
 
+                                    #################### AI ####################
+                                    # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
+                                    self.increment_turn_count()  # increments turn count of current turn color
+                                    self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+                                    self.game_board = self.Minimax.alpha_beta(["move", self.game_board, self.turn,
+                                                                               0])  # gets move generated from AI and updates game board
+
+                                    # redraws new game board generated from AI within ai.py from line above
+                                    self.draw_game_board()
+                                    self.initialize_game_board_pieces()
+
+                                    self.increment_turn_count()  # increments turn count of current turn color
+                                    self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+                                    #################### AI ####################
+
+
                             # performs 2 or 3 group piece movements
                             elif self.num_pieces_selected > 1:
                                 vector_of_dir = self.Move.get_dir_of_selected_pieces(self.selected_pieces)
@@ -243,6 +260,7 @@ class GameBoard(tk.Tk):
                                         self.selected_pieces = []       # resets list
                                         self.selected_pieces_xy_coords = []     # resets list
 
+                                        #################### AI ####################
                                         # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
                                         self.increment_turn_count()  # increments turn count of current turn color
                                         self.turn = Converter.get_opposite_color(self.turn)  # turn color change
@@ -257,6 +275,8 @@ class GameBoard(tk.Tk):
 
                                         self.increment_turn_count()  # increments turn count of current turn color
                                         self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+                                        #################### AI ####################
+
 
                                         # print("\n--- Debug ---")
                                         # print(f"Black turn num: {self.turn_count_black}")
@@ -265,7 +285,16 @@ class GameBoard(tk.Tk):
 
                                     # checks if the player is trying to perform a sumito
                                     elif self.possible_moves[piece_clicked] == "sumito":
-                                        # get vector of direction of dir of opposing color
+                                        valid_sumito = self.is_valid_sumito(row_key, col)
+
+                                        print(valid_sumito)
+                                        if valid_sumito:
+                                            # call method to perform sumito (shift pieces, account for off board push)
+
+                                            self.piece_to_be_sumitoed = []
+
+                                            pass
+
                                         # get num of adj piece of opposing color
                                         # if valid sumito then check last piece of opposing color to see if piece will be pushed off board
                                         # draw pieces, update self.game_board accordingly
@@ -291,6 +320,68 @@ class GameBoard(tk.Tk):
                                                 self.possible_moves = set()
                                                 self.selected_pieces = []
                                                 self.selected_pieces_xy_coords = []
+
+    def is_valid_sumito(self, piece_clicked_row: str, piece_clicked_col: int) -> bool:
+        """
+        Determines if the proposed sumito is valid ir not, and returns True if it is.
+        :return: a boolean
+        """
+        # adds the first piece for the sumito check to the sumito piece list
+        self.piece_to_be_sumitoed.append((piece_clicked_row, piece_clicked_col))
+
+        # gets internal notation for piece to check sumito for, and gets adjacent spaces
+        sumito_piece_adj_spaces = self.Move.get_adj_spaces(piece_clicked_row, piece_clicked_col)
+
+        # finds the piece of the turn color closest to piece to check sumito for
+        adjacent_piece_internal = None
+        for adjacent_selected_piece in self.selected_pieces:
+            # gets internal notation of selected pieces for following membership check
+            adjacent_selected_piece_external = Converter.internal_notation_to_external(adjacent_selected_piece[0],
+                                                                                       adjacent_selected_piece[1])
+            if adjacent_selected_piece_external in sumito_piece_adj_spaces:
+                adjacent_piece_internal = Converter.external_notation_to_internal(adjacent_selected_piece_external)
+                print(f"ADJ {adjacent_piece_internal}")
+
+        # gets vector of direction for selected piece and sumito piece to find num of
+        # adjacent opposing color pieces
+        vector_of_dir_for_sumito_check = self.Move.get_dir_of_selected_pieces([adjacent_piece_internal, (piece_clicked_row, piece_clicked_col)])
+
+
+        # iterates through the list of directions, finds the correct vector to get num of adj opposing color pieces,
+        # and returns this number
+        for direction in vector_of_dir_for_sumito_check:
+            dir_tuple = self.Move.get_adjusted_tuple_or_cardinal_dir(piece_clicked_row, cardinal_dir=direction)
+
+            # resets the piece to be checked
+            adj_piece = (piece_clicked_row, piece_clicked_col)
+
+            # checks if there are 2 pieces adjacent to the piece to be sumito'ed
+            for num in range(0, 2):
+                adj_piece = Converter.simulate_game_piece_movement(adj_piece[0], adj_piece[1], dir_tuple)
+
+                # catches game space checks that might be out of bounds
+                try:
+                    # ensures the column isn't out of bounds
+                    if adj_piece[1] < 0:
+                        raise KeyError
+                    elif self.game_board[adj_piece[0]][adj_piece[1]]["color"] == Converter.get_opposite_color(self.turn):
+                        print(f"Sumito: {Converter.internal_notation_to_external(adj_piece[0], adj_piece[1])}")
+                        self.piece_to_be_sumitoed.append((adj_piece[0], adj_piece[1]))
+                    else:
+                        break
+
+                except (IndexError, KeyError):
+                    pass
+
+        print(f"SUMITO LIST: {self.piece_to_be_sumitoed}")
+        if len(self.piece_to_be_sumitoed) < self.num_pieces_selected:
+            return True
+        else:
+            return False
+
+    def execute_sumito(self):
+        pass
+
 
     def increment_turn_count(self):
         """

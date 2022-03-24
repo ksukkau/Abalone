@@ -294,6 +294,9 @@ class Move:
         :param cardinal_dir:
         :param dir_tuple:
         """
+        if type(row_num) != int:
+            row_num = Converter.convert_row_to_string_or_int(row_num)
+
         row_dir_keys = list(self.direction_tuple_map[row_num].keys())
         row_dir_values = list(self.direction_tuple_map[row_num].values())
         dir = None
