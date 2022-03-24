@@ -636,9 +636,9 @@ class StateSpaceGenerator:
                 # remove back piece
                 location = Converter.external_notation_to_internal(move[1][1])
                 self.updated_game_board[location[0]][location[1]]['color'] = None
-                self.output_board()
+                #self.output_board()
                 # resets board to before move
-                self.states.append((move, self.updated_game_board))
+                self.states.append([move, self.updated_game_board])
                 self.updated_game_board = deepcopy(self.game)
 
         for move in self.possible_moves_double:
@@ -652,9 +652,9 @@ class StateSpaceGenerator:
                     trailing_piece_external_coords)
                 # remove old trailing piece
                 self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["color"] = None
-                self.output_board()
+                #self.output_board()
                 # resets board to before move
-                self.states.append((move, self.updated_game_board))
+                self.states.append([move, self.updated_game_board])
                 self.updated_game_board = deepcopy(self.game)
 
         for move in self.possible_moves_triple:
@@ -668,9 +668,9 @@ class StateSpaceGenerator:
                     trailing_piece_external_coords)
                 # remove old trailing piece
                 self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["color"] = None
-                self.output_board()
+                #self.output_board()
                 # resets board to before move
-                self.states.append((move, self.updated_game_board))
+                self.states.append([move, self.updated_game_board])
                 self.updated_game_board = deepcopy(self.game)
 
         for move in self.possible_moves_sumito:
@@ -712,8 +712,8 @@ class StateSpaceGenerator:
                     # removes trailing piece
                     self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["color"] = None
 
-                self.output_board()
-                self.states.append((move, self.updated_game_board))
+                #self.output_board()
+                self.states.append([move, self.updated_game_board])
                 # resets board to before move
                 self.updated_game_board = deepcopy(self.game)
 
@@ -739,8 +739,8 @@ class StateSpaceGenerator:
                                                                    sidestep_dir_tuple)
                 self.updated_game_board[sidestep_piece[0]][sidestep_piece[1]]["color"] = self.turn
 
-            self.output_board()
-            self.states.append((move, self.updated_game_board))
+            #self.output_board()
+            self.states.append([move, self.updated_game_board])
             # resets board to before move
             self.updated_game_board = deepcopy(self.game)
 
