@@ -8,6 +8,7 @@ test_board = {'row0': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': 
 
 move = Move()
 
+
 def center(board, color):
     """
     gets average of distance from center of all pieces of provided color
@@ -86,14 +87,14 @@ def space_translation(board, adj_list, color):
                 if item['color'] == color:
                     adjs.append(spot)
 
-    print(adjs)
-
-
-#print(groups(test_board, "black"))
-print(groups(test_board, "white"))
-
-print(center(test_board, "black"))
-print(center(test_board, "white"))
-print(pieces(test_board, "black"))
-print(pieces(test_board, "white"))
-
+#     print(adjs)
+#
+#
+# #print(groups(test_board, "black"))
+# print(groups(test_board, "white"))
+#
+# print(center(test_board, "black"))
+# print(center(test_board, "white"))
+# print(pieces(test_board, "black"))
+# print(pieces(test_board, "white"))
+#
