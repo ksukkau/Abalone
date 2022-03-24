@@ -286,19 +286,19 @@ class Move:
 
         return unoccupied_game_spaces
 
-    def get_adjusted_tuple_or_cardinal_dir(self, row_num: int, cardinal_dir=None, dir_tuple=None):
+    def get_adjusted_tuple_or_cardinal_dir(self, row, cardinal_dir=None, dir_tuple=None):
         """
         Gets either the cardinal direction if a direction tuple is passed, or the direction tuple if the cardinal
         direction is passed. Provides the adjusted direction if the direction tuple is return.
-        :param row_num:
+        :param row:
         :param cardinal_dir:
         :param dir_tuple:
         """
-        if type(row_num) != int:
-            row_num = Converter.convert_row_to_string_or_int(row_num)
+        if type(row) != int:
+            row = Converter.convert_row_to_string_or_int(row)
 
-        row_dir_keys = list(self.direction_tuple_map[row_num].keys())
-        row_dir_values = list(self.direction_tuple_map[row_num].values())
+        row_dir_keys = list(self.direction_tuple_map[row].keys())
+        row_dir_values = list(self.direction_tuple_map[row].values())
         dir = None
 
         # gets the direction tuple

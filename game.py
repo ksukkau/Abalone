@@ -71,7 +71,10 @@ class GameBoard(tk.Tk):
         self.selected_pieces = []
         self.selected_pieces_xy_coords = []
         self.num_pieces_selected = 0
-        self.piece_to_be_sumitoed = []
+        self.sumito_chain = []  # stores the chain of pieces to be sumito, in order
+        self.dir_tuple_sumito = ()  # stores the vector of direction for the sumito chain
+        self.first_piece_selection = None  # stores the index of piece adjacent to first piece in sumito chain
+
 
     @staticmethod
     def get_row_key(row: int, offset=0) -> str:
@@ -123,7 +126,7 @@ class GameBoard(tk.Tk):
                         selected_piece_color = selected_row[col].get("color")
 
                         piece_clicked = Converter.internal_notation_to_external(row, col)
-                        print(f"Selected piece at: {piece_clicked} + Color: {selected_piece_color}")  # prints clicked piece
+                        print(f"Selected piece at: {piece_clicked}{selected_piece_color[0].lower()}")  # prints clicked piece
 
                         # ensures that the turn color can't select the opposing color's pieces for movement
                         if selected_piece_color == self.turn:
@@ -207,7 +210,7 @@ class GameBoard(tk.Tk):
                                 if piece_clicked in self.possible_moves:
 
                                     # TODO refactor code block below to its own method
-                                    self.move_piece(row, col, piece_x_pos, piece_y_pos)
+                                    self.move_single_selected_piece(row, col, piece_x_pos, piece_y_pos)
                                     self.num_pieces_selected = 0    # resets num of pieces selected
                                     self.adjacent_spaces = set()    # resets set
                                     self.possible_moves = set()     # resets set
@@ -229,7 +232,6 @@ class GameBoard(tk.Tk):
                                     self.turn = Converter.get_opposite_color(self.turn)  # turn color change
                                     #################### AI ####################
 
-
                             # performs 2 or 3 group piece movements
                             elif self.num_pieces_selected > 1:
                                 vector_of_dir = self.Move.get_dir_of_selected_pieces(self.selected_pieces)
@@ -247,10 +249,10 @@ class GameBoard(tk.Tk):
 
                                         # if the clicked piece is adjacent to the 1st selected game piece
                                         if piece_clicked in self.adjacent_spaces:
-                                            self.move_piece(row, col, piece_x_pos, piece_y_pos)
+                                            self.move_single_selected_piece(row, col, piece_x_pos, piece_y_pos)
 
                                         else:
-                                            self.move_piece(row, col, piece_x_pos, piece_y_pos, index=0)
+                                            self.move_single_selected_piece(row, col, piece_x_pos, piece_y_pos, index=0)
 
                                         # TODO refactor code block below to its own method
                                         self.deselect_pieces()  # deselects and toggles "selected" flag on pieces
@@ -274,7 +276,6 @@ class GameBoard(tk.Tk):
                                         self.turn = Converter.get_opposite_color(self.turn)  # turn color change
                                         #################### AI ####################
 
-
                                         # print("\n--- Debug ---")
                                         # print(f"Black turn num: {self.turn_count_black}")
                                         # print(f"White turn num: {self.turn_count_white}")
@@ -284,20 +285,35 @@ class GameBoard(tk.Tk):
                                     elif self.possible_moves[piece_clicked] == "sumito":
                                         valid_sumito = self.is_valid_sumito(row_key, col)
 
-                                        print(valid_sumito)
                                         if valid_sumito:
                                             # call method to perform sumito (shift pieces, account for off board push)
+                                            self.execute_sumito()
 
-                                            self.piece_to_be_sumitoed = []
+                                            self.deselect_pieces()  # deselects and toggles "selected" flag on pieces
+                                            self.num_pieces_selected = 0  # resets num of pieces selected
+                                            self.adjacent_spaces = set()  # resets set
+                                            self.possible_moves = set()  # resets set
+                                            self.selected_pieces = []  # resets list
+                                            self.selected_pieces_xy_coords = []  # resets list
 
-                                            pass
+                                            #################### AI ####################
+                                            # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
+                                            self.increment_turn_count()  # increments turn count of current turn color
+                                            self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+                                            self.game_board = self.Minimax.alpha_beta(
+                                                ["move", self.game_board, self.turn,
+                                                 0])  # gets move generated from AI and updates game board
 
-                                        # get num of adj piece of opposing color
-                                        # if valid sumito then check last piece of opposing color to see if piece will be pushed off board
-                                        # draw pieces, update self.game_board accordingly
-                                            # also update piece count, num of turns, etc...
+                                            # redraws new game board generated from AI within ai.py from line above
+                                            self.draw_game_board()
+                                            self.initialize_game_board_pieces()
 
-                                        pass
+                                            self.increment_turn_count()  # increments turn count of current turn color
+                                            self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+                                            #################### AI ####################
+
+                                        # clears the chain of sumito'ed pieces
+                                        self.sumito_chain = []
 
                                     # For some reason this is never called
                                     else:
@@ -309,7 +325,7 @@ class GameBoard(tk.Tk):
                                                     occupied = True
 
                                             if not occupied:
-                                                self.move_piece(row, col, piece_x_pos, piece_y_pos)
+                                                self.move_single_selected_piece(row, col, piece_x_pos, piece_y_pos)
 
                                                 self.deselect_pieces()
                                                 self.num_pieces_selected = 0
@@ -324,7 +340,7 @@ class GameBoard(tk.Tk):
         :return: a boolean
         """
         # adds the first piece for the sumito check to the sumito piece list
-        self.piece_to_be_sumitoed.append((piece_clicked_row, piece_clicked_col))
+        self.sumito_chain.append((piece_clicked_row, piece_clicked_col))
 
         # gets internal notation for piece to check sumito for, and gets adjacent spaces
         sumito_piece_adj_spaces = self.Move.get_adj_spaces(piece_clicked_row, piece_clicked_col)
@@ -337,12 +353,16 @@ class GameBoard(tk.Tk):
                                                                                        adjacent_selected_piece[1])
             if adjacent_selected_piece_external in sumito_piece_adj_spaces:
                 adjacent_piece_internal = Converter.external_notation_to_internal(adjacent_selected_piece_external)
-                print(f"ADJ {adjacent_piece_internal}")
+
+                # gets the last piece in the selected piece chain that ISN'T adjacent to the 1st piece in sumito chain
+                if self.selected_pieces.index(adjacent_selected_piece) == 0:
+                    self.first_piece_selection = -1
+                else:
+                    self.first_piece_selection = 0
 
         # gets vector of direction for selected piece and sumito piece to find num of
         # adjacent opposing color pieces
         vector_of_dir_for_sumito_check = self.Move.get_dir_of_selected_pieces([adjacent_piece_internal, (piece_clicked_row, piece_clicked_col)])
-
 
         # iterates through the list of directions, finds the correct vector to get num of adj opposing color pieces,
         # and returns this number
@@ -361,24 +381,79 @@ class GameBoard(tk.Tk):
                     # ensures the column isn't out of bounds
                     if adj_piece[1] < 0:
                         raise KeyError
+
+                    # checks if the next adjacent piece is the opposing color
                     elif self.game_board[adj_piece[0]][adj_piece[1]]["color"] == Converter.get_opposite_color(self.turn):
-                        print(f"Sumito: {Converter.internal_notation_to_external(adj_piece[0], adj_piece[1])}")
-                        self.piece_to_be_sumitoed.append((adj_piece[0], adj_piece[1]))
+                        self.sumito_chain.append((adj_piece[0], adj_piece[1]))
+
+                    # gets the vector of direction of sumito chain by reversing direction of selected pieces chain
+                    elif self.game_board[adj_piece[0]][adj_piece[1]]["color"] == self.turn:
+                        direction_cardinal_index = vector_of_dir_for_sumito_check.index(direction)
+
+                        # gets the opposite cardinal direction
+                        if direction_cardinal_index == 0:
+                            sumito_dir_cardinal = vector_of_dir_for_sumito_check[1]
+                        else:
+                            sumito_dir_cardinal = vector_of_dir_for_sumito_check[0]
+                        self.dir_tuple_sumito = self.Move.get_adjusted_tuple_or_cardinal_dir(piece_clicked_row, cardinal_dir=sumito_dir_cardinal)
+
+                    # stops searching for 3rd adjacent sumito chain piece if there isn't a 2nd
                     else:
                         break
 
                 except (IndexError, KeyError):
                     pass
 
-        print(f"SUMITO LIST: {self.piece_to_be_sumitoed}")
-        if len(self.piece_to_be_sumitoed) < self.num_pieces_selected:
+        if len(self.sumito_chain) < self.num_pieces_selected:
             return True
         else:
             return False
 
     def execute_sumito(self):
-        pass
+        """
+        Executes the sumito. This involves updating the game_board dictionary, and drawing the correct game board state.
+        """
+        last_piece_in_chain = self.sumito_chain[-1]
+        space_behind_sumito_chain = Converter.simulate_game_piece_movement(last_piece_in_chain[0], last_piece_in_chain[1], self.dir_tuple_sumito)
+        opposite_color = Converter.get_opposite_color(self.turn)
 
+        try:
+            # if column is out of bounds then that means piece is pushed off board
+            if space_behind_sumito_chain[1] < 0:
+                raise KeyError
+
+            # pushes the sumito chain
+            elif self.game_board[space_behind_sumito_chain[0]][space_behind_sumito_chain[1]]["color"] == None:
+                # logic for updating game board and drawing
+
+                # gets first piece in sumito chain and places it behind the sumito chain
+                self.game_board[space_behind_sumito_chain[0]][space_behind_sumito_chain[1]]["color"] = opposite_color
+                behind_space_x_pos = self.game_board[space_behind_sumito_chain[0]][space_behind_sumito_chain[1]]["x_pos"]
+                behind_space_y_pos = self.game_board[space_behind_sumito_chain[0]][space_behind_sumito_chain[1]]["y_pos"]
+                self.draw_game_piece(behind_space_x_pos, behind_space_y_pos, opposite_color)
+
+        # means that the piece is pushed off the board
+        except (IndexError, KeyError):
+            # decrements the piece count for the opposing color
+            if self.turn == "black":
+                self.white_pieces -= 1
+            else:
+                self.black_pieces -= 1
+
+            pushed_off_piece = self.sumito_chain[-1]
+            pushed_off_piece_internal = Converter.internal_notation_to_external(pushed_off_piece[0], pushed_off_piece[1])
+            print(f"{pushed_off_piece_internal}{opposite_color[0].lower()} pushed off the board!")
+
+            # debug
+            print(f"Num of Black: {self.black_pieces}")
+            print(f"Num of White: {self.white_pieces}")
+
+        finally:
+            # gets the first piece in the sumito chain and changes it to the turn color
+            first_sumito_piece = self.sumito_chain[0]
+            first_sumito_piece_x_pos = self.game_board[first_sumito_piece[0]][first_sumito_piece[1]]["x_pos"]
+            first_sumito_piece_y_pos = self.game_board[first_sumito_piece[0]][first_sumito_piece[1]]["y_pos"]
+            self.move_single_selected_piece(first_sumito_piece[0], first_sumito_piece[1], first_sumito_piece_x_pos, first_sumito_piece_y_pos, self.first_piece_selection)
 
     def increment_turn_count(self):
         """
@@ -389,7 +464,7 @@ class GameBoard(tk.Tk):
         else:
             self.turn_count_white += 1
 
-    def move_piece(self, new_row_num: int, new_col_num: int, new_x_pos: int, new_y_pos: int, index=-1):
+    def move_single_selected_piece(self, new_row_num: int, new_col_num: int, new_x_pos: int, new_y_pos: int, index=-1):
         """
         Moves the game piece. The method draws the new game pieces, removes the old game piece, toggles the "selected"
         flag, and then updates the game board "color" value for both the new space and old space.
@@ -399,6 +474,10 @@ class GameBoard(tk.Tk):
         :param new_y_pos: an int, the y coordinates of the new space
         :param index: an int, the index of the piece to be moved
         """
+
+        if type(new_row_num) != int:
+            new_row_num = Converter.convert_row_to_string_or_int(new_row_num)
+
         selected_piece_internal_coords = self.selected_pieces.pop(index)
         selected_piece_xy_coords = self.selected_pieces_xy_coords.pop(index)
         self.num_pieces_selected -= 1
