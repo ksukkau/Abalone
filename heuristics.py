@@ -11,8 +11,15 @@ def get_opposite_color(color):
 class KatsHeuristic:
 
     @staticmethod
-    def heuristic(board, turn):
-        center_value = center(board, turn) - center(board, get_opposite_color(turn))
+    def heuristic(state):
+        center_value = center(state[1], state[2]) - center(state[1], get_opposite_color(state[2]))
+
+        move = state[0]
+        if len(move[1]) == 3:
+            push = True
+        else:
+            push = False
+        print(push)
         # #
         #
         # grouping = 0
@@ -22,6 +29,6 @@ class KatsHeuristic:
         #
         marbles = 0
         if abs(center_value) < 1.8:
-            marbles = pieces(board, turn) - pieces(board, get_opposite_color(turn))
+            marbles = pieces(state[1], state[2]) - pieces(state[1], get_opposite_color(state[2]))
 
         return center_value + marbles
