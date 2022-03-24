@@ -122,7 +122,7 @@ class GameBoard(tk.Tk):
                         selected_piece_color = selected_row[col].get("color")
 
                         piece_clicked = Converter.internal_notation_to_external(row, col)
-                        print(f"Selected piece at: {piece_clicked}")  # prints clicked piece
+                        print(f"Selected piece at: {piece_clicked} + Color: {selected_piece_color}")  # prints clicked piece
 
                         # ensures that the turn color can't select the opposing color's pieces for movement
                         if selected_piece_color == self.turn:
@@ -213,6 +213,22 @@ class GameBoard(tk.Tk):
                                     self.selected_pieces = []       # resets list
                                     self.selected_pieces_xy_coords = []     # resets list
 
+                                    #################### AI ####################
+                                    # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
+                                    self.increment_turn_count()  # increments turn count of current turn color
+                                    self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+                                    self.game_board = self.Minimax.alpha_beta(["move", self.game_board, self.turn,
+                                                                               0])  # gets move generated from AI and updates game board
+
+                                    # redraws new game board generated from AI within ai.py from line above
+                                    self.draw_game_board()
+                                    self.initialize_game_board_pieces()
+
+                                    self.increment_turn_count()  # increments turn count of current turn color
+                                    self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+                                    #################### AI ####################
+
+
                             # performs 2 or 3 group piece movements
                             elif self.num_pieces_selected > 1:
                                 vector_of_dir = self.Move.get_dir_of_selected_pieces(self.selected_pieces)
@@ -243,6 +259,7 @@ class GameBoard(tk.Tk):
                                         self.selected_pieces = []       # resets list
                                         self.selected_pieces_xy_coords = []     # resets list
 
+                                        #################### AI ####################
                                         # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
                                         self.increment_turn_count()  # increments turn count of current turn color
                                         self.turn = Converter.get_opposite_color(self.turn)  # turn color change
@@ -254,6 +271,8 @@ class GameBoard(tk.Tk):
 
                                         self.increment_turn_count()  # increments turn count of current turn color
                                         self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+                                        #################### AI ####################
+
 
                                         # print("\n--- Debug ---")
                                         # print(f"Black turn num: {self.turn_count_black}")
