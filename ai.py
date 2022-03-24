@@ -199,13 +199,16 @@ class Minimax:
 
 
 
+        return next_states_values_dict[value][1]  # returns updated game board to game.py on line 249 within game.py
+
     @staticmethod
     def get_next_states(state):
         generator = StateSpaceGenerator(state[1], state[2])
         next_states = generator.run_generation()
         return next_states
 
-
+# commented out for integration testing with game.py
+"""
 m = Minimax()
 depth = 2
 # m.minimax_decision(test_board, turn)
@@ -219,3 +222,4 @@ print(m.pruned)
 
 
 #print(m.minimax_decision(test_board, turn))
+"""

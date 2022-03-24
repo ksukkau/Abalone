@@ -57,7 +57,7 @@ def groups(board, color):
         row = row[1]
         for place in row:
             if place['color'] == color:
-                spaces = move.get_adj_game_spaces(row_number, place['colNum'])
+                spaces = move.get_adj_spaces(row_number, place['colNum'])
                 agjs = space_translation(board, spaces, color)
                 #print(spaces)
                 list_of_pieces.append((row_number, place['colNum']))
