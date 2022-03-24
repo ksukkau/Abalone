@@ -122,7 +122,7 @@ class GameBoard(tk.Tk):
                         selected_piece_color = selected_row[col].get("color")
 
                         piece_clicked = Converter.internal_notation_to_external(row, col)
-                        print(f"Selected piece at: {piece_clicked}" + f" - Color: {self.game_board[row_key][col]['color']} - Selected: {self.game_board[row_key][col]['selected']}")  # prints clicked piece
+                        print(f"Selected piece at: {piece_clicked}")  # prints clicked piece
 
                         # ensures that the turn color can't select the opposing color's pieces for movement
                         if selected_piece_color == self.turn:
@@ -137,10 +137,10 @@ class GameBoard(tk.Tk):
 
                                 # handles logic for the first piece to be selected
                                 if self.num_pieces_selected == 0:
+
+                                    # TODO refactor code block below to its own method
                                     self.num_pieces_selected += 1  # increments number of pieces selected to 1
-
                                     self.adjacent_spaces = self.Move.get_adj_spaces(row, col)   # gets adjacent spaces
-
                                     self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn)  # draws game piece selection
                                     self.toggle_selected_flag(row_key, col)  # toggles selected flag
                                     self.selected_pieces.append((row_key, col))  # adds selected piece to a list
@@ -150,10 +150,10 @@ class GameBoard(tk.Tk):
                                 if self.num_pieces_selected == 1:
                                     # checks if the second piece clicked is adjacent to the first
                                     if piece_clicked in self.adjacent_spaces:
+
+                                        # TODO refactor code block below to its own method
                                         self.num_pieces_selected += 1  # increments number of pieces selected to 1
-
                                         self.adjacent_spaces = self.Move.get_adj_spaces(row, col)  # gets adjacent spaces
-
                                         self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn)  # draws game piece selection
                                         self.toggle_selected_flag(row_key, col)  # toggles selected flag
                                         self.selected_pieces.append((row_key, col))  # adds selected piece to a list
@@ -178,10 +178,10 @@ class GameBoard(tk.Tk):
                                         # checks if the selected pieces are inline
                                         if inline_row != len(self.selected_pieces) - 1 and inline_col != len(
                                                 self.selected_pieces) - 1:
+
+                                            # TODO refactor code block below to its own method
                                             self.num_pieces_selected += 1  # increments number of pieces selected to 1
-
                                             self.adjacent_spaces = self.Move.get_adj_spaces(row, col)  # gets adjacent spaces
-
                                             self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn)  # draws game piece selection
                                             self.toggle_selected_flag(row_key, col)  # toggles selected flag
                                             self.selected_pieces.append((row_key, col))  # adds selected piece to a list
@@ -205,14 +205,13 @@ class GameBoard(tk.Tk):
                                 # checks if new space clicked is unoccupied, if so then performs single piece move
                                 if piece_clicked in self.possible_moves:
 
+                                    # TODO refactor code block below to its own method
                                     self.move_piece(row, col, piece_x_pos, piece_y_pos)
-
                                     self.num_pieces_selected = 0    # resets num of pieces selected
                                     self.adjacent_spaces = set()    # resets set
                                     self.possible_moves = set()     # resets set
                                     self.selected_pieces = []       # resets list
                                     self.selected_pieces_xy_coords = []     # resets list
-
 
                             # performs 2 or 3 group piece movements
                             elif self.num_pieces_selected > 1:
@@ -236,24 +235,30 @@ class GameBoard(tk.Tk):
                                         else:
                                             self.move_piece(row, col, piece_x_pos, piece_y_pos, index=0)
 
+                                        # TODO refactor code block below to its own method
                                         self.deselect_pieces()  # deselects and toggles "selected" flag on pieces
-
                                         self.num_pieces_selected = 0    # resets num of pieces selected
                                         self.adjacent_spaces = set()    # resets set
                                         self.possible_moves = set()     # resets set
                                         self.selected_pieces = []       # resets list
                                         self.selected_pieces_xy_coords = []     # resets list
 
+                                        # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
                                         self.increment_turn_count()  # increments turn count of current turn color
                                         self.turn = Converter.get_opposite_color(self.turn)  # turn color change
                                         self.game_board = self.Minimax.alpha_beta(["move", self.game_board, self.turn, 0])  # gets move generated from AI and updates game board
 
-                                        # redraws new game board generated from AI within ai.py
+                                        # redraws new game board generated from AI within ai.py from line above
                                         self.draw_game_board()
                                         self.initialize_game_board_pieces()
 
                                         self.increment_turn_count()  # increments turn count of current turn color
                                         self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+
+                                        # print("\n--- Debug ---")
+                                        # print(f"Black turn num: {self.turn_count_black}")
+                                        # print(f"White turn num: {self.turn_count_white}")
+                                        # print("-------------\n")
 
                                     # checks if the player is trying to perform a sumito
                                     elif self.possible_moves[piece_clicked] == "sumito":
