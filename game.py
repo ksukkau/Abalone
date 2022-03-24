@@ -133,7 +133,7 @@ class GameBoard(tk.Tk):
                                 if self.num_pieces_selected == 0:
                                     self.num_pieces_selected += 1  # increments number of pieces selected to 1
 
-                                    self.adjacent_spaces = self.Move.get_adj_game_spaces_and_direction(row, col)   # gets adjacent spaces
+                                    self.adjacent_spaces = self.Move.get_adj_spaces(row, col)   # gets adjacent spaces
 
                                     self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn)  # draws game piece selection
                                     self.toggle_selected_flag(row_key, col)  # toggles selected flag
@@ -146,7 +146,7 @@ class GameBoard(tk.Tk):
                                     if piece_clicked in self.adjacent_spaces:
                                         self.num_pieces_selected += 1  # increments number of pieces selected to 1
 
-                                        self.adjacent_spaces = self.Move.get_adj_game_spaces_and_direction(row, col)  # gets adjacent spaces
+                                        self.adjacent_spaces = self.Move.get_adj_spaces(row, col)  # gets adjacent spaces
 
                                         self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn)  # draws game piece selection
                                         self.toggle_selected_flag(row_key, col)  # toggles selected flag
@@ -174,7 +174,7 @@ class GameBoard(tk.Tk):
                                                 self.selected_pieces) - 1:
                                             self.num_pieces_selected += 1  # increments number of pieces selected to 1
 
-                                            self.adjacent_spaces = self.Move.get_adj_game_spaces_and_direction(row, col)  # gets adjacent spaces
+                                            self.adjacent_spaces = self.Move.get_adj_spaces(row, col)  # gets adjacent spaces
 
                                             self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn)  # draws game piece selection
                                             self.toggle_selected_flag(row_key, col)  # toggles selected flag
@@ -221,7 +221,7 @@ class GameBoard(tk.Tk):
 
                                     if self.possible_moves[piece_clicked] == "inline":
 
-                                        self.adjacent_spaces = self.Move.get_adj_game_spaces(self.selected_pieces[0][0], self.selected_pieces[0][1])
+                                        self.adjacent_spaces = self.Move.get_adj_spaces(self.selected_pieces[0][0], self.selected_pieces[0][1])
 
                                         # if the clicked piece is adjacent to the 1st selected game piece
                                         if piece_clicked in self.adjacent_spaces:
@@ -238,9 +238,20 @@ class GameBoard(tk.Tk):
                                         self.selected_pieces = []
                                         self.selected_pieces_xy_coords = []
 
+                                    # checks if the player is trying to perform a sumito
+                                    elif self.possible_moves[piece_clicked] == "sumito":
+                                        # get vector of direction of dir of opposing color
+                                        # get num of adj piece of opposing color
+                                        # if valid sumito then check last piece of opposing color to see if piece will be pushed off board
+                                        # draw pieces, update self.game_board accordingly
+                                            # also update piece count, num of turns, etc...
+
+
+                                        pass
+
                                     # For some reason this is never called
                                     else:
-                                        self.adjacent_spaces = self.Move.get_adj_game_spaces(self.selected_pieces[0][0], self.selected_pieces[0][1])
+                                        self.adjacent_spaces = self.Move.get_adj_spaces(self.selected_pieces[0][0], self.selected_pieces[0][1])
                                         if piece_clicked in self.adjacent_spaces:
                                             occupied = False
                                             for piece in self.selected_pieces:
@@ -257,16 +268,11 @@ class GameBoard(tk.Tk):
                                                 self.selected_pieces = []
                                                 self.selected_pieces_xy_coords = []
 
-
-
-
                                 """
                                 if 2 pieces selected
                                     - get vector of selected game pieces
                                     - 
                                 """
-
-
 
 
     def move_piece(self, new_row_num: int, new_col_num: int, new_x_pos: int, new_y_pos: int, index=-1):
@@ -315,15 +321,15 @@ class GameBoard(tk.Tk):
 
             # gets the internal coordinates of the selected piece and gets the adjacent spaces to it
             first_piece_internal = self.selected_pieces[0]  # gets the 1st selected piece
-            self.adjacent_spaces = self.Move.get_adj_game_spaces_and_direction(first_piece_internal[0], first_piece_internal[1])
+            self.adjacent_spaces = self.Move.get_adj_spaces(first_piece_internal[0], first_piece_internal[1])
 
         # handles logic when 3rd selected piece is selected again
         elif index_of_selected_piece == 2:
 
             # gets the internal coordinates of the 2nd selected piece and gets the adjacent spaces to it
             second_piece_internal_coords = self.selected_pieces[1]  # 2nd selected piece is always index 1 within self.selected_pieces
-            self.adjacent_spaces = self.Move.get_adj_game_spaces_and_direction(second_piece_internal_coords[0],
-                                                                               second_piece_internal_coords[1])
+            self.adjacent_spaces = self.Move.get_adj_spaces(second_piece_internal_coords[0],
+                                                            second_piece_internal_coords[1])
 
             # removes coords of 3rd piece from the list and toggles its 'selected' flag
             deselected_piece_internal_coords = self.selected_pieces.pop()  # removes the 3rd, selected piece from the list

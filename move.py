@@ -1,4 +1,5 @@
 from converter import Converter
+from copy import deepcopy
 
 
 class Move:
@@ -44,7 +45,7 @@ class Move:
     def __init__(self):
         self.direction_of_selected_pieces = None  # stores vector of selected game pieces
 
-    def get_adj_game_spaces(self, row, col: int) -> set:
+    def get_adj_spaces(self, row, col: int) -> set:
         """
         Gets all the game spaces adjacent to the selected game piece.
         :param row: an int, the number of the row
@@ -72,6 +73,7 @@ class Move:
 
             adjacent_spaces.add(adjacent_space_external)
 
+        adjacent_spaces = self.clean_adjacent_space_set(adjacent_spaces)
         return adjacent_spaces
 
     def get_dir_of_selected_pieces(self, selected_pieces: list) -> list:
@@ -119,39 +121,27 @@ class Move:
         # extracting the index, and getting the direction at that index
         direction_cardinal = self.get_adjusted_tuple_or_cardinal_dir(first_piece_row_num, dir_tuple=(row_difference, col_difference))
 
-        # selected_row_keys = list(self.direction_tuple_map[first_piece_row_num].keys())  # gets the dir keys for the specified row
-        # selected_row_values = list(self.direction_tuple_map[first_piece_row_num].values())  # gets the dir values for the specified row
-        #
-        # index = selected_row_values.index((row_difference, col_difference))  # gets the index of the difference in row and column
-        # direction_cardinal = selected_row_keys[index]  # gets the cardinal direction through indexing the row and col difference
-
         return [direction_cardinal, self.opposite_directions[direction_cardinal]]
 
-    def get_adj_game_spaces_and_direction(self, row: int, col: int) -> set:
+    def clean_adjacent_space_set(self, adjacent_spaces: set):
         """
-        Gets all the game spaces adjacent to the selected game piece.
-        :param row: an int, the number of the row
-        :param col: an int, the number of the column
-        :return: a set, of the adjacent game spaces
+        Removes out of bounds spaces from the adjacent spaces lIst.
+        :param adjacent_spaces: a set, containing the adjacent spaces for a given piece
+        :return: a set, with the out of bound spaces removed
         """
-        adjacent_spaces = set()
+        VALID_ROWS = {"A", "B", "C", "D", "E", "F", "G", "H", "I"}
+        VALID_COLS = range(0, 9)
 
-        # if the row key is passed, then it is converted to the row number
-        if type(row) != int:
-            row = Converter.convert_row_to_string_or_int(row)
+        temp_set = deepcopy(adjacent_spaces)
+        # iterates through the spaces within adjacent spaces
+        for space in temp_set:
+            # gets the row and col char from each space
+            row_char = space[0]
+            col_char = space[1]
 
-        # iterates through all possible directions around a given game piece
-        for direction in self.directions:
-            # gets the direction coordinate tuple, and gets the adjusted direction tuple
-            direction_tuple = self.move_directions[direction]
-            adjusted_direction_tuple = Converter.calculate_adjusted_direction_tuple(row, direction_tuple)
-
-            # gets the internal notation of the adjacent piece
-            adjacent_space_internal = Converter.simulate_game_piece_movement(row, col, adjusted_direction_tuple)
-            # converts the internal notation to external notation
-            adjacent_space_external = Converter.internal_notation_to_external(adjacent_space_internal[0], adjacent_space_internal[1])
-
-            adjacent_spaces.add(adjacent_space_external)
+            # checks if the row or column is out of bounds, if so it removes it from the set of adjacent spaces
+            if row_char not in VALID_ROWS or int(col_char) not in VALID_COLS:
+                adjacent_spaces.remove(space)
 
         return adjacent_spaces
 
@@ -172,7 +162,7 @@ class Move:
             selected_piece = selected_pieces[0]
 
             # gets all adjacent spaces to the selected piece
-            adjacent_spaces = self.get_adj_game_spaces_and_direction(selected_piece[0], selected_piece[1])
+            adjacent_spaces = self.get_adj_spaces(selected_piece[0], selected_piece[1])
 
             # iterates over all adjacent spaces and filters out spaces that are occupied
             for space in adjacent_spaces:
@@ -217,6 +207,8 @@ class Move:
 
         # adds any valid or sumito moves found
         unoccupied_game_spaces.update(self.get_valid_inline_moves(first_selected, last_selected, game_board, turn_color, vector_of_dir))
+
+        # adjacent_spaces = self.get_adj_spaces()
 
         return unoccupied_game_spaces
 
@@ -265,6 +257,7 @@ class Move:
                         unoccupied_game_spaces.update({valid_piece: "sumito"})
             except (IndexError, KeyError):
                 pass
+
         last_dir_tuple = self.get_adjusted_tuple_or_cardinal_dir(last_selected_row_num, cardinal_dir=vector_of_dir[1])
         space_infront_last = Converter.simulate_game_piece_movement(last_selected_row_num, last_selected_col_num,
                                                                     last_dir_tuple)
