@@ -16,9 +16,9 @@ class KatsHeuristic:
 
         move = state[0]
         if len(move[1]) == 3:
-            push = True
+            push = 100
         else:
-            push = False
+            push = 0
         print(push)
         # #
         #
@@ -31,4 +31,4 @@ class KatsHeuristic:
         if abs(center_value) < 1.8:
             marbles = pieces(state[1], state[2]) - pieces(state[1], get_opposite_color(state[2]))
 
-        return center_value + marbles
+        return center_value + marbles + push
