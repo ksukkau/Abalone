@@ -82,7 +82,7 @@ turn = "black"
 
 class Minimax:
 
-    def __init__(self, max_depth=3):
+    def __init__(self, max_depth=2):
         self.max_depth = max_depth
         self.pruned = 0
 

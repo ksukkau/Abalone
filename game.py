@@ -223,8 +223,10 @@ class GameBoard(tk.Tk):
                                     # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
                                     self.increment_turn_count()  # increments turn count of current turn color
                                     self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+                                    start = time.perf_counter()
                                     result = self.Minimax.alpha_beta(
                                         ["move", self.game_board, self.turn, 0])  # gets move and board from ai choice
+                                    ai_time = time.perf_counter() - start  # gives time take for ai to select move
 
                                     self.game_board = result[1]  # ai selected board
                                     selected_move = result[
