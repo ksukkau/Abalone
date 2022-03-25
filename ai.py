@@ -183,7 +183,7 @@ class Minimax:
 
     @staticmethod
     def get_value(state):
-        return KatsHeuristic.heuristic(state)
+        return KatsHeuristic.weighted_heuristic(state)
 
     @staticmethod
     def random_choice(list):

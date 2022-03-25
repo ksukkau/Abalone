@@ -21,7 +21,7 @@ def center(board, color):
                 pieces += 1
                 col_dist = abs(place['colNum'] - 4)
                 row_dist = abs(int(row_number) - 4)
-                total= col_dist + row_dist
+                total = col_dist + row_dist
                 proximity_counter += total
     proximity_counter = proximity_counter/pieces
     return proximity_counter
@@ -80,6 +80,46 @@ def space_translation(board, adj_list, color):
             if item['colNum'] == spot[1]:
                 if item['color'] == color:
                     adjs.append(spot)
+
+
+def push_eval(state):
+
+    move = state[0]
+    if len(move[1]) == 3:
+        push = True
+    else:
+        push = False
+
+    if push:
+        # find distance of pushed piece from the edge
+        piece_location = Converter.external_notation_to_internal(move[1][1])
+        row_number = Converter.convert_row_to_string_or_int(piece_location[0])
+        print(piece_location)
+        col_dist = abs(piece_location[1] - 4)
+        row_dist = abs(int(row_number) - 4)
+        total = col_dist + row_dist
+        if total > 2:
+            return 10
+        else:
+            return 2
+    else:
+        return 0
+
+
+def move_piece_count(state):
+    move_notation = state[0]
+    if len(move_notation[1]) == 3:
+        move = move_notation[1], move_notation[2]
+    else:
+        move = move_notation
+    first_piece_location = Converter.external_notation_to_internal(move[1][0])
+    first_row_number = Converter.convert_row_to_string_or_int(first_piece_location[0])
+    last_piece_location = Converter.external_notation_to_internal(move[1][1])
+    last_row_number = Converter.convert_row_to_string_or_int(last_piece_location[0])
+    return abs(first_piece_location[1] - last_piece_location[1] + first_row_number - last_row_number)
+
+
+
 
 #     print(adjs)
 #
