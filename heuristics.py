@@ -31,3 +31,4 @@ class KatsHeuristic:
             marbles = pieces(state[1], state[2]) - pieces(state[1], get_opposite_color(state[2]))
 
         return center_value + marbles + push
+
