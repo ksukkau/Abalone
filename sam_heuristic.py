@@ -15,7 +15,6 @@ class SamsHeuristic:
         center_value = center(state[1], state[2])
         current_turn_center_value = center_value * (40 - state[3])
 
-        current_piece_value = (40 - pieces(state[1], state[2]))
-        opponent_piece_value = pieces(state[1], get_opposite_color(state[2]))
+        current_piece_value = pieces(state[1], state[2]) - pieces(state[1], get_opposite_color(state[2]))
 
-        return current_turn_center_value + current_piece_value - opponent_piece_value
+        return current_turn_center_value + current_piece_value * state[3]
