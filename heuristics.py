@@ -40,10 +40,11 @@ class KatsHeuristic:
         center_weight = 0.1
         push_weight = 0.1
         group_weight = 0.1
+        move_size = 0.0
 
         # piece_count = move_piece_count(state)
         # print("piece count:" + str(piece_count))
-        score = pieces(state[1],state[2]) - pieces(state[1], get_opposite_color(state[2]))
+        score = pieces(state[1], state[2]) - pieces(state[1], get_opposite_color(state[2]))
         #print("score: " + str(score))
         center_value = center(state[1], state[2]) - center(state[1], get_opposite_color(state[2]))
         #print("center: " + str(center_value))

@@ -8,41 +8,12 @@ from converter import *
 
 from state_space_generator import *
 
-#
-# def center(board, turn):
-#     """
-#     gets average of distance from center of all pieces of provided color
-#     :param board: gameboard array
-#     :param color: player whose turn it is color
-#     :return: float
-#     """
-#     proximity_counter = 0
-#     pieces = 0
-#     # 9 rows 9 columns center is E5 or board notation row 4 column 4
-#     for row in board.items():
-#         row_number = Converter.convert_row_to_string_or_int(row[0])
-#         row = row[1]
-#         for place in row:
-#             if place['color'] == turn:
-#                 pieces += 1
-#                 col_dist = abs(place['colNum'] - 4)
-#                 row_dist = abs(int(row_number) - 4)
-#                 total = col_dist + row_dist
-#                 proximity_counter += total
-#     proximity_counter = proximity_counter/pieces
-#     return proximity_counter
-#
 
 def get_opposite_color(color):
     if color == 'black':
         return 'white'
     else:
         return 'black'
-
-#
-# def heuristic(state):
-#     center_value = center(state[1], state[2]) - center(state[1], get_opposite_color(state[2]))
-#     return center_value
 
 
 test_board = {'row0': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},

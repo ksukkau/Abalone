@@ -94,7 +94,6 @@ def push_eval(state):
         # find distance of pushed piece from the edge
         piece_location = Converter.external_notation_to_internal(move[1][1])
         row_number = Converter.convert_row_to_string_or_int(piece_location[0])
-        print(piece_location)
         col_dist = abs(piece_location[1] - 4)
         row_dist = abs(int(row_number) - 4)
         total = col_dist + row_dist
