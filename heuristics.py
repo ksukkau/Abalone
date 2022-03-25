@@ -19,7 +19,6 @@ class KatsHeuristic:
             push = 100
         else:
             push = 0
-        print(push)
         # #
         #
         # grouping = 0
