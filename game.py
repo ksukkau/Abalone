@@ -1,4 +1,6 @@
 import math
+import random
+import time
 import tkinter as tk
 from tkinter import *
 
@@ -855,6 +857,87 @@ class GameBoard(tk.Tk):
         self.draw_game_board()
         self.initialize_game_board_pieces()
 
+    def make_random_first_move(self):
+        """
+        Gets the first random move for black.
+        """
+        ZERO_INDEX_OFFSET = 1
+
+        StateSpaceGenRandFirstMove = StateSpaceGenerator(self.game_board, self.turn)
+        states = StateSpaceGenRandFirstMove.run_generation()
+
+        random_int = random.randint(0, len(states) - ZERO_INDEX_OFFSET)  # gets a random int
+        random_state = states[random_int]  # gets a random state with the random int
+
+        self.game_board = random_state[1]
+        self.draw_game_board()
+        self.initialize_game_board_pieces()
+
+    def ai_vs_ai(self):
+
+        while True:
+
+            if self.black_pieces < 8:
+                print("White wins! Six Black pieces pushed off the board!")
+                break
+            elif self.white_pieces < 8:
+                print("Black wins! Six White pieces pushed off the board!")
+                break
+
+            # if turn limit is reached, color with the most marbles pushed off wins, else there is a tie
+            elif self.black_move_count == 0 or self.white_move_count == 0:
+                if self.white_pieces < self.black_pieces:
+                    print("Turn limit reached, Black wins! More White pieces pushed off the board than Black pieces.")
+                elif self.white_pieces > self.black_pieces:
+                    print("Turn limit reached, White wins! More Black pieces pushed off the board than White pieces.")
+                elif self.white_pieces == self.black_pieces:
+                    print("Turn limit reached, it's a tie! Same amount of Black and White pieces remaining.")
+
+                print(f"Black pieces remaining: {self.black_pieces}")
+                print(f"White pieces remaining: {self.white_pieces}")
+                break
+
+            time.sleep(1)
+
+            #################### AI ####################
+            # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
+            self.increment_turn_count()  # increments turn count of current turn color
+            self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+            result = self.Minimax.alpha_beta(
+                ["move", self.game_board, self.turn, 0])  # gets move and board from ai choice
+
+            self.game_board = result[1]  # ai selected board
+            selected_move = result[
+                0]  # the move needs to print to the game console and show highlighted ai pieces
+            print("Ai selected move" + str(selected_move))
+            # redraws new game board generated from AI within ai.py from line above
+            self.draw_game_board()
+            self.initialize_game_board_pieces()
+
+            self.increment_turn_count()  # increments turn count of current turn color
+            self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+            #################### AI ####################
+
+
+    def apply_game_mode(self):
+        """
+        Handles the game mode selection for the player specified settings.
+        # TODO fully implement method
+        """
+        p1_settings = self.settings_selections["mode_p1"]
+        p2_settings = self.settings_selections["mode_p2"]
+
+        self.canvas.unbind("<Button-1>")  # unbinds mouse click event listener
+
+        if p1_settings == "Computer" and p2_settings == "Computer":
+            self.make_random_first_move()
+
+            time.sleep(1)
+
+            self.ai_vs_ai()
+        else:
+            self.canvas.bind("<Button-1>", self.click_event_listener_engine)  # re-initializes mouse click event listener
+
     def draw_timer_window(self):
         """
         Initializes and draws the window containing the turn timer for both the black and white team.
@@ -990,6 +1073,7 @@ class GameBoard(tk.Tk):
         print(self.settings_selections)
 
         self.apply_draw_game_board_layout()
+        self.apply_game_mode()
 
     def new_game_window(self):
         """
@@ -1007,6 +1091,7 @@ class GameBoard(tk.Tk):
         self.show_moves()
 
         self.canvas.bind("<Button-1>", self.click_event_listener_engine)  # sets up mouse click event listener
+
         self.mainloop()
 
 

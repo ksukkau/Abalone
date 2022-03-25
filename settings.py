@@ -75,7 +75,7 @@ class Settings(tk.Toplevel):
         menu1 = OptionMenu(select_game_mode_label, self.mode_choice_p1, *self.modes)
         menu1.config(font=self.font)
         menu1.grid(sticky=W)
-        self.mode_choice_p2.set("Human")
+        self.mode_choice_p2.set("Computer")
         Label(select_game_mode_label, text="Player 2", font=self.font).grid(sticky=W)
         menu2 = OptionMenu(select_game_mode_label, self.mode_choice_p2, *self.modes)
         menu2.config(font=self.font)
