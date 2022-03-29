@@ -76,6 +76,7 @@ class GameBoard(tk.Tk):
         self.dir_tuple_sumito = ()  # stores the vector of direction for the sumito chain
         self.first_piece_selection = None  # stores the index of piece adjacent to first piece in sumito chain
 
+        self.test = []
 
     @staticmethod
     def get_row_key(row: int, offset=0) -> str:
@@ -876,8 +877,28 @@ class GameBoard(tk.Tk):
         self.initialize_game_board_pieces()
 
     def ai_vs_ai(self):
-
         while True:
+            #################### AI ####################
+            # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
+            self.increment_turn_count()  # increments turn count of current turn color
+            self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+            result = self.Minimax.alpha_beta(
+                ["move", self.game_board, self.turn, 0])  # gets move and board from ai choice
+
+            self.game_board = result[1]  # ai selected board
+            selected_move = result[
+                0]  # the move needs to print to the game console and show highlighted ai pieces
+            print("Ai selected move" + str(selected_move))
+            # redraws new game board generated from AI within ai.py from line above
+
+            self.draw_game_board()
+            self.initialize_game_board_pieces()
+
+            self.increment_turn_count()  # increments turn count of current turn color
+            self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+            #################### AI ####################
+
+            self.update()  # forces tkinter to re-draw the new board despite being blocked by the while-loop
 
             if self.black_pieces < 8:
                 print("White wins! Six Black pieces pushed off the board!")
@@ -899,28 +920,6 @@ class GameBoard(tk.Tk):
                 print(f"White pieces remaining: {self.white_pieces}")
                 break
 
-            time.sleep(1)
-
-            #################### AI ####################
-            # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
-            self.increment_turn_count()  # increments turn count of current turn color
-            self.turn = Converter.get_opposite_color(self.turn)  # turn color change
-            result = self.Minimax.alpha_beta(
-                ["move", self.game_board, self.turn, 0])  # gets move and board from ai choice
-
-            self.game_board = result[1]  # ai selected board
-            selected_move = result[
-                0]  # the move needs to print to the game console and show highlighted ai pieces
-            print("Ai selected move" + str(selected_move))
-            # redraws new game board generated from AI within ai.py from line above
-            self.draw_game_board()
-            self.initialize_game_board_pieces()
-
-            self.increment_turn_count()  # increments turn count of current turn color
-            self.turn = Converter.get_opposite_color(self.turn)  # turn color change
-            #################### AI ####################
-
-
     def apply_game_mode(self):
         """
         Handles the game mode selection for the player specified settings.
@@ -933,9 +932,6 @@ class GameBoard(tk.Tk):
 
         if p1_settings == "Computer" and p2_settings == "Computer":
             self.make_random_first_move()
-
-            time.sleep(1)
-
             self.ai_vs_ai()
         else:
             self.canvas.bind("<Button-1>", self.click_event_listener_engine)  # re-initializes mouse click event listener
@@ -1074,8 +1070,11 @@ class GameBoard(tk.Tk):
         self.settings_selections = self.settings.selections
         print(self.settings_selections)
 
+        print("before")
         self.apply_draw_game_board_layout()
         self.apply_game_mode()
+
+        print("after")
 
     def new_game_window(self):
         """

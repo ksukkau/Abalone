@@ -2,6 +2,69 @@ from game import *
 from move import *
 from converter import *
 
+test_board = {'row0': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 1, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 2, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 3, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 4, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None}],
+              'row1': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 1, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 2, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 3, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 4, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 5, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None}],
+              'row2': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 1, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 2, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 3, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 4, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 5, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 6, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None}],
+              'row3': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 1, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 2, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 3, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 4, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 5, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 6, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 7, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None}],
+              'row4': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 1, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 2, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 3, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 4, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 5, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 6, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 7, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 8, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None}],
+              'row5': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 1, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 2, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 3, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 4, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 5, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 6, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 7, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None}],
+              'row6': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 1, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 2, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 3, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 4, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 5, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 6, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None}],
+              'row7': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 1, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 2, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 3, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 4, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 5, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None}],
+              'row8': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 1, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 2, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 3, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 4, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None}]}
+turn = "black"
+
 
 def center(board, color):
     """
@@ -116,6 +179,14 @@ def move_piece_count(state):
     last_piece_location = Converter.external_notation_to_internal(move[1][1])
     last_row_number = Converter.convert_row_to_string_or_int(last_piece_location[0])
     return abs(first_piece_location[1] - last_piece_location[1] + first_row_number - last_row_number)
+
+
+class AllyCount:
+
+    def __init__(self):
+        self.ally_groups = []  # contains sets with the ally counts
+        self.game_board = {}
+
 
 
 

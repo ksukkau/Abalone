@@ -139,7 +139,6 @@ class Minimax:
             b = min(b, v)
         return v
 
-
     @staticmethod
     def get_opposite_color(color):
         if color == 'black':
