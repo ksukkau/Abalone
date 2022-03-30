@@ -30,6 +30,14 @@ class Move:
         "W": "E",
         "NW": "SE"
     }
+    sidestep_directions = {
+        "NE": ["E", "SE", "W", "NW"],
+        "E": ["NE", "SE", "SW", "NW"],
+        "SE": ["NE", "E", "SW", "W"],
+        "SW": ["E", "SE", "W", "NW"],
+        "W": ["NE", "SE", "SW", "NW"],
+        "NW": ["NE", "E", "SW", "W"]
+    }
     direction_tuple_map = [
         {"NE": (-1, 0), "E": (0, 1), "SE": (1, 1), "SW": (1, 0), "W": (0, -1), "NW": (-1, -1)},
         {"NE": (-1, 0), "E": (0, 1), "SE": (1, 1), "SW": (1, 0), "W": (0, -1), "NW": (-1, -1)},
@@ -199,18 +207,40 @@ class Move:
         :param vector_of_dir: a list, containing the vector of direction of the selected game pieces
         :return: a dictionary
         """
-        unoccupied_game_spaces = {}
+        valid_moves = {}
 
         # gets the first and last selected piece internal coords (e.g. ('row3', 4))
         first_selected = selected_pieces[0]
         last_selected = selected_pieces[-1]
 
         # adds any valid or sumito moves found
-        unoccupied_game_spaces.update(self.get_valid_inline_moves(first_selected, last_selected, game_board, turn_color, vector_of_dir))
+        valid_moves.update(self.get_valid_inline_moves(first_selected, last_selected, game_board, turn_color, vector_of_dir))
+
+        # adds any valid sidestep moves
+        if num_pieces_selected >= 2:
+            valid_moves.update(self.get_valid_sidestep_moves(selected_pieces, num_pieces_selected, game_board, turn_color, vector_of_dir))
+            pass
 
         # adjacent_spaces = self.get_adj_spaces()
 
-        return unoccupied_game_spaces
+        return valid_moves
+
+    def get_valid_sidestep_moves(self, selected_pieces: list, num_pieces_selected: int, game_board: dict, turn_color: str, vector_of_dir: list) -> dict:
+        """
+        Finds the valid sidestep moves and adds it to the
+        :param selected_pieces:
+        :param num_pieces_selected:
+        :param game_board:
+        :param turn_color:
+        :param vector_of_dir:
+        :return:
+        """
+        valid_moves = {}
+
+        sidestep_dirs_to_check = self.sidestep_directions[vector_of_dir[0]]
+        print(sidestep_dirs_to_check)
+
+
 
     def get_valid_inline_moves(self, first_selected: tuple, last_selected: tuple, game_board: dict, turn_color: str, vector_of_dir: list):
         """
@@ -222,7 +252,7 @@ class Move:
         :param vector_of_dir: a list, of the vector of direction of the selected game pieces
         :return: a dictionary, of the valid spaces to move inline, or perform a sumito
         """
-        unoccupied_game_spaces = {}
+        valid_moves = {}
 
         # gets the row and column number, and direction tuple for both the first and last selected game piece
         first_selected_row_num = Converter.convert_row_to_string_or_int(first_selected[0])
@@ -251,10 +281,10 @@ class Move:
 
                     # if space is unoccupied, then it is added as an inline move
                     if infront_first_val == None:
-                        unoccupied_game_spaces.update({valid_piece: "inline"})
+                        valid_moves.update({valid_piece: "inline"})
                     # if space is occupied by opposing turn_color, then it is added as a sumito
                     elif infront_first_val == Converter.get_opposite_color(turn_color):
-                        unoccupied_game_spaces.update({valid_piece: "sumito"})
+                        valid_moves.update({valid_piece: "sumito"})
             except (IndexError, KeyError):
                 pass
 
@@ -277,14 +307,14 @@ class Move:
 
                     # if space is unoccupied, then it is added as an inline move
                     if infront_last_val == None:
-                        unoccupied_game_spaces.update({valid_piece: "inline"})
+                        valid_moves.update({valid_piece: "inline"})
                     # if space is occupied by opposing turn_color, then it is added as a sumito
                     elif infront_last_val == Converter.get_opposite_color(turn_color):
-                        unoccupied_game_spaces.update({valid_piece: "sumito"})
+                        valid_moves.update({valid_piece: "sumito"})
             except (IndexError, KeyError):
                 pass
 
-        return unoccupied_game_spaces
+        return valid_moves
 
     def get_adjusted_tuple_or_cardinal_dir(self, row, cardinal_dir=None, dir_tuple=None):
         """

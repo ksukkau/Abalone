@@ -895,7 +895,6 @@ class GameBoard(tk.Tk):
             self.initialize_game_board_pieces()
 
             self.increment_turn_count()  # increments turn count of current turn turn_color
-            self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
             #################### AI ####################
 
             self.update()  # forces tkinter to re-draw the new board despite being blocked by the while-loop
