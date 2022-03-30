@@ -334,32 +334,39 @@ class GameBoard(tk.Tk):
 
                                     # For some reason this is never called
                                 else:
+                                    # gets all possible sidestep moves
                                     self.possible_sidestep_moves = self.Move.get_valid_sidestep_moves(self.selected_pieces, self.num_pieces_selected, self.game_board, self.turn, vector_of_dir)
-                                    print(f"Possible sidesteps: {self.possible_sidestep_moves}")
+
+                                    # iterates through all possible side step moves and checks if the 1st piece selected
+                                    # is the same as the first piece selected for all possible sidestep moves
                                     for valid_sidestep_pieces in self.possible_sidestep_moves:
 
                                         piece_clicked_internal_notation = Converter.external_notation_to_internal(piece_clicked)
                                         if piece_clicked_internal_notation == valid_sidestep_pieces[0][0] and self.num_pieces_selected == len(valid_sidestep_pieces[0]):
 
+                                            # helper method to perform the sidestep move
                                             self.perform_sidestep(valid_sidestep_pieces)
 
-                                        # self.adjacent_spaces = self.Move.get_adj_spaces(self.selected_pieces[0][0],
-                                        #                                                 self.selected_pieces[0][1])
-                                        # if piece_clicked in self.adjacent_spaces:
-                                        #     occupied = False
-                                        #     for piece in self.selected_pieces:
-                                        #         if piece not in self.possible_inline_moves:
-                                        #             occupied = True
-                                        #
-                                        #     if not occupied:
-                                        #         self.move_single_selected_piece(row, col, piece_x_pos, piece_y_pos)
-                                        #
-                                        #         self.deselect_pieces()
-                                        #         self.num_pieces_selected = 0
-                                        #         self.adjacent_spaces = set()
-                                        #         self.possible_inline_moves = set()
-                                        #         self.selected_pieces = []
-                                        #         self.selected_pieces_xy_coords = []
+                                            #################### AI ####################
+                                            # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
+                                            self.increment_turn_count()  # increments turn count of current turn turn_color
+                                            self.turn = Converter.get_opposite_color(
+                                                self.turn)  # turn turn_color change
+                                            result = self.Minimax.alpha_beta(["move", self.game_board, self.turn,
+                                                                              0])  # gets move and board from ai choice
+
+                                            self.game_board = result[1]  # ai selected board
+                                            selected_move = result[
+                                                0]  # the move needs to print to the game console and show highlighted ai pieces
+                                            print("Ai selected move" + str(selected_move))
+                                            # redraws new game board generated from AI within ai.py from line above
+                                            self.draw_game_board()
+                                            self.initialize_game_board_pieces()
+
+                                            self.increment_turn_count()  # increments turn count of current turn turn_color
+                                            self.turn = Converter.get_opposite_color(
+                                                self.turn)  # turn turn_color change
+                                            #################### AI ####################
 
     def perform_sidestep(self, sidestep_move_details: list):
         """
@@ -370,11 +377,14 @@ class GameBoard(tk.Tk):
         for _ in range(0, self.num_pieces_selected):
             new_spaces = sidestep_move_details[0]  # new_spaces is a list of internal game board coords
             new_space = new_spaces.pop()
-            new_x_pos = self.game_board[new_space[0]][new_space[1]]["x_pos"]
-            new_y_pos = self.game_board[new_space[0]][new_space[1]]["y_pos"]
-            self.move_single_selected_piece(new_space[0], new_space[1], new_x_pos, new_y_pos)
+            new_row = new_space[0]  # gets row of new space
+            new_col = new_space[1]  # gets col of new space
+            new_x_pos = self.game_board[new_space[0]][new_space[1]]["x_pos"]  # gets x coordinates of new position
+            new_y_pos = self.game_board[new_space[0]][new_space[1]]["y_pos"]  # gets y coordinates of new position
 
-        self.possible_sidestep_moves = []
+            self.move_single_selected_piece(new_row, new_col, new_x_pos, new_y_pos)  # draws new piece
+
+        self.possible_sidestep_moves = []  # clears the list of valid sidestep moves
 
     def is_valid_sumito(self, piece_clicked_row: str, piece_clicked_col: int) -> bool:
         """
