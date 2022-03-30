@@ -73,6 +73,12 @@ def center(board, color):
     :param color: player whose turn it is turn_color
     :return: float
     """
+    distance = {
+        4: [(0, 4), (1, 5), (2, 6), (3, 7), (4, 8), (5, 7), (6, 6), (7, 5)],
+        3: [(2, 5), (3, 6), (4, 7), (5, 6), (6, 5)],
+        2: [(3, 5), (4, 6), (5, 5)],
+        1: [(4,5)]
+    }
     proximity_counter = 0
     pieces = 0
     # 9 rows 9 columns center is E5 or board notation row 4 column 4
@@ -82,10 +88,17 @@ def center(board, color):
         for place in row:
             if place['turn_color'] == color:
                 pieces += 1
-                col_dist = abs(place['colNum'] - 4)
-                row_dist = abs(int(row_number) - 4)
-                total = col_dist + row_dist
-                proximity_counter += total
+                column = place['colNum']
+                dist = 0
+                if row_number == 0 or row_number == 8 or column == 0 or (row_number, column) in distance[4]:
+                    dist = 4
+                elif row_number == 1 or row_number == 7 or column == 1 or (row_number, column) in distance[3]:
+                    dist = 3
+                elif row_number == 2 or row_number == 6 or column == 2 or (row_number, column) in distance[2]:
+                    dist = 2
+                elif row_number == 3 or row_number == 5 or column == 3 or (row_number, column) in distance[1]:
+                    dist = 1
+                proximity_counter += dist
     proximity_counter = proximity_counter/pieces
     return proximity_counter
 
@@ -293,3 +306,4 @@ class AllyCount:
 # color = "black"
 # ally_count = groups(test_board, color)
 # print(ally_count)
+

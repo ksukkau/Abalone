@@ -49,10 +49,10 @@ class KatsHeuristic:
         #print("score: " + str(score))
         center_value = center(state[1], state[2]) - center(state[1], get_opposite_color(state[2]))
         #print("center: " + str(center_value))
-    #   group = groups(state[1], state[2]) - groups(state[1], get_opposite_color(state[2]))
+        group = len(groups(state[1], state[2])) - len(groups(state[1], get_opposite_color(state[2])))
         push = push_eval(state)
         #print("push:" + str(push))
 
-        return score_weight * score + center_weight * center_value + push_weight * push
+        return center_value
 
 

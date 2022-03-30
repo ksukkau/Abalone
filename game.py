@@ -933,6 +933,8 @@ class GameBoard(tk.Tk):
         if p1_settings == "Computer" and p2_settings == "Computer":
             self.make_random_first_move()
             self.ai_vs_ai()
+        elif p1_settings == "Computer" and self.settings_selections['turn_color'] == 1:
+            self.make_random_first_move()
         else:
             self.canvas.bind("<Button-1>", self.click_event_listener_engine)  # re-initializes mouse click event listener
 
