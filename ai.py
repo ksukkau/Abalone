@@ -99,9 +99,10 @@ class Minimax:
             a = max(a, value)
             next_states_values_dict.update({value: next_depth_state})
 
-        max_val = max([x for x in next_states_values_dict.keys()])
+        #print([x for x, y in next_states_values_dict.items()])
+        max_val = min([x for x in next_states_values_dict.keys()])
         options = [x for x in next_states_values_dict.items() if x[0] == max_val]
-        print(options)
+        #print(options)
         choice = self.random_choice(options)
         print(time.perf_counter() - start)
         print(self.pruned)

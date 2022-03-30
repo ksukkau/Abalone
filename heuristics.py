@@ -37,9 +37,9 @@ class KatsHeuristic:
 
     @staticmethod
     def weighted_heuristic(state):
-        score_weight = 1
-        center_weight = 9
-        push_weight = 1
+        score_weight = 10
+        center_weight = 5
+        push_weight = 9
         group_weight = 1
         move_size = 3
 
@@ -54,7 +54,6 @@ class KatsHeuristic:
         push = push_eval(state)
         #print("Push", push)
         int_value = int(score_weight * score + center_weight * center_value + push_weight * push + group * group_weight)
-        print(int_value)
         return int_value
 
 
