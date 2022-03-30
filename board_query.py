@@ -58,11 +58,11 @@ test_board = {'row0': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': 
                        {'colNum': 3, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
                        {'colNum': 4, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
                        {'colNum': 5, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None}],
-              'row8': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 1, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+              'row8': [{'colNum': 0, 'color': "black", 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 1, 'color': "black", 'selected': False, 'x_pos': None, 'y_pos': None},
                        {'colNum': 2, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 3, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 4, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None}]}
+                       {'colNum': 3, 'color': "black", 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 4, 'color': "black", 'selected': False, 'x_pos': None, 'y_pos': None}]}
 turn = "black"
 
 
@@ -107,31 +107,9 @@ def pieces(board, color):
 
 
 def groups(board, color):
-    # group_count = 1
-    # list_of_pieces = []
-    # for row in board.items():
-    #     row_number = Converter.convert_row_to_string_or_int(row[0])
-    #     row = row[1]
-    #     for place in row:
-    #         if place['color'] == color:
-    #             spaces = Move.get_adj_spaces(row_number, place['colNum'])
-    #             agjs = space_translation(board, spaces, color)
-    #             #print(spaces)
-    #             list_of_pieces.append((row_number, place['colNum']))
-    # #print(list_of_pieces)
-    # for i in range(len(list_of_pieces)-1):
-    #     row = abs(list_of_pieces[i][0] - list_of_pieces[i+1][0])
-    #     col = abs(list_of_pieces[i][1] - list_of_pieces[i+1][1])
-    #     if row > 1 and col > 1:
-    #         group_count += 1
-
-    ally_count = []
-
-    ally_count_grouping = []
-    grouping_num = 0
-
+    ally_count = []  # contains all of the groupings of ally counts
+    ally_count_grouping = []  # temporarily stores the current ally count grouping
     neighbours_to_check = set()
-
     already_checked = set()
 
     for row in board:
@@ -143,18 +121,22 @@ def groups(board, color):
                 already_checked.add((row, piece["colNum"]))  # adds the piece to the set of already checked pieces
                 neighbours_to_check.add((row, piece["colNum"]))
 
-                # checks the neighbours of a piece if it's the same color as the turn color
+                # checks the all neighbours of the piece, and neighbours of neighbours of neighbours...etc
                 valid_neighbours = True
                 while valid_neighbours:
                     piece_to_check = neighbours_to_check.pop()
-                    adjacent_pieces = get_adj_spaces(piece_to_check[0], piece_to_check[1])  # gets adjacent pieces
+                    adjacent_pieces = get_adj_spaces_in_internal_notation(piece_to_check[0], piece_to_check[1])  # gets adjacent pieces
 
                     for adjacent_piece in adjacent_pieces:
-                        if board[adjacent_piece[0]][adjacent_piece[1]]["color"] == color and adjacent_piece not in already_checked:
+                        try:
+                            if board[adjacent_piece[0]][adjacent_piece[1]]["color"] == color and adjacent_piece not in already_checked:
 
-                            ally_count_grouping.append(adjacent_piece)
-                            already_checked.add(adjacent_piece)
-                            neighbours_to_check.add(adjacent_piece)
+                                ally_count_grouping.append(adjacent_piece)
+                                already_checked.add(adjacent_piece)
+                                neighbours_to_check.add(adjacent_piece)
+
+                        except IndexError:
+                            pass
 
                     if len(neighbours_to_check) == 0:
                         ally_count.append(ally_count_grouping)  # adds the grouping to the ally count
@@ -165,7 +147,7 @@ def groups(board, color):
     return ally_count
 
 
-def get_adj_spaces(row, col: int) -> set:
+def get_adj_spaces_in_internal_notation(row, col: int) -> set:
     """
     Gets all the game spaces adjacent to the selected game piece.
     :param row: an int, the number of the row
@@ -213,17 +195,31 @@ def get_adj_spaces(row, col: int) -> set:
 
 def is_in_bounds(row, col):
     """
-    Removes out of bounds spaces from the adjacent spaces lIst.
+    Checks if the given coordinates is within the game board
     :param adjacent_spaces: a set, containing the adjacent spaces for a given piece
     :return: a set, with the out of bound spaces removed
     """
+    NUM_COLS_PER_ROW = [
+        5,
+        6,
+        7,
+        8,
+        9,
+        8,
+        7,
+        6,
+        5
+    ]
     VALID_ROWS_COLS = range(0, 9)
 
     if type(row) != int:
         row = Converter.convert_row_to_string_or_int(row)
 
     if row in VALID_ROWS_COLS and col in VALID_ROWS_COLS:
-        return True
+
+        COLS_PER_ROW = NUM_COLS_PER_ROW[row]  # gets num of columns for the given row
+        if col in range(0, COLS_PER_ROW):  # checks if the column is in bounds for that row
+            return True
     else:
         return False
 
