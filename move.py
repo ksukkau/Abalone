@@ -174,7 +174,7 @@ class Move:
                     row_key = space_internal_tuple[0]
                     col_num = space_internal_tuple[1]
 
-                    adjacent_space_color = game_board[row_key][col_num]["color"]
+                    adjacent_space_color = game_board[row_key][col_num]["turn_color"]
 
                     # means the adjacent space is unoccupied, if column number is < 0 then it is off the game board
                     if adjacent_space_color == None and col_num >= 0:
@@ -195,7 +195,7 @@ class Move:
         :param num_pieces_selected: a int, the number of currently selected game pieces
         :param selected_pieces: a list, containing the external coordinates of the selected game pieces, in order
         :param game_board: the current game board
-        :param turn_color: a string, the current turn color
+        :param turn_color: a string, the current turn turn_color
         :param vector_of_dir: a list, containing the vector of direction of the selected game pieces
         :return: a dictionary
         """
@@ -218,7 +218,7 @@ class Move:
         :param first_selected: a tuple, internal coords for the first selected piece
         :param last_selected: a tuple, internal coords for the last selected piece
         :param game_board: a dictionary, of the game board
-        :param turn_color: a string, of the current turn's color
+        :param turn_color: a string, of the current turn's turn_color
         :param vector_of_dir: a list, of the vector of direction of the selected game pieces
         :return: a dictionary, of the valid spaces to move inline, or perform a sumito
         """
@@ -242,9 +242,9 @@ class Move:
             # if IndexError or KeyError is raised, then space is off the game board
             try:
                 # gets the value of the space to move to
-                infront_first_val = game_board[space_infront_first_row_key][space_infront_first_col_num]["color"]
+                infront_first_val = game_board[space_infront_first_row_key][space_infront_first_col_num]["turn_color"]
 
-                # ensures that the space isn't occupied by piece of current turn color
+                # ensures that the space isn't occupied by piece of current turn turn_color
                 if infront_first_val != turn_color:
                     valid_piece = Converter.internal_notation_to_external(space_infront_first_row_key,
                                                                           space_infront_first_col_num)
@@ -252,7 +252,7 @@ class Move:
                     # if space is unoccupied, then it is added as an inline move
                     if infront_first_val == None:
                         unoccupied_game_spaces.update({valid_piece: "inline"})
-                    # if space is occupied by opposing color, then it is added as a sumito
+                    # if space is occupied by opposing turn_color, then it is added as a sumito
                     elif infront_first_val == Converter.get_opposite_color(turn_color):
                         unoccupied_game_spaces.update({valid_piece: "sumito"})
             except (IndexError, KeyError):
@@ -268,9 +268,9 @@ class Move:
             # if IndexError or KeyError is raised, then space is off the game board
             try:
                 # gets the value of the space to move to
-                infront_last_val = game_board[space_infront_last_row_key][space_infront_last_col_num]["color"]
+                infront_last_val = game_board[space_infront_last_row_key][space_infront_last_col_num]["turn_color"]
 
-                # ensures that the space isn't occupied by piece of current turn color
+                # ensures that the space isn't occupied by piece of current turn turn_color
                 if infront_last_val != turn_color:
                     valid_piece = Converter.internal_notation_to_external(space_infront_last_row_key,
                                                                           space_infront_last_col_num)
@@ -278,7 +278,7 @@ class Move:
                     # if space is unoccupied, then it is added as an inline move
                     if infront_last_val == None:
                         unoccupied_game_spaces.update({valid_piece: "inline"})
-                    # if space is occupied by opposing color, then it is added as a sumito
+                    # if space is occupied by opposing turn_color, then it is added as a sumito
                     elif infront_last_val == Converter.get_opposite_color(turn_color):
                         unoccupied_game_spaces.update({valid_piece: "sumito"})
             except (IndexError, KeyError):

@@ -50,10 +50,10 @@ class Settings(tk.Toplevel):
 
     def player_color(self):
         """
-        Draws and creates the settings menu portion to allow the player to select which color they would like
+        Draws and creates the settings menu portion to allow the player to select which turn_color they would like
         to play as.
         """
-        player_color_label = LabelFrame(self, text="Select Player 1 color", font=self.font)
+        player_color_label = LabelFrame(self, text="Select Player 1 turn_color", font=self.font)
         player_color_label.grid(sticky=W, padx=10, pady=10)
 
         for (text, color) in self.colors.items():
@@ -131,7 +131,7 @@ class Settings(tk.Toplevel):
         """
         Retrieves the specified settings by the player and passes the settings to the main program loop.
         """
-        self.selections['color'] = self.color_choice.get()
+        self.selections['turn_color'] = self.color_choice.get()
         self.selections["mode_p1"] = self.mode_choice_p1.get()
         self.selections["mode_p2"] = self.mode_choice_p2.get()
         self.selections["config"] = self.board_config.get()

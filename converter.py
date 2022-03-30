@@ -42,7 +42,7 @@ class Converter:
     @staticmethod
     def get_opposite_color(color: str) -> str:
         """
-        Gets the opposing color of the turn color.
+        Gets the opposing turn_color of the turn turn_color.
         :param color: a string
         :return: a string
         """

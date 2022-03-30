@@ -18,11 +18,11 @@ class GameBoard(tk.Tk):
     def __init__(self):
         super().__init__()
 
-        # default font and color
+        # default font and turn_color
         self.font = "Montserrat", 15
         self.font_color = "White"
 
-        # default background color
+        # default background turn_color
         self.bg = "#303b41"
 
         self.title("Game")
@@ -56,7 +56,7 @@ class GameBoard(tk.Tk):
         self.white_pieces = None
         self.black_pieces = None
         self.settings = None
-        self.settings_selections = {'color': 0, 'mode_p1': "Human", 'mode_p2': "Human", 'config': 0, 'turns': 15,
+        self.settings_selections = {'turn_color': 0, 'mode_p1': "Human", 'mode_p2': "Human", 'config': 0, 'turns': 15,
                                     'time1': 30, 'time2': 30}
         self.spot_coords = {}
         self.board_screen_pos = None
@@ -125,13 +125,13 @@ class GameBoard(tk.Tk):
 
                     # ensures clicked area is within the drawn board piece along the y-axis
                     if piece_y_pos - RANGE <= event.y <= piece_y_pos + RANGE:
-                        selected_piece_color = selected_row[col].get("color")
+                        selected_piece_color = selected_row[col].get("turn_color")
 
                         piece_clicked = Converter.internal_notation_to_external(row, col)
                         # print(f"Selected piece at: {piece_clicked}{selected_piece_color[0].lower()}")  # prints clicked piece
                         print(f"Selected piece at: {piece_clicked}")  # prints clicked piece
 
-                        # ensures that the turn color can't select the opposing color's pieces for movement
+                        # ensures that the turn turn_color can't select the opposing turn_color's pieces for movement
                         if selected_piece_color == self.turn:
 
                             if selected_row[col]["selected"]:
@@ -222,8 +222,8 @@ class GameBoard(tk.Tk):
 
                                     #################### AI ####################
                                     # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
-                                    self.increment_turn_count()  # increments turn count of current turn color
-                                    self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+                                    self.increment_turn_count()  # increments turn count of current turn turn_color
+                                    self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
                                     start = time.perf_counter()
                                     result = self.Minimax.alpha_beta(
                                         ["move", self.game_board, self.turn, 0])  # gets move and board from ai choice
@@ -237,8 +237,8 @@ class GameBoard(tk.Tk):
                                     self.draw_game_board()
                                     self.initialize_game_board_pieces()
 
-                                    self.increment_turn_count()  # increments turn count of current turn color
-                                    self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+                                    self.increment_turn_count()  # increments turn count of current turn turn_color
+                                    self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
                                     #################### AI ####################
 
                             # performs 2 or 3 group piece movements
@@ -273,8 +273,8 @@ class GameBoard(tk.Tk):
 
                                         #################### AI ####################
                                         # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
-                                        self.increment_turn_count()  # increments turn count of current turn color
-                                        self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+                                        self.increment_turn_count()  # increments turn count of current turn turn_color
+                                        self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
                                         result = self.Minimax.alpha_beta(["move", self.game_board, self.turn, 0])  # gets move and board from ai choice
 
                                         self.game_board = result[1]  # ai selected board
@@ -284,8 +284,8 @@ class GameBoard(tk.Tk):
                                         self.draw_game_board()
                                         self.initialize_game_board_pieces()
 
-                                        self.increment_turn_count()  # increments turn count of current turn color
-                                        self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+                                        self.increment_turn_count()  # increments turn count of current turn turn_color
+                                        self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
                                         #################### AI ####################
 
                                         # print("\n--- Debug ---")
@@ -310,8 +310,8 @@ class GameBoard(tk.Tk):
 
                                             #################### AI ####################
                                             # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
-                                            self.increment_turn_count()  # increments turn count of current turn color
-                                            self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+                                            self.increment_turn_count()  # increments turn count of current turn turn_color
+                                            self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
                                             result = self.Minimax.alpha_beta(
                                                 ["move", self.game_board, self.turn,
                                                  0])  # gets move and board from ai choice
@@ -324,8 +324,8 @@ class GameBoard(tk.Tk):
                                             self.draw_game_board()
                                             self.initialize_game_board_pieces()
 
-                                            self.increment_turn_count()  # increments turn count of current turn color
-                                            self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+                                            self.increment_turn_count()  # increments turn count of current turn turn_color
+                                            self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
                                             #################### AI ####################
 
                                         # clears the chain of sumito'ed pieces
@@ -361,7 +361,7 @@ class GameBoard(tk.Tk):
         # gets internal notation for piece to check sumito for, and gets adjacent spaces
         sumito_piece_adj_spaces = self.Move.get_adj_spaces(piece_clicked_row, piece_clicked_col)
 
-        # finds the piece of the turn color closest to piece to check sumito for
+        # finds the piece of the turn turn_color closest to piece to check sumito for
         adjacent_piece_internal = None
         for adjacent_selected_piece in self.selected_pieces:
             # gets internal notation of selected pieces for following membership check
@@ -377,10 +377,10 @@ class GameBoard(tk.Tk):
                     self.first_piece_selection = 0
 
         # gets vector of direction for selected piece and sumito piece to find num of
-        # adjacent opposing color pieces
+        # adjacent opposing turn_color pieces
         vector_of_dir_for_sumito_check = self.Move.get_dir_of_selected_pieces([adjacent_piece_internal, (piece_clicked_row, piece_clicked_col)])
 
-        # iterates through the list of directions, finds the correct vector to get num of adj opposing color pieces,
+        # iterates through the list of directions, finds the correct vector to get num of adj opposing turn_color pieces,
         # and returns this number
         for direction in vector_of_dir_for_sumito_check:
             dir_tuple = self.Move.get_adjusted_tuple_or_cardinal_dir(piece_clicked_row, cardinal_dir=direction)
@@ -398,12 +398,12 @@ class GameBoard(tk.Tk):
                     if adj_piece[1] < 0:
                         raise KeyError
 
-                    # checks if the next adjacent piece is the opposing color
-                    elif self.game_board[adj_piece[0]][adj_piece[1]]["color"] == Converter.get_opposite_color(self.turn):
+                    # checks if the next adjacent piece is the opposing turn_color
+                    elif self.game_board[adj_piece[0]][adj_piece[1]]["turn_color"] == Converter.get_opposite_color(self.turn):
                         self.sumito_chain.append((adj_piece[0], adj_piece[1]))
 
                     # gets the vector of direction of sumito chain by reversing direction of selected pieces chain
-                    elif self.game_board[adj_piece[0]][adj_piece[1]]["color"] == self.turn:
+                    elif self.game_board[adj_piece[0]][adj_piece[1]]["turn_color"] == self.turn:
                         direction_cardinal_index = vector_of_dir_for_sumito_check.index(direction)
 
                         # gets the opposite cardinal direction
@@ -439,18 +439,18 @@ class GameBoard(tk.Tk):
                 raise KeyError
 
             # pushes the sumito chain
-            elif self.game_board[space_behind_sumito_chain[0]][space_behind_sumito_chain[1]]["color"] == None:
+            elif self.game_board[space_behind_sumito_chain[0]][space_behind_sumito_chain[1]]["turn_color"] == None:
                 # logic for updating game board and drawing
 
                 # gets first piece in sumito chain and places it behind the sumito chain
-                self.game_board[space_behind_sumito_chain[0]][space_behind_sumito_chain[1]]["color"] = opposite_color
+                self.game_board[space_behind_sumito_chain[0]][space_behind_sumito_chain[1]]["turn_color"] = opposite_color
                 behind_space_x_pos = self.game_board[space_behind_sumito_chain[0]][space_behind_sumito_chain[1]]["x_pos"]
                 behind_space_y_pos = self.game_board[space_behind_sumito_chain[0]][space_behind_sumito_chain[1]]["y_pos"]
                 self.draw_game_piece(behind_space_x_pos, behind_space_y_pos, opposite_color)
 
         # means that the piece is pushed off the board
         except (IndexError, KeyError):
-            # decrements the piece count for the opposing color
+            # decrements the piece count for the opposing turn_color
             if self.turn == "black":
                 self.white_pieces -= 1
             else:
@@ -465,7 +465,7 @@ class GameBoard(tk.Tk):
             print(f"Num of White: {self.white_pieces}")
 
         finally:
-            # gets the first piece in the sumito chain and changes it to the turn color
+            # gets the first piece in the sumito chain and changes it to the turn turn_color
             first_sumito_piece = self.sumito_chain[0]
             first_sumito_piece_x_pos = self.game_board[first_sumito_piece[0]][first_sumito_piece[1]]["x_pos"]
             first_sumito_piece_y_pos = self.game_board[first_sumito_piece[0]][first_sumito_piece[1]]["y_pos"]
@@ -473,7 +473,7 @@ class GameBoard(tk.Tk):
 
     def increment_turn_count(self):
         """
-        Increments the turn count for the current turn's color.
+        Increments the turn count for the current turn's turn_color.
         """
         if self.turn == "black":
             self.turn_count_black += 1
@@ -483,7 +483,7 @@ class GameBoard(tk.Tk):
     def move_single_selected_piece(self, new_row_num: int, new_col_num: int, new_x_pos: int, new_y_pos: int, index=-1):
         """
         Moves the game piece. The method draws the new game pieces, removes the old game piece, toggles the "selected"
-        flag, and then updates the game board "color" value for both the new space and old space.
+        flag, and then updates the game board "turn_color" value for both the new space and old space.
         :param new_row_num: an int, the new row number to move to
         :param new_col_num: an int, the new column number to move to
         :param new_x_pos: an int, the x coordinates of the new space
@@ -503,8 +503,8 @@ class GameBoard(tk.Tk):
 
         self.toggle_selected_flag(selected_piece_internal_coords[0], selected_piece_internal_coords[1])
 
-        self.game_board[selected_piece_internal_coords[0]][selected_piece_internal_coords[1]]["color"] = None
-        self.game_board[Converter.convert_row_to_string_or_int(new_row_num)][new_col_num]["color"] = self.turn
+        self.game_board[selected_piece_internal_coords[0]][selected_piece_internal_coords[1]]["turn_color"] = None
+        self.game_board[Converter.convert_row_to_string_or_int(new_row_num)][new_col_num]["turn_color"] = self.turn
 
     def handle_selecting_selected_piece(self, index_of_selected_piece: int):
         """
@@ -595,7 +595,7 @@ class GameBoard(tk.Tk):
 
     def draw_game_piece(self, piece_x_pos: float, piece_y_pos: float, piece_color: str):
         """
-        Draws the specified color game piece at the specified x and y coordinates.
+        Draws the specified turn_color game piece at the specified x and y coordinates.
         :param piece_x_pos: a float
         :param piece_y_pos: a float
         :param piece_color: a string, either 'white' or 'black'
@@ -666,14 +666,14 @@ class GameBoard(tk.Tk):
     def initialize_game_board_pieces(self):
         """
         Iterates through the game_board data structure, retrieves the x and y coordinates of each board space,
-        and draws the game piece on the board of appropriate specified color.
+        and draws the game piece on the board of appropriate specified turn_color.
         """
         for row in range(self.hexes_across):
             row_key = self.get_row_key(row)
             row_length = Converter.calculate_row_length(row)
 
             for col in range(row_length):
-                piece_color = self.game_board.get(row_key)[col].get("color")
+                piece_color = self.game_board.get(row_key)[col].get("turn_color")
                 piece_x = self.game_board.get(row_key)[col].get("x_pos")  # x coordinates of the selected piece
                 piece_y = self.game_board.get(row_key)[col].get("y_pos")  # y coordinates of the selected piece
 
@@ -681,7 +681,7 @@ class GameBoard(tk.Tk):
 
     def initialize_default_layout(self):
         """
-        Initializes the game board array representing the game board with the game pieces of each color in the standard,
+        Initializes the game board array representing the game board with the game pieces of each turn_color in the standard,
         default, layout.
         """
         lines_to_fill = 2
@@ -690,24 +690,24 @@ class GameBoard(tk.Tk):
             row_key = "row" + str(row)
 
             for col in range(Converter.calculate_row_length(row)):
-                self.game_board.get(row_key)[col].update({"color": "white"})
+                self.game_board.get(row_key)[col].update({"turn_color": "white"})
 
                 if row == 1:  # populates front 3 white pieces
                     for nested_col in range(2, 5):
-                        self.game_board.get("row2")[nested_col].update({"color": "white"})
+                        self.game_board.get("row2")[nested_col].update({"turn_color": "white"})
 
         for row in range(7, 9):
             row_key = "row" + str(row)
 
             if (row - 1) == 6:  # populates front 3 black pieces
                 for nested_col in range(2, 5):
-                    self.game_board.get("row6")[nested_col].update({"color": "black"})
+                    self.game_board.get("row6")[nested_col].update({"turn_color": "black"})
             for col in range(Converter.calculate_row_length(row)):
-                self.game_board.get(row_key)[col].update({"color": "black"})
+                self.game_board.get(row_key)[col].update({"turn_color": "black"})
 
     def initialize_german_layout(self):
         """
-        Initializes the game board array representing the game board with the game pieces of each color in the German
+        Initializes the game board array representing the game board with the game pieces of each turn_color in the German
         daisy layout.
         """
         ZERO_INDEX_OFFSET = 1
@@ -721,24 +721,24 @@ class GameBoard(tk.Tk):
 
                 if row == 0:  # populates game pieces on the first row (row I)
                     if col in range(0, 1 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on first row (row I)
-                        self.game_board[row_key][col].update({"color": "white"})
+                        self.game_board[row_key][col].update({"turn_color": "white"})
 
                     if col in range(3, 4 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on first row (row I)
-                        self.game_board[row_key][col].update({"color": "black"})
+                        self.game_board[row_key][col].update({"turn_color": "black"})
 
                 if row == 1:  # populates game pieces on the second row (row H)
                     if col in range(0, 2 + ZERO_INDEX_OFFSET):  # populates 3 white pieces on second row (row H)
-                        self.game_board[row_key][col].update({"color": "white"})
+                        self.game_board[row_key][col].update({"turn_color": "white"})
 
                     if col in range(3, 5 + ZERO_INDEX_OFFSET):  # populates 3 black pieces on second row (row H)
-                        self.game_board[row_key][col].update({"color": "black"})
+                        self.game_board[row_key][col].update({"turn_color": "black"})
 
                 if row == 2:  # populates game pieces on the third row (row G)
                     if col in range(1, 2 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on third row (row G)
-                        self.game_board[row_key][col].update({"color": "white"})
+                        self.game_board[row_key][col].update({"turn_color": "white"})
 
                     if col in range(4, 5 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on third row (row G)
-                        self.game_board[row_key][col].update({"color": "black"})
+                        self.game_board[row_key][col].update({"turn_color": "black"})
 
         # populates lower half of the game board (rows C to D)
         for row in range(6, 8 + ZERO_INDEX_OFFSET):
@@ -748,28 +748,28 @@ class GameBoard(tk.Tk):
 
                 if row == 6:  # populates game pieces on the seventh row (row C)
                     if col in range(1, 2 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on seventh row (row C)
-                        self.game_board[row_key][col].update({"color": "black"})
+                        self.game_board[row_key][col].update({"turn_color": "black"})
 
                     if col in range(4, 5 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on seventh row (row C)
-                        self.game_board[row_key][col].update({"color": "white"})
+                        self.game_board[row_key][col].update({"turn_color": "white"})
 
                 if row == 7:  # populates game pieces on the eighth row (row B)
                     if col in range(0, 2 + ZERO_INDEX_OFFSET):  # populates 3 black pieces on eighth row (row B)
-                        self.game_board[row_key][col].update({"color": "black"})
+                        self.game_board[row_key][col].update({"turn_color": "black"})
 
                     if col in range(3, 5 + ZERO_INDEX_OFFSET):  # populates 3 white pieces on eighth row (row B)
-                        self.game_board[row_key][col].update({"color": "white"})
+                        self.game_board[row_key][col].update({"turn_color": "white"})
 
                 if row == 8:  # populates game pieces on the ninth row (row A)
                     if col in range(0, 1 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on ninth row (row A)
-                        self.game_board[row_key][col].update({"color": "black"})
+                        self.game_board[row_key][col].update({"turn_color": "black"})
 
                     if col in range(3, 4 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on ninth row (row A)
-                        self.game_board[row_key][col].update({"color": "white"})
+                        self.game_board[row_key][col].update({"turn_color": "white"})
 
     def initialize_belgian_layout(self):
         """
-        Initializes the game board array representing the game board with the game pieces of each color in the Belgian
+        Initializes the game board array representing the game board with the game pieces of each turn_color in the Belgian
         daisy layout.
         """
         ZERO_INDEX_OFFSET = 1
@@ -783,24 +783,24 @@ class GameBoard(tk.Tk):
 
                 if row == 1:  # populates game pieces on the second row (row H)
                     if col in range(0, 1 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on second row (row H)
-                        self.game_board[row_key][col].update({"color": "white"})
+                        self.game_board[row_key][col].update({"turn_color": "white"})
 
                     if col in range(4, 5 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on second row (row H)
-                        self.game_board[row_key][col].update({"color": "black"})
+                        self.game_board[row_key][col].update({"turn_color": "black"})
 
                 if row == 2:  # populates game pieces on the third row (row G)
                     if col in range(0, 2 + ZERO_INDEX_OFFSET):  # populates 3 white pieces on second row (row HG)
-                        self.game_board[row_key][col].update({"color": "white"})
+                        self.game_board[row_key][col].update({"turn_color": "white"})
 
                     if col in range(4, 6 + ZERO_INDEX_OFFSET):  # populates 3 black pieces on second row (row G)
-                        self.game_board[row_key][col].update({"color": "black"})
+                        self.game_board[row_key][col].update({"turn_color": "black"})
 
                 if row == 3:  # populates game pieces on the fourth row (row F)
                     if col in range(1, 2 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on second row (row F)
-                        self.game_board[row_key][col].update({"color": "white"})
+                        self.game_board[row_key][col].update({"turn_color": "white"})
 
                     if col in range(5, 6 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on second row (row F)
-                        self.game_board[row_key][col].update({"color": "black"})
+                        self.game_board[row_key][col].update({"turn_color": "black"})
 
         # populates lower half of the game board (rows C to D)
         for row in range(5, 7 + ZERO_INDEX_OFFSET):
@@ -810,29 +810,29 @@ class GameBoard(tk.Tk):
 
                 if row == 5:  # populates game pieces on the sixth row (row D)
                     if col in range(1, 2 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on second row (row D)
-                        self.game_board[row_key][col].update({"color": "black"})
+                        self.game_board[row_key][col].update({"turn_color": "black"})
 
                     if col in range(5, 6 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on second row (row D)
-                        self.game_board[row_key][col].update({"color": "white"})
+                        self.game_board[row_key][col].update({"turn_color": "white"})
 
                 if row == 6:  # populates game pieces on the seventh row (row C)
                     if col in range(0, 2 + ZERO_INDEX_OFFSET):  # populates 3 black pieces on second row (row C)
-                        self.game_board[row_key][col].update({"color": "black"})
+                        self.game_board[row_key][col].update({"turn_color": "black"})
 
                     if col in range(4, 6 + ZERO_INDEX_OFFSET):  # populates 3 white pieces on second row (row C)
-                        self.game_board[row_key][col].update({"color": "white"})
+                        self.game_board[row_key][col].update({"turn_color": "white"})
 
                 if row == 7:  # populates game pieces on the eighth row (row B)
                     if col in range(0, 1 + ZERO_INDEX_OFFSET):  # populates 2 black pieces on second row (row B)
-                        self.game_board[row_key][col].update({"color": "black"})
+                        self.game_board[row_key][col].update({"turn_color": "black"})
 
                     if col in range(4, 5 + ZERO_INDEX_OFFSET):  # populates 2 white pieces on second row (row B)
-                        self.game_board[row_key][col].update({"color": "white"})
+                        self.game_board[row_key][col].update({"turn_color": "white"})
 
     def initialize_game_board_array(self):
         """
         Initializes the dictionary representing the game board containing arrays of dictionaries that contain the
-        various attributes of the game pieces. These attributes are: the column number, piece color, if the piece
+        various attributes of the game pieces. These attributes are: the column number, piece turn_color, if the piece
         has been clicked on by the player, and the piece's x and y coordinates.
         """
         self.game_board = {}
@@ -844,7 +844,7 @@ class GameBoard(tk.Tk):
 
             for row in range(row_length):
                 self.game_board.get(row_key).append(
-                    {"colNum": row, "color": None, "selected": False, "x_pos": None, "y_pos": None})
+                    {"colNum": row, "turn_color": None, "selected": False, "x_pos": None, "y_pos": None})
 
     def apply_draw_game_board_layout(self):
         self.initialize_game_board_array()
@@ -880,8 +880,8 @@ class GameBoard(tk.Tk):
         while True:
             #################### AI ####################
             # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
-            self.increment_turn_count()  # increments turn count of current turn color
-            self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+            self.increment_turn_count()  # increments turn count of current turn turn_color
+            self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
             result = self.Minimax.alpha_beta(
                 ["move", self.game_board, self.turn, 0])  # gets move and board from ai choice
 
@@ -894,8 +894,8 @@ class GameBoard(tk.Tk):
             self.draw_game_board()
             self.initialize_game_board_pieces()
 
-            self.increment_turn_count()  # increments turn count of current turn color
-            self.turn = Converter.get_opposite_color(self.turn)  # turn color change
+            self.increment_turn_count()  # increments turn count of current turn turn_color
+            self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
             #################### AI ####################
 
             self.update()  # forces tkinter to re-draw the new board despite being blocked by the while-loop
@@ -907,7 +907,7 @@ class GameBoard(tk.Tk):
                 print("Black wins! Six White pieces pushed off the board!")
                 break
 
-            # if turn limit is reached, color with the most marbles pushed off wins, else there is a tie
+            # if turn limit is reached, turn_color with the most marbles pushed off wins, else there is a tie
             elif self.black_move_count == 0 or self.white_move_count == 0:
                 if self.white_pieces < self.black_pieces:
                     print("Turn limit reached, Black wins! More White pieces pushed off the board than Black pieces.")

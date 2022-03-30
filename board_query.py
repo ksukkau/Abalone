@@ -2,75 +2,75 @@ from game import *
 from move import *
 from converter import *
 
-test_board = {'row0': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 1, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 2, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 3, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 4, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None}],
-              'row1': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 1, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 2, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 3, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 4, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 5, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None}],
-              'row2': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 1, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 2, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 3, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 4, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 5, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 6, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None}],
-              'row3': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 1, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 2, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 3, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 4, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 5, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 6, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 7, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None}],
-              'row4': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 1, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 2, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 3, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 4, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 5, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 6, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 7, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 8, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None}],
-              'row5': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 1, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 2, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 3, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 4, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 5, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 6, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 7, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None}],
-              'row6': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 1, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 2, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 3, 'color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 4, 'color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 5, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 6, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None}],
-              'row7': [{'colNum': 0, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 1, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 2, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 3, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 4, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 5, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None}],
-              'row8': [{'colNum': 0, 'color': "black", 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 1, 'color': "black", 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 2, 'color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 3, 'color': "black", 'selected': False, 'x_pos': None, 'y_pos': None},
-                       {'colNum': 4, 'color': "black", 'selected': False, 'x_pos': None, 'y_pos': None}]}
+test_board = {'row0': [{'colNum': 0, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 1, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 2, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 3, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 4, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None}],
+              'row1': [{'colNum': 0, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 1, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 2, 'turn_color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 3, 'turn_color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 4, 'turn_color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 5, 'turn_color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None}],
+              'row2': [{'colNum': 0, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 1, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 2, 'turn_color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 3, 'turn_color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 4, 'turn_color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 5, 'turn_color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 6, 'turn_color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None}],
+              'row3': [{'colNum': 0, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 1, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 2, 'turn_color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 3, 'turn_color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 4, 'turn_color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 5, 'turn_color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 6, 'turn_color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 7, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None}],
+              'row4': [{'colNum': 0, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 1, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 2, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 3, 'turn_color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 4, 'turn_color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 5, 'turn_color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 6, 'turn_color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 7, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 8, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None}],
+              'row5': [{'colNum': 0, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 1, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 2, 'turn_color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 3, 'turn_color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 4, 'turn_color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 5, 'turn_color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 6, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 7, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None}],
+              'row6': [{'colNum': 0, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 1, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 2, 'turn_color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 3, 'turn_color': 'white', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 4, 'turn_color': 'black', 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 5, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 6, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None}],
+              'row7': [{'colNum': 0, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 1, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 2, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 3, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 4, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 5, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None}],
+              'row8': [{'colNum': 0, 'turn_color': "black", 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 1, 'turn_color': "black", 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 2, 'turn_color': None, 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 3, 'turn_color': "black", 'selected': False, 'x_pos': None, 'y_pos': None},
+                       {'colNum': 4, 'turn_color': "black", 'selected': False, 'x_pos': None, 'y_pos': None}]}
 turn = "black"
 
 
 def center(board, color):
     """
-    gets average of distance from center of all pieces of provided color
+    gets average of distance from center of all pieces of provided turn_color
     :param board: gameboard array
-    :param color: player whose turn it is color
+    :param color: player whose turn it is turn_color
     :return: float
     """
     proximity_counter = 0
@@ -80,7 +80,7 @@ def center(board, color):
         row_number = Converter.convert_row_to_string_or_int(row[0])
         row = row[1]
         for place in row:
-            if place['color'] == color:
+            if place['turn_color'] == color:
                 pieces += 1
                 col_dist = abs(place['colNum'] - 4)
                 row_dist = abs(int(row_number) - 4)
@@ -92,21 +92,27 @@ def center(board, color):
 
 def pieces(board, color):
     """
-    counts pieces of the color on the board
+    counts pieces of the turn_color on the board
     :param board: gameboard array
-    :param color: player whose turn it is color
+    :param color: player whose turn it is turn_color
     :return: int
     """
     piece_count = 0
     for row in board.items():
         row = row[1]
         for place in row:
-            if place['color'] == color:
+            if place['turn_color'] == color:
                 piece_count += 1
     return piece_count
 
 
-def groups(board, color):
+def groups(board: dict, turn_color: str) -> list:
+    """
+    Returns the ally count of the specified color for a given game board state.
+    :param board: a dictionary, of the game board
+    :param turn_color: a string, the color to perform the ally count for
+    :return: a list of lists, containing the ally count groupings
+    """
     ally_count = []  # contains all of the groupings of ally counts
     ally_count_grouping = []  # temporarily stores the current ally count grouping
     neighbours_to_check = set()
@@ -115,7 +121,7 @@ def groups(board, color):
     for row in board:
         for piece in board[row]:
 
-            if piece["color"] == color and (row, piece["colNum"]) not in already_checked:
+            if piece["turn_color"] == turn_color and (row, piece["colNum"]) not in already_checked:
 
                 ally_count_grouping.append((row, piece["colNum"]))  # adds the piece to the ally count grouping
                 already_checked.add((row, piece["colNum"]))  # adds the piece to the set of already checked pieces
@@ -129,7 +135,7 @@ def groups(board, color):
 
                     for adjacent_piece in adjacent_pieces:
                         try:
-                            if board[adjacent_piece[0]][adjacent_piece[1]]["color"] == color and adjacent_piece not in already_checked:
+                            if board[adjacent_piece[0]][adjacent_piece[1]]["turn_color"] == turn_color and adjacent_piece not in already_checked:
 
                                 ally_count_grouping.append(adjacent_piece)
                                 already_checked.add(adjacent_piece)
@@ -171,7 +177,6 @@ def get_adj_spaces_in_internal_notation(row, col: int) -> set:
         "W": (0, -1),
         "NW": (-1, -1)
     }
-
     adjacent_spaces = set()
 
     # if the row key is passed, then it is converted to the row number
@@ -193,11 +198,12 @@ def get_adj_spaces_in_internal_notation(row, col: int) -> set:
     return adjacent_spaces
 
 
-def is_in_bounds(row, col):
+def is_in_bounds(row, col: int) -> bool:
     """
     Checks if the given coordinates is within the game board
-    :param adjacent_spaces: a set, containing the adjacent spaces for a given piece
-    :return: a set, with the out of bound spaces removed
+    :param row: an int or string, of the row
+    :param col: an int, of the colujn
+    :return: a boolean, if the coordinates are within the game board
     """
     NUM_COLS_PER_ROW = [
         5,
@@ -226,7 +232,7 @@ def is_in_bounds(row, col):
 
 def space_translation(board, adj_list, color):
     """
-    finds any same color adjacent pieces to the current piece
+    finds any same turn_color adjacent pieces to the current piece
     :param board:
     :param adj_list:
     :param color:
@@ -237,7 +243,7 @@ def space_translation(board, adj_list, color):
         spot = Converter.external_notation_to_internal(item)
         for item in board[spot[0]]:
             if item['colNum'] == spot[1]:
-                if item['color'] == color:
+                if item['turn_color'] == color:
                     adjs.append(spot)
 
 
@@ -284,18 +290,6 @@ class AllyCount:
         self.game_board = {}
 
 
-color = "black"
-ally_count = groups(test_board, color)
-print(ally_count)
-
-#     print(adjs)
-#
-#
-# #print(groups(test_board, "black"))
-# print(groups(test_board, "white"))
-#
-# print(center(test_board, "black"))
-# print(center(test_board, "white"))
-# print(pieces(test_board, "black"))
-# print(pieces(test_board, "white"))
-#
+# color = "black"
+# ally_count = groups(test_board, color)
+# print(ally_count)

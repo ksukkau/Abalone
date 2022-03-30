@@ -119,7 +119,7 @@ class StateSpaceGenerator:
             color = self.colors[item[2]]
             column = Converter.calculate_column(row, col)
             row_list = self.game[row_key]
-            row_list[column]['color'] = color
+            row_list[column]['turn_color'] = color
 
     def create_piece_list_for_current_turn(self):
         """
@@ -139,11 +139,11 @@ class StateSpaceGenerator:
     def get_sumito_num_of_adj_pieces(self, piece_color: str, row_key: str, col_num: int, direction: str,
                                      groupings=2) -> int:
         """
-        Gets the number of adjacent pieces of the same color passed to this method. Checks the pieces adjacent to the
+        Gets the number of adjacent pieces of the same turn_color passed to this method. Checks the pieces adjacent to the
         specified piece in the specified vector of adjusted_direction_tuple. The number of groups can be specified to determine if the
         method searches for 2 or 3 piece groupings.
 
-        :param piece_color: a string, the color of the adjacent pieces to get
+        :param piece_color: a string, the turn_color of the adjacent pieces to get
         :param row_key: a string, containing the row of the piece to find adjacent pieces for
         :param col_num: an int, containing the column of the piece to find adjacent pieces for
         :param direction: a string of the raw cardinal adjusted_direction_tuple of movement (e.g. 'NE' or 'S')
@@ -168,10 +168,10 @@ class StateSpaceGenerator:
         # ensures column number isn't off the game board
         if new_col_num >= 0:
             try:
-                # gets the color of the adjacent game piece
-                adj_space_piece_color = self.updated_game_board[new_row_key][new_col_num]["color"]
+                # gets the turn_color of the adjacent game piece
+                adj_space_piece_color = self.updated_game_board[new_row_key][new_col_num]["turn_color"]
 
-                # checks if the adjacent game piece is the same color, or else it returns 0
+                # checks if the adjacent game piece is the same turn_color, or else it returns 0
                 if adj_space_piece_color == piece_color:
                     num_of_adj_pieces += 1
                 else:
@@ -195,8 +195,8 @@ class StateSpaceGenerator:
                     # gets the new row key of the second adjacent game piece
                     new_row_key = Converter.convert_row_to_string_or_int(new_row_num)
 
-                    # checks if second adjacent game piece is the same color
-                    adj_space_piece_color = self.updated_game_board[new_row_key][new_col_num]["color"]
+                    # checks if second adjacent game piece is the same turn_color
+                    adj_space_piece_color = self.updated_game_board[new_row_key][new_col_num]["turn_color"]
                     if (adj_space_piece_color == piece_color):
                         num_of_adj_pieces += 1
 
@@ -236,7 +236,7 @@ class StateSpaceGenerator:
                     raise KeyError
 
                 # checks if the space we want to move to is unoccupied or if it's within the game board
-                space_value = self.game[new_row_key][new_col_num]['color']
+                space_value = self.game[new_row_key][new_col_num]['turn_color']
                 if space_value is None:
                     # piece can move
                     pieces = (piece, piece)
@@ -255,23 +255,23 @@ class StateSpaceGenerator:
                     sumito_groupings = 2
                     while sumito_groupings < 4:
 
-                        # gets the number of adjacent pieces of the turn color
+                        # gets the number of adjacent pieces of the turn turn_color
                         num_of_adj_selected_pieces = self.get_sumito_num_of_adj_pieces(self.turn, row_key, col_num,
                                                                                        direction, sumito_groupings)
 
-                        # gets the opposite adjusted_direction_tuple to check for adjacent pieces of the opposite color
+                        # gets the opposite adjusted_direction_tuple to check for adjacent pieces of the opposite turn_color
                         opposite_direction = self.opposite_direction[direction]
                         opposite_direction_tuple = self.move_directions[opposite_direction]
                         num_of_adj_opposing_pieces = self.get_sumito_num_of_adj_pieces("white", new_row_key,
                                                                                        new_col_num, opposite_direction,
                                                                                        sumito_groupings)
 
-                        # if num of adjacent pieces of current color is greater than num of adjacent pieces of opposing
-                        # color them sumito is performed
+                        # if num of adjacent pieces of current turn_color is greater than num of adjacent pieces of opposing
+                        # turn_color them sumito is performed
                         if num_of_adj_selected_pieces > num_of_adj_opposing_pieces:
                             # getting row and col of space where sumito'ed piece is going to end up
 
-                            # gets the internal coords for the leading piece of the opposing color that will be sumitoed
+                            # gets the internal coords for the leading piece of the opposing turn_color that will be sumitoed
                             leading_piece = Converter.get_leading_or_trailing_piece(new_row_num, new_col_num,
                                                                                     num_of_adj_opposing_pieces,
                                                                                     direction_tuple)
@@ -292,7 +292,7 @@ class StateSpaceGenerator:
                                     raise KeyError
 
                                 # checks if the space in front of the leading space is un-occupied
-                                if self.updated_game_board[space_in_front_row_key][piece_in_front_col_num]["color"] is None:
+                                if self.updated_game_board[space_in_front_row_key][piece_in_front_col_num]["turn_color"] is None:
                                     self.add_valid_sumito_to_move_set(col_num, direction, direction_tuple,
                                                                       leading_piece, num_of_adj_selected_pieces,
                                                                       opposite_direction_tuple, piece, row_num)
@@ -375,11 +375,11 @@ class StateSpaceGenerator:
         :param row_num: an int
         :return:
         """
-        # gets the color of the leading game piece that will be sumito'ed
-        leading_piece_color = self.updated_game_board[leading_piece[0]][leading_piece[1]]["color"]
+        # gets the turn_color of the leading game piece that will be sumito'ed
+        leading_piece_color = self.updated_game_board[leading_piece[0]][leading_piece[1]]["turn_color"]
         if leading_piece_color != self.turn:
 
-            # gets the internal coordinates of the trailing piece of the turn color
+            # gets the internal coordinates of the trailing piece of the turn turn_color
             trailing_piece = Converter.get_leading_or_trailing_piece(row_num, col_num, num_of_adj_selected_pieces,
                                                                      opposite_direction_tuple)
 
@@ -415,20 +415,20 @@ class StateSpaceGenerator:
 
     def is_valid_adjacent_piece(self, opposite_adj_row_key: str, opposite_adj_col_num: int) -> bool:
         """
-        Checks if the piece behind is of the same color, and returns a true if it is, or else false is returned.
+        Checks if the piece behind is of the same turn_color, and returns a true if it is, or else false is returned.
 
         :param opposite_adj_col_num: a string of row_key of the adjacent piece to be checked
         :param opposite_adj_row_key: an int, of the column of the adjacent piece to be checked
         :return: a boolean
         """
 
-        # checks if the adjacent piece in the opposing adjusted_direction_tuple of movement is the same color as the select piece
+        # checks if the adjacent piece in the opposing adjusted_direction_tuple of movement is the same turn_color as the select piece
         try:
             # ensures column isn't out of bounds
             if opposite_adj_col_num < 0:
                 raise KeyError
 
-            if self.updated_game_board[opposite_adj_row_key][opposite_adj_col_num]["color"] == self.turn:
+            if self.updated_game_board[opposite_adj_row_key][opposite_adj_col_num]["turn_color"] == self.turn:
                 return True
             else:
                 return False
@@ -471,7 +471,7 @@ class StateSpaceGenerator:
                 if new_col_num < 0:
                     raise KeyError
 
-                space_value = self.game[new_row_key][new_col_num]['color']
+                space_value = self.game[new_row_key][new_col_num]['turn_color']
                 if space_value is None and new_col_num >= 0:
 
                     # sets the grouping of sidesteps to find possible moves for
@@ -518,7 +518,7 @@ class StateSpaceGenerator:
                                     if sidestep_space[1] < 0:
                                         raise KeyError
 
-                                    if self.updated_game_board[sidestep_space[0]][sidestep_space[1]]["color"] is None and sidestep_complimentary_dir != skip_dir:
+                                    if self.updated_game_board[sidestep_space[0]][sidestep_space[1]]["turn_color"] is None and sidestep_complimentary_dir != skip_dir:
 
                                         # handles adding 3 group side steps to the move list
                                         if num_of_adj_pieces == 2:
@@ -567,7 +567,7 @@ class StateSpaceGenerator:
         """
         Finds the number of adjacent pieces that can make a legal sidestep move.
 
-        :param piece_color: a string, the color of the adjacent pieces to get
+        :param piece_color: a string, the turn_color of the adjacent pieces to get
         :param row_key: a string, containing the row key (e.g. 'row3')
         :param col_num: an int, containing the column number
         :param direction: a string of the raw caridnal adjusted_direction_tuple (e.g. 'NE' or 'W')
@@ -592,10 +592,10 @@ class StateSpaceGenerator:
             if new_col_num < 0:
                 raise KeyError
 
-            # gets the color of the adjacent piece
-            adj_space_piece_color = self.updated_game_board[new_row_key][new_col_num]["color"]
+            # gets the turn_color of the adjacent piece
+            adj_space_piece_color = self.updated_game_board[new_row_key][new_col_num]["turn_color"]
 
-            # checks if adjacent piece is same color or else it returns 0
+            # checks if adjacent piece is same turn_color or else it returns 0
             if adj_space_piece_color == piece_color:
                 num_of_adj_pieces += 1
             else:
@@ -612,8 +612,8 @@ class StateSpaceGenerator:
                 # gets the row key for the second adjacent game piece
                 new_row_key = Converter.convert_row_to_string_or_int(new_row_num)
 
-                # checks if second adjacent game piece is the same color
-                adj_space_piece_color = self.updated_game_board[new_row_key][new_col_num]["color"]
+                # checks if second adjacent game piece is the same turn_color
+                adj_space_piece_color = self.updated_game_board[new_row_key][new_col_num]["turn_color"]
                 if adj_space_piece_color == piece_color:
                     num_of_adj_pieces += 1
 
@@ -639,7 +639,7 @@ class StateSpaceGenerator:
 
                 opposing_color = Converter.get_opposite_color(self.turn)
                 color_of_second_piece = \
-                    self.updated_game_board[second_place_piece_coords[0]][second_place_piece_coords[1]]["color"]
+                    self.updated_game_board[second_place_piece_coords[0]][second_place_piece_coords[1]]["turn_color"]
 
                 try:
                     # ensures column number isn't out of bounds
@@ -647,7 +647,7 @@ class StateSpaceGenerator:
                         raise KeyError
 
                     # push opposing piece
-                    self.updated_game_board[move[3]][move[4]]["color"] = opposing_color
+                    self.updated_game_board[move[3]][move[4]]["turn_color"] = opposing_color
 
                 except (IndexError, KeyError):
                     # shift pieces as piece has been pushed off game board
@@ -657,16 +657,16 @@ class StateSpaceGenerator:
                     # print(f"{sumitoed_piece + opposing_color[0]} pushed off the board!")
 
                 finally:
-                    # leading piece replaced by color of piece directly behind it
+                    # leading piece replaced by turn_color of piece directly behind it
                     self.updated_game_board[leading_piece_coords[0]][leading_piece_coords[1]][
-                        "color"] = color_of_second_piece
+                        "turn_color"] = color_of_second_piece
 
-                    # replaces second place piece with piece of turn color
+                    # replaces second place piece with piece of turn turn_color
                     self.updated_game_board[second_place_piece_coords[0]][second_place_piece_coords[1]][
-                        "color"] = self.turn
+                        "turn_color"] = self.turn
 
                     # removes trailing piece
-                    self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["color"] = None
+                    self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["turn_color"] = None
 
                 # self.output_board()
                 self.states.append([move, self.updated_game_board])
@@ -677,13 +677,13 @@ class StateSpaceGenerator:
             # only for single piece moves
             if move[0] == 'i':
                 # move trailing piece up front
-                self.updated_game_board[move[3]][move[4]]["color"] = self.turn
+                self.updated_game_board[move[3]][move[4]]["turn_color"] = self.turn
 
                 trailing_piece_external_coords = move[1][1]
                 trailing_piece_coords = self.translate_external_coords_to_internal_coords(
                     trailing_piece_external_coords)
                 # remove old trailing piece
-                self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["color"] = None
+                self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["turn_color"] = None
                 #self.output_board()
                 # resets board to before move
                 self.states.append([move, self.updated_game_board])
@@ -693,13 +693,13 @@ class StateSpaceGenerator:
             # only for single piece moves
             if move[0] == 'i':
                 # move trailing piece up front
-                self.updated_game_board[move[3]][move[4]]["color"] = self.turn
+                self.updated_game_board[move[3]][move[4]]["turn_color"] = self.turn
 
                 trailing_piece_external_coords = move[1][1]
                 trailing_piece_coords = self.translate_external_coords_to_internal_coords(
                     trailing_piece_external_coords)
                 # remove old trailing piece
-                self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["color"] = None
+                self.updated_game_board[trailing_piece_coords[0]][trailing_piece_coords[1]]["turn_color"] = None
                 #self.output_board()
                 # resets board to before move
                 self.states.append([move, self.updated_game_board])
@@ -714,7 +714,7 @@ class StateSpaceGenerator:
                 piece_coords_tuple = self.translate_external_coords_to_internal_coords(piece)
 
                 # removes where the piece used to be
-                self.updated_game_board[piece_coords_tuple[0]][piece_coords_tuple[1]]["color"] = None
+                self.updated_game_board[piece_coords_tuple[0]][piece_coords_tuple[1]]["turn_color"] = None
 
                 # gets the adjusted_direction_tuple of the side step and packs the adjusted_direction_tuple into a tuple
                 sidestep_row_dir_coord = direction_tuple[0]
@@ -725,7 +725,7 @@ class StateSpaceGenerator:
                 # performs the sidestep
                 sidestep_piece = self.simulate_game_piece_movement(piece_coords_tuple[0], piece_coords_tuple[1],
                                                                    sidestep_dir_tuple)
-                self.updated_game_board[sidestep_piece[0]][sidestep_piece[1]]["color"] = self.turn
+                self.updated_game_board[sidestep_piece[0]][sidestep_piece[1]]["turn_color"] = self.turn
 
             #self.output_board()
             self.states.append([move, self.updated_game_board])
@@ -736,10 +736,10 @@ class StateSpaceGenerator:
             # only for single piece moves
             if move[0] == 'i':
                 # move front piece up
-                self.updated_game_board[move[3]][move[4]]['color'] = self.turn
+                self.updated_game_board[move[3]][move[4]]['turn_color'] = self.turn
                 # remove back piece
                 location = Converter.external_notation_to_internal(move[1][1])
-                self.updated_game_board[location[0]][location[1]]['color'] = None
+                self.updated_game_board[location[0]][location[1]]['turn_color'] = None
                 #self.output_board()
                 # resets board to before move
                 self.states.append([move, self.updated_game_board])
@@ -792,13 +792,13 @@ class StateSpaceGenerator:
         for row, col in self.updated_game_board.items():
             for piece in col:
 
-                if piece["color"] is not None:
+                if piece["turn_color"] is not None:
 
                     row_num = Converter.convert_row_to_string_or_int(row)
                     col_num = piece["colNum"]
                     piece_letter_coord = Converter.internal_notation_to_external(row_num, col_num)
 
-                    if piece["color"] == "black":
+                    if piece["turn_color"] == "black":
                         blacks.append(piece_letter_coord + 'b')
                     else:
                         whites.append(piece_letter_coord + 'w')
