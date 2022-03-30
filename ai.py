@@ -101,7 +101,7 @@ class Minimax:
 
         max_val = max([x for x in next_states_values_dict.keys()])
         options = [x for x in next_states_values_dict.items() if x[0] == max_val]
-
+        print(options)
         choice = self.random_choice(options)
         print(time.perf_counter() - start)
         print(self.pruned)
@@ -109,7 +109,9 @@ class Minimax:
 
     def max_value(self, depth_state, a, b):
         if self.is_terminal(depth_state):  # if depth is equal to max depth
-            return self.get_value(depth_state)
+            value = self.get_value(depth_state)
+            #print("Max value", value)
+            return value
 
         v = float('-inf')
 
@@ -125,7 +127,9 @@ class Minimax:
 
     def min_value(self, depth_state, a, b):
         if self.is_terminal(depth_state):  # if depth is equal to max depth
-            return self.get_value(depth_state)
+            value = self.get_value(depth_state)
+            #print("Min value", value)
+            return value
 
         v = float('inf')
 
