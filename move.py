@@ -137,8 +137,9 @@ class Move:
         :param adjacent_spaces: a set, containing the adjacent spaces for a given piece
         :return: a set, with the out of bound spaces removed
         """
+        ZERO_INDEX_OFFSET = 1
         VALID_ROWS = {"A", "B", "C", "D", "E", "F", "G", "H", "I"}
-        VALID_COLS = range(0, 9)
+        VALID_COLS = range(0, 9 + ZERO_INDEX_OFFSET)
 
         temp_set = deepcopy(adjacent_spaces)
         # iterates through the spaces within adjacent spaces
@@ -216,31 +217,51 @@ class Move:
         # adds any valid or sumito moves found
         valid_moves.update(self.get_valid_inline_moves(first_selected, last_selected, game_board, turn_color, vector_of_dir))
 
-        # adds any valid sidestep moves
-        if num_pieces_selected >= 2:
-            valid_moves.update(self.get_valid_sidestep_moves(selected_pieces, num_pieces_selected, game_board, turn_color, vector_of_dir))
-            pass
-
-        # adjacent_spaces = self.get_adj_spaces()
-
         return valid_moves
 
-    def get_valid_sidestep_moves(self, selected_pieces: list, num_pieces_selected: int, game_board: dict, turn_color: str, vector_of_dir: list) -> dict:
+    def get_valid_sidestep_moves(self, selected_pieces: list, num_pieces_selected: int, game_board: dict, turn_color: str, vector_of_dir: list) -> list:
         """
         Finds the valid sidestep moves and adds it to the
-        :param selected_pieces:
-        :param num_pieces_selected:
-        :param game_board:
-        :param turn_color:
-        :param vector_of_dir:
-        :return:
+        :param num_pieces_selected: a int, the number of currently selected game pieces
+        :param selected_pieces: a list, containing the external coordinates of the selected game pieces, in order
+        :param game_board: the current game board
+        :param turn_color: a string, the current turn turn_color
+        :param vector_of_dir: a list, containing the vector of direction of the selected game pieces
+        :return: a list
         """
-        valid_moves = {}
+        valid_sidesteps = []
+        temp_grouping = []
+        is_valid_move = True
 
         sidestep_dirs_to_check = self.sidestep_directions[vector_of_dir[0]]
-        print(sidestep_dirs_to_check)
+        for dir in sidestep_dirs_to_check:
 
+            for piece in selected_pieces:
+                row = piece[0]
+                col = piece[1]
 
+                # gets the adjusted direction tuple and then gets the piece adjacent to the selected piece(s)
+                adjusted_dir_tuple = self.get_adjusted_tuple_or_cardinal_dir(row, cardinal_dir=dir)
+                adjacent_space = Converter.simulate_game_piece_movement(row, col, adjusted_dir_tuple)
+
+                # checks if the grouping can make a valid sidestep to spaces that are unoccupied
+                try:
+                    if is_valid_move and game_board[adjacent_space[0]][adjacent_space[1]]["turn_color"] == None:
+                        temp_grouping.append(adjacent_space)
+                    else:
+                        is_valid_move = False
+                except (IndexError, KeyError):
+                    is_valid_move = False
+
+            # if all selected pieces have unoccupied spaces in the direction of movement, it's added as a valid sidestep
+            if is_valid_move:
+                valid_sidesteps.append([temp_grouping, dir])
+
+            # resets the is_valid_move flag and resets the temp grouping for the next direction check
+            is_valid_move = True
+            temp_grouping = []
+
+        return valid_sidesteps
 
     def get_valid_inline_moves(self, first_selected: tuple, last_selected: tuple, game_board: dict, turn_color: str, vector_of_dir: list):
         """
