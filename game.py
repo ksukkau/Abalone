@@ -214,26 +214,8 @@ class GameBoard(tk.Tk):
                                     self.selected_pieces = []  # resets list
                                     self.selected_pieces_xy_coords = []  # resets list
 
-                                    #################### AI ####################
-                                    # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
-                                    self.increment_turn_count()  # increments turn count of current turn turn_color
-                                    self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
-                                    start = time.perf_counter()
-                                    result = self.Minimax.alpha_beta(
-                                        ["move", self.game_board, self.turn, 0])  # gets move and board from ai choice
-                                    ai_time = time.perf_counter() - start  # gives time take for ai to select move
+                                    self.apply_ai()  # gets, and applies, the AI's move
 
-                                    self.game_board = result[1]  # ai selected board
-                                    selected_move = result[
-                                        0]  # the move needs to print to the game console and show highlighted ai pieces
-                                    print("Ai selected move" + str(selected_move))
-                                    # redraws new game board generated from AI within ai.py from line above
-                                    self.draw_game_board()
-                                    self.initialize_game_board_pieces()
-
-                                    self.increment_turn_count()  # increments turn count of current turn turn_color
-                                    self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
-                                    #################### AI ####################
 
                             # performs 2 or 3 group piece movements
                             elif self.num_pieces_selected > 1:
@@ -268,24 +250,7 @@ class GameBoard(tk.Tk):
                                         self.selected_pieces = []  # resets list
                                         self.selected_pieces_xy_coords = []  # resets list
 
-                                        #################### AI ####################
-                                        # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
-                                        self.increment_turn_count()  # increments turn count of current turn turn_color
-                                        self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
-                                        result = self.Minimax.alpha_beta(["move", self.game_board, self.turn,
-                                                                          0])  # gets move and board from ai choice
-
-                                        self.game_board = result[1]  # ai selected board
-                                        selected_move = result[
-                                            0]  # the move needs to print to the game console and show highlighted ai pieces
-                                        print("Ai selected move" + str(selected_move))
-                                        # redraws new game board generated from AI within ai.py from line above
-                                        self.draw_game_board()
-                                        self.initialize_game_board_pieces()
-
-                                        self.increment_turn_count()  # increments turn count of current turn turn_color
-                                        self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
-                                        #################### AI ####################
+                                        self.apply_ai()  # gets, and applies, the AI's move
 
                                         # print("\n--- Debug ---")
                                         # print(f"Black turn num: {self.turn_count_black}")
@@ -307,27 +272,7 @@ class GameBoard(tk.Tk):
                                             self.selected_pieces = []  # resets list
                                             self.selected_pieces_xy_coords = []  # resets list
 
-                                            #################### AI ####################
-                                            # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
-                                            self.increment_turn_count()  # increments turn count of current turn turn_color
-                                            self.turn = Converter.get_opposite_color(
-                                                self.turn)  # turn turn_color change
-                                            result = self.Minimax.alpha_beta(
-                                                ["move", self.game_board, self.turn,
-                                                 0])  # gets move and board from ai choice
-
-                                            self.game_board = result[1]  # ai selected board
-                                            selected_move = result[
-                                                0]  # the move needs to print to the game console and show highlighted ai pieces
-                                            print("Ai selected move" + str(selected_move))
-                                            # redraws new game board generated from AI within ai.py from line above
-                                            self.draw_game_board()
-                                            self.initialize_game_board_pieces()
-
-                                            self.increment_turn_count()  # increments turn count of current turn turn_color
-                                            self.turn = Converter.get_opposite_color(
-                                                self.turn)  # turn turn_color change
-                                            #################### AI ####################
+                                            self.apply_ai()  # gets, and applies, the AI's move
 
                                         # clears the chain of sumito'ed pieces
                                         self.sumito_chain = []
@@ -346,27 +291,24 @@ class GameBoard(tk.Tk):
 
                                             # helper method to perform the sidestep move
                                             self.perform_sidestep(valid_sidestep_pieces)
+                                            self.apply_ai()  # gets, and applies, the AI's move
 
-                                            #################### AI ####################
-                                            # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
-                                            self.increment_turn_count()  # increments turn count of current turn turn_color
-                                            self.turn = Converter.get_opposite_color(
-                                                self.turn)  # turn turn_color change
-                                            result = self.Minimax.alpha_beta(["move", self.game_board, self.turn,
-                                                                              0])  # gets move and board from ai choice
+    def apply_ai(self):
+        """
+        Gets the AI's move, and then redraws the game board with the AI's new move.
+        """
+        self.increment_turn_count()  # increments turn count of current turn turn_color
+        self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
+        result = self.Minimax.alpha_beta(["move", self.game_board, self.turn, 0])  # gets move and board from ai choice
+        self.game_board = result[1]  # ai selected board
+        selected_move = result[0]  # the move needs to print to the game console and show highlighted ai pieces
+        print("Ai selected move" + str(selected_move))
 
-                                            self.game_board = result[1]  # ai selected board
-                                            selected_move = result[
-                                                0]  # the move needs to print to the game console and show highlighted ai pieces
-                                            print("Ai selected move" + str(selected_move))
-                                            # redraws new game board generated from AI within ai.py from line above
-                                            self.draw_game_board()
-                                            self.initialize_game_board_pieces()
-
-                                            self.increment_turn_count()  # increments turn count of current turn turn_color
-                                            self.turn = Converter.get_opposite_color(
-                                                self.turn)  # turn turn_color change
-                                            #################### AI ####################
+        # redraws new game board generated from AI within ai.py from line above
+        self.draw_game_board()
+        self.initialize_game_board_pieces()
+        self.increment_turn_count()  # increments turn count of current turn turn_color
+        self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
 
     def perform_sidestep(self, sidestep_move_details: list):
         """
