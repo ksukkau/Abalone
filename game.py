@@ -129,7 +129,6 @@ class GameBoard(tk.Tk):
                         selected_piece_color = selected_row[col].get("turn_color")
 
                         piece_clicked = Converter.internal_notation_to_external(row, col)
-                        # print(f"Selected piece at: {piece_clicked}{selected_piece_color[0].lower()}")  # prints clicked piece
                         print(f"Selected piece at: {piece_clicked} {self.game_board[row_key][col]['turn_color']}")  # prints clicked piece
 
                         # ensures that the turn turn_color can't select the opposing turn_color's pieces for movement
@@ -202,7 +201,6 @@ class GameBoard(tk.Tk):
                                 self.possible_inline_moves = self.Move.get_possible_single_moves(self.selected_pieces,
                                                                                                  self.num_pieces_selected,
                                                                                                  self.game_board)
-                                print(f"Possible inline moves: {self.possible_inline_moves}")
 
                                 # checks if new space clicked is unoccupied, if so then performs single piece move
                                 if piece_clicked in self.possible_inline_moves:
@@ -216,7 +214,6 @@ class GameBoard(tk.Tk):
 
                                     self.apply_ai()  # gets, and applies, the AI's move
 
-
                             # performs 2 or 3 group piece movements
                             elif self.num_pieces_selected > 1:
                                 vector_of_dir = self.Move.get_dir_of_selected_pieces(self.selected_pieces)
@@ -224,9 +221,6 @@ class GameBoard(tk.Tk):
                                                                                                   self.num_pieces_selected,
                                                                                                   self.game_board, self.turn,
                                                                                                   vector_of_dir)
-
-
-                                print(f"Possible inline {self.possible_inline_moves}")
 
                                 if piece_clicked in self.possible_inline_moves.keys():
 
