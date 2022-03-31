@@ -3,6 +3,7 @@ import random
 import time
 import tkinter as tk
 from tkinter import *
+from tkinter import messagebox
 
 from ai import *
 from settings import *
@@ -493,6 +494,14 @@ class GameBoard(tk.Tk):
         self.game_board = result[1]  # ai selected board
         selected_move = result[0]  # the move needs to print to the game console and show highlighted ai pieces
         time_taken = time.perf_counter() - start
+
+        if self.turn == "black":
+            turn_timer = 'time1'
+        else:
+            turn_timer = 'time2'
+        if time_taken > self.settings_selections[turn_timer]:
+            messagebox.showinfo("Timer", "Out of Time!")
+
         print("Ai selected move" + str(selected_move))
 
         # redraws new game board generated from AI within ai.py from line above
@@ -1342,12 +1351,11 @@ class GameBoard(tk.Tk):
     def update_timer(self):
 
         time_limit = self.settings_selections['time1']
-        timer = time_limit*1000
-        while timer > 0:
-            timer = time_limit * 1000 - 100
+        while time_limit > 0:
+            time_limit -= 1
+            self.current_move_timer_label.configure(text=time_limit)
+            self.after(100, self.update_timer)
 
-            self.current_move_timer_label.configure(text=timer)
-            self.after(100, self.update_timer())
 
 
 def main():
