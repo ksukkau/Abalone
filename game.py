@@ -1337,6 +1337,9 @@ class GameBoard(tk.Tk):
         self.apply_draw_game_board_layout()
         self.white_move_count = self.settings_selections['turns']
         self.black_move_count = self.settings_selections['turns']
+        self.white_pieces = 14
+        self.black_pieces = 14
+        self.set_pieces_count()
         self.player_info()
         self.draw_moves_window()
         self.draw_timer_window()

@@ -93,7 +93,7 @@ class Minimax:
         next_states = generator.run_generation()
         next_states_values_dict = {}
         for next_state in next_states:
-            print(next_state[0])
+            #print(next_state[0])
             next_depth_state = next_state[0], next_state[1], self.get_opposite_color(state[2]), state[3] + 1
             value = max(value, self.min_value(next_depth_state, a, b))
             a = max(a, value)
