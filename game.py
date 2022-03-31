@@ -8,7 +8,6 @@ from ai import *
 from settings import *
 from converter import Converter
 from move import Move
-from copy import deepcopy
 import time
 
 
@@ -80,9 +79,6 @@ class GameBoard(tk.Tk):
         self.first_piece_selection = None  # stores the index of piece adjacent to first piece in sumito chain
         self.latest_human_move = ()  # stores the latest human move
 
-        # ----- Undo Moves ----- #
-        self.previous_board_states = []
-
     @staticmethod
     def get_row_key(row: int, offset=0) -> str:
         """
@@ -114,7 +110,7 @@ class GameBoard(tk.Tk):
         piece has been clicked, it is highlighted and the selected game piece is colored green.
         :param event: an Event object containing various data attributes including the x and y coords of the click event
         """
-        DEBUG_PRINT_STATEMENTS = False  # setting to True enables print statements that contain additional information
+        DEBUG_PRINT_STATEMENTS = True  # setting to True enables print statements that contain additional information
         RANGE = 20
         print(f"Clicked at {event.x}, {event.y}")
 
@@ -212,7 +208,6 @@ class GameBoard(tk.Tk):
 
                                 # checks if new space clicked is unoccupied, if so then performs single piece move
                                 if piece_clicked in self.possible_inline_moves:
-                                    self.store_last_move()  # stores the last AI move
 
                                     #--- Stores the notation for the human move ---#
                                     direction = self.Move.get_dir_of_selected_pieces([(row_key, col), self.selected_pieces[0]])[0]
@@ -249,7 +244,6 @@ class GameBoard(tk.Tk):
 
                                         # if the clicked piece is adjacent to the 1st selected game piece
                                         if piece_clicked in self.adjacent_spaces:
-                                            self.store_last_move()  # stores the last AI move
 
                                             # --- Stores the notation for the human move ---#
                                             first_selected_piece = self.selected_pieces[0]
@@ -269,8 +263,6 @@ class GameBoard(tk.Tk):
                                             self.move_single_selected_piece(row, col, piece_x_pos, piece_y_pos)
 
                                         else:
-                                            self.store_last_move()  # stores the last AI move
-
                                             # --- Stores the notation for the human move ---#
                                             first_selected_piece = self.selected_pieces[0]
                                             last_selected_piece = self.selected_pieces[-1]
@@ -309,8 +301,6 @@ class GameBoard(tk.Tk):
                                         valid_sumito = self.is_valid_sumito(row_key, col)
 
                                         if valid_sumito:
-                                            self.store_last_move()  # stores the last AI move
-
                                             # --- Stores the notation for the human move ---#
                                             first_selected_piece = self.selected_pieces[0]
                                             last_selected_piece = self.selected_pieces[-1]
@@ -353,7 +343,6 @@ class GameBoard(tk.Tk):
 
                                         piece_clicked_internal_notation = Converter.external_notation_to_internal(piece_clicked)
                                         if piece_clicked_internal_notation == valid_sidestep_pieces[0][0] and self.num_pieces_selected == len(valid_sidestep_pieces[0]):
-                                            self.store_last_move()  # stores the last AI move
 
                                             # --- Stores the notation for the human move ---#
                                             direction = valid_sidestep_pieces[1]
@@ -374,105 +363,6 @@ class GameBoard(tk.Tk):
                                             self.perform_sidestep(valid_sidestep_pieces)
                                             self.apply_ai()  # gets, and applies, the AI's move
 
-    def undo_last_move(self):
-        """
-        Performs an undo from before the latest move was made.
-        """
-        if len(self.previous_board_states) > 0:
-            previous_state = self.previous_board_states.pop()
-
-            print(f"BLACK MOVES {previous_state['black_moves']}")
-            print(f"WHITE MOVES {previous_state['white_moves']}")
-
-            # deletes content within the black & white, timer & moves box
-            self.repopulate_listbox(self.black_timer_box, previous_state["black_timer_box"])
-            self.repopulate_listbox(self.white_timer_box, previous_state["white_timer_box"])
-
-            self.repopulate_listbox(self.black_moves_box, previous_state["black_moves"])
-            self.repopulate_listbox(self.white_moves_box, previous_state["white_moves"])
-
-
-            # undoes the black and white move count
-            self.black_move_count = previous_state["black_move_count"]
-            self.white_move_count = previous_state["white_move_count"]
-
-            # undoes the black and white piece count
-            self.black_pieces = previous_state["black_pieces"]
-            self.white_pieces = previous_state["white_pieces"]
-
-            # undoes the state of the game board
-            self.game_board = previous_state["game_board"]
-
-            # resets ALL movement related data attributes
-            self.adjacent_spaces = set()
-            self.possible_inline_moves = set()
-            self.possible_sidestep_moves = []
-            self.selected_pieces = []
-            self.selected_pieces_xy_coords = []
-            self.num_pieces_selected = 0
-            self.sumito_chain = []  # stores the chain of pieces to be sumito, in order
-            self.dir_tuple_sumito = ()  # stores the vector of direction for the sumito chain
-            self.first_piece_selection = None  # stores the index of piece adjacent to first piece in sumito chain
-            self.latest_human_move = ()  # stores the latest human move
-
-            self.remove_selection_flag()
-
-            # redraws the game board and updates the black and white move and piece count
-            self.draw_game_board()
-            self.initialize_game_board_pieces()
-            self.player_info()
-
-    def remove_selection_flag(self):
-        """
-        Removes the "selected" piece flag for all game pieces
-        """
-        for row in self.game_board:
-            for col in self.game_board[row]:
-                if col["selected"]:
-                    col["selected"] = False
-
-    def repopulate_listbox(self, listbox, content):
-        """
-        Repopulates the Listbox with it's updated content
-        """
-        if len(content) > 0:
-            listbox.delete(2, END)
-
-            for item in content:
-                listbox.insert(END, item)
-        else:
-            listbox.delete(2, END)
-
-    def store_last_move(self):
-        """
-        Stores the entire game state to allow the undo button to function
-        """
-        print("STORED")
-        game_board = deepcopy(self.game_board)
-
-        black_move_count = self.black_move_count
-        white_move_count = self.white_move_count
-
-        black_pieces = self.black_pieces
-        white_pieces = self.white_pieces
-
-        black_timer_box = self.black_timer_box.get(2, END)
-        white_timer_box = self.white_timer_box.get(2, END)
-
-        black_moves = self.black_moves_box.get(2, END)
-        white_moves = self.white_moves_box.get(2, END)
-
-        current_game_state = {"game_board": game_board,
-                              "black_move_count": black_move_count, "white_move_count": white_move_count,
-                              "black_pieces": black_pieces, "white_pieces": white_pieces,
-                              "black_timer_box": black_timer_box, "white_timer_box": white_timer_box,
-                              "black_moves": black_moves, "white_moves": white_moves}
-
-        if len(self.previous_board_states) == 10:
-            self.previous_board_states.pop(0)
-
-        self.previous_board_states.append(current_game_state)
-
     def apply_ai(self):
         """
         Gets the AI's move, and then redraws the game board with the AI's new move.
@@ -481,9 +371,6 @@ class GameBoard(tk.Tk):
         update = self.update_timerbox_and_moves_for_color()
         # update[0].insert(END, f"{time_taken:.5f}")  # TODO where the human timer would be updated
         update[1].insert(END, self.latest_human_move)
-
-        self.store_last_move()  # stores the last AI move
-
 
         self.increment_turn_count()  # increments turn count of current turn turn_color
         #self.update_timer()
@@ -580,7 +467,8 @@ class GameBoard(tk.Tk):
                         raise KeyError
 
                     # checks if the next adjacent piece is the opposing turn_color
-                    elif self.game_board[adj_piece[0]][adj_piece[1]]["turn_color"] == Converter.get_opposite_color(self.turn):
+                    elif self.game_board[adj_piece[0]][adj_piece[1]]["turn_color"] == Converter.get_opposite_color(
+                            self.turn):
                         self.sumito_chain.append((adj_piece[0], adj_piece[1]))
 
                     # gets the vector of direction of sumito chain by reversing direction of selected pieces chain
@@ -592,7 +480,8 @@ class GameBoard(tk.Tk):
                             sumito_dir_cardinal = vector_of_dir_for_sumito_check[1]
                         else:
                             sumito_dir_cardinal = vector_of_dir_for_sumito_check[0]
-                        self.dir_tuple_sumito = self.Move.get_adjusted_tuple_or_cardinal_dir(piece_clicked_row, cardinal_dir=sumito_dir_cardinal)
+                        self.dir_tuple_sumito = self.Move.get_adjusted_tuple_or_cardinal_dir(piece_clicked_row,
+                                                                                             cardinal_dir=sumito_dir_cardinal)
 
                     # stops searching for 3rd adjacent sumito chain piece if there isn't a 2nd
                     else:
@@ -1108,10 +997,12 @@ class GameBoard(tk.Tk):
             self.increment_turn_count()  # increments turn count of current turn turn_color
             self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
             start = time.perf_counter()
-            result = self.Minimax.alpha_beta(["move", self.game_board, self.turn, 0])  # gets move and board from ai choice
+            result = self.Minimax.alpha_beta(
+                ["move", self.game_board, self.turn, 0])  # gets move and board from ai choice
 
             self.game_board = result[1]  # ai selected board
-            selected_move = result[0]  # the move needs to print to the game console and show highlighted ai pieces
+            selected_move = result[
+                0]  # the move needs to print to the game console and show highlighted ai pieces
             time_taken = time.perf_counter() - start
             print("Ai selected move" + str(selected_move))
             # redraws new game board generated from AI within ai.py from line above
@@ -1151,6 +1042,7 @@ class GameBoard(tk.Tk):
     def apply_game_mode(self):
         """
         Handles the game mode selection for the player specified settings.
+        # TODO fully implement method
         """
         p1_settings = self.settings_selections["mode_p1"]
         p2_settings = self.settings_selections["mode_p2"]
@@ -1163,7 +1055,8 @@ class GameBoard(tk.Tk):
         elif p1_settings == "Computer" and self.settings_selections['turn_color'] == 1:
             self.make_random_first_move()
         else:
-            self.canvas.bind("<Button-1>", self.click_event_listener_engine)  # re-initializes mouse click event listener
+            self.canvas.bind("<Button-1>",
+                             self.click_event_listener_engine)  # re-initializes mouse click event listener
 
     def draw_timer_window(self):
         """
@@ -1270,7 +1163,7 @@ class GameBoard(tk.Tk):
         pause = Button(frame, text="Pause", width=10, bg=self.bg, font=font2, fg=self.font_color)
         reset = Button(frame, text="Reset", width=10, bg=self.bg, font=font2, fg=self.font_color,
                        command=self.reset_game)
-        undo = Button(frame, text="Undo Last", width=10, bg=self.bg, font=font2, fg=self.font_color, command=self.undo_last_move)
+        undo = Button(frame, text="Undo Last", width=10, bg=self.bg, font=font2, fg=self.font_color)
         settings = Button(frame, text="Settings", width=10, bg=self.bg, font=font2, fg=self.font_color,
                           command=self.settings_set_up)
 
@@ -1305,6 +1198,7 @@ class GameBoard(tk.Tk):
         self.settings_selections = self.settings.selections
         print(self.settings_selections)
 
+        print("before")
         self.apply_draw_game_board_layout()
         self.white_move_count = self.settings_selections['turns']
         self.black_move_count = self.settings_selections['turns']
@@ -1312,6 +1206,8 @@ class GameBoard(tk.Tk):
         self.draw_moves_window()
         self.draw_timer_window()
         self.apply_game_mode()
+
+        print("after")
 
     def reset_game(self):
         self.apply_draw_game_board_layout()
