@@ -260,7 +260,7 @@ def space_translation(board, adj_list, color):
                     adjs.append(spot)
 
 
-def push_eval(state):
+def push_eval(state, center_val):
 
     move = state[0]
     if len(move[1]) == 3:
@@ -269,12 +269,15 @@ def push_eval(state):
         push = False
 
     if push:
-        # find distance of pushed piece from the edge
+        # find distance of pushed piece from the edge couldnt figure this out,
+        # i think if ew can add distance to the edge for this move as in doesit move you closer to the edge
+        # or transition in score somehow this would make our ai more agressive
         piece_location = Converter.external_notation_to_internal(move[1][1])
         row_number = Converter.convert_row_to_string_or_int(piece_location[0])
-        center_val = center(state[1], state[2])
+        print("center_val", center_val)
         total = 5 - center_val
-        if total < 2:
+        print("total", total)
+        if total < 4.8:
             return 5
         else:
             return 0.5
@@ -290,5 +293,3 @@ class AllyCount:
 
 
 test_state = (('i', ('C4', 'C5', 'C6'), 'W', 'row6', 2), {'row0': [{'colNum': 0, 'turn_color': 'white', 'selected': False, 'x_pos': 240, 'y_pos': 57}, {'colNum': 1, 'turn_color': 'white', 'selected': False, 'x_pos': 295, 'y_pos': 57}, {'colNum': 2, 'turn_color': None, 'selected': False, 'x_pos': 350, 'y_pos': 57}, {'colNum': 3, 'turn_color': None, 'selected': False, 'x_pos': 405, 'y_pos': 57}, {'colNum': 4, 'turn_color': None, 'selected': False, 'x_pos': 460, 'y_pos': 57}], 'row1': [{'colNum': 0, 'turn_color': 'white', 'selected': False, 'x_pos': 212, 'y_pos': 104}, {'colNum': 1, 'turn_color': 'white', 'selected': False, 'x_pos': 267, 'y_pos': 104}, {'colNum': 2, 'turn_color': 'white', 'selected': False, 'x_pos': 322, 'y_pos': 104}, {'colNum': 3, 'turn_color': None, 'selected': False, 'x_pos': 377, 'y_pos': 104}, {'colNum': 4, 'turn_color': None, 'selected': False, 'x_pos': 432, 'y_pos': 104}, {'colNum': 5, 'turn_color': 'white', 'selected': False, 'x_pos': 487, 'y_pos': 104}], 'row2': [{'colNum': 0, 'turn_color': None, 'selected': False, 'x_pos': 185, 'y_pos': 152}, {'colNum': 1, 'turn_color': None, 'selected': False, 'x_pos': 240, 'y_pos': 152}, {'colNum': 2, 'turn_color': None, 'selected': False, 'x_pos': 295, 'y_pos': 152}, {'colNum': 3, 'turn_color': None, 'selected': False, 'x_pos': 350, 'y_pos': 152}, {'colNum': 4, 'turn_color': 'white', 'selected': False, 'x_pos': 405, 'y_pos': 152}, {'colNum': 5, 'turn_color': 'white', 'selected': False, 'x_pos': 460, 'y_pos': 152}, {'colNum': 6, 'turn_color': 'black', 'selected': False, 'x_pos': 515, 'y_pos': 152}], 'row3': [{'colNum': 0, 'turn_color': None, 'selected': False, 'x_pos': 157, 'y_pos': 200}, {'colNum': 1, 'turn_color': None, 'selected': False, 'x_pos': 212, 'y_pos': 200}, {'colNum': 2, 'turn_color': 'white', 'selected': False, 'x_pos': 267, 'y_pos': 200}, {'colNum': 3, 'turn_color': 'white', 'selected': False, 'x_pos': 322, 'y_pos': 200}, {'colNum': 4, 'turn_color': 'white', 'selected': False, 'x_pos': 377, 'y_pos': 200}, {'colNum': 5, 'turn_color': 'white', 'selected': False, 'x_pos': 432, 'y_pos': 200}, {'colNum': 6, 'turn_color': None, 'selected': False, 'x_pos': 487, 'y_pos': 200}, {'colNum': 7, 'turn_color': None, 'selected': False, 'x_pos': 542, 'y_pos': 200}], 'row4': [{'colNum': 0, 'turn_color': None, 'selected': False, 'x_pos': 130, 'y_pos': 247}, {'colNum': 1, 'turn_color': None, 'selected': False, 'x_pos': 185, 'y_pos': 247}, {'colNum': 2, 'turn_color': None, 'selected': False, 'x_pos': 240, 'y_pos': 247}, {'colNum': 3, 'turn_color': None, 'selected': False, 'x_pos': 295, 'y_pos': 247}, {'colNum': 4, 'turn_color': None, 'selected': False, 'x_pos': 350, 'y_pos': 247}, {'colNum': 5, 'turn_color': 'black', 'selected': False, 'x_pos': 405, 'y_pos': 247}, {'colNum': 6, 'turn_color': 'black', 'selected': False, 'x_pos': 460, 'y_pos': 247}, {'colNum': 7, 'turn_color': None, 'selected': False, 'x_pos': 515, 'y_pos': 247}, {'colNum': 8, 'turn_color': None, 'selected': False, 'x_pos': 570, 'y_pos': 247}], 'row5': [{'colNum': 0, 'turn_color': None, 'selected': False, 'x_pos': 157, 'y_pos': 295}, {'colNum': 1, 'turn_color': 'black', 'selected': False, 'x_pos': 212, 'y_pos': 295}, {'colNum': 2, 'turn_color': None, 'selected': False, 'x_pos': 267, 'y_pos': 295}, {'colNum': 3, 'turn_color': None, 'selected': False, 'x_pos': 322, 'y_pos': 295}, {'colNum': 4, 'turn_color': 'white', 'selected': False, 'x_pos': 377, 'y_pos': 295}, {'colNum': 5, 'turn_color': None, 'selected': False, 'x_pos': 432, 'y_pos': 295}, {'colNum': 6, 'turn_color': 'black', 'selected': False, 'x_pos': 487, 'y_pos': 295}, {'colNum': 7, 'turn_color': None, 'selected': False, 'x_pos': 542, 'y_pos': 295}], 'row6': [{'colNum': 0, 'turn_color': None, 'selected': False, 'x_pos': 185, 'y_pos': 343}, {'colNum': 1, 'turn_color': 'black', 'selected': False, 'x_pos': 240, 'y_pos': 343}, {'colNum': 2, 'turn_color': 'white', 'selected': False, 'x_pos': 295, 'y_pos': 343}, {'colNum': 3, 'turn_color': 'black', 'selected': False, 'x_pos': 350, 'y_pos': 343}, {'colNum': 4, 'turn_color': 'black', 'selected': False, 'x_pos': 405, 'y_pos': 343}, {'colNum': 5, 'turn_color': None, 'selected': False, 'x_pos': 460, 'y_pos': 343}, {'colNum': 6, 'turn_color': None, 'selected': False, 'x_pos': 515, 'y_pos': 343}], 'row7': [{'colNum': 0, 'turn_color': 'black', 'selected': False, 'x_pos': 212, 'y_pos': 390}, {'colNum': 1, 'turn_color': 'black', 'selected': False, 'x_pos': 267, 'y_pos': 390}, {'colNum': 2, 'turn_color': 'black', 'selected': False, 'x_pos': 322, 'y_pos': 390}, {'colNum': 3, 'turn_color': None, 'selected': False, 'x_pos': 377, 'y_pos': 390}, {'colNum': 4, 'turn_color': None, 'selected': False, 'x_pos': 432, 'y_pos': 390}, {'colNum': 5, 'turn_color': None, 'selected': False, 'x_pos': 487, 'y_pos': 390}], 'row8': [{'colNum': 0, 'turn_color': None, 'selected': False, 'x_pos': 240, 'y_pos': 438}, {'colNum': 1, 'turn_color': None, 'selected': False, 'x_pos': 295, 'y_pos': 438}, {'colNum': 2, 'turn_color': 'black', 'selected': False, 'x_pos': 350, 'y_pos': 438}, {'colNum': 3, 'turn_color': 'black', 'selected': False, 'x_pos': 405, 'y_pos': 438}, {'colNum': 4, 'turn_color': 'black', 'selected': False, 'x_pos': 460, 'y_pos': 438}]}, 'white', 2)
-
-push_eval(test_state)
