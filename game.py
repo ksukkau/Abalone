@@ -8,6 +8,7 @@ from ai import *
 from settings import *
 from converter import Converter
 from move import Move
+import time
 
 
 class GameBoard(tk.Tk):
@@ -61,7 +62,7 @@ class GameBoard(tk.Tk):
         self.spot_coords = {}
         self.board_screen_pos = None
         self.game_board = None
-
+        self.current_move_timer_label = None
         # ----- AI ----- #
         self.Minimax = Minimax()
 
@@ -292,14 +293,19 @@ class GameBoard(tk.Tk):
         Gets the AI's move, and then redraws the game board with the AI's new move.
         """
         self.increment_turn_count()  # increments turn count of current turn turn_color
+        #self.update_timer()
+        start = time.perf_counter()
         self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
         result = self.Minimax.alpha_beta(["move", self.game_board, self.turn, 0])  # gets move and board from ai choice
         self.game_board = result[1]  # ai selected board
         selected_move = result[0]  # the move needs to print to the game console and show highlighted ai pieces
+        time_taken = time.perf_counter() - start
         print("Ai selected move" + str(selected_move))
 
         # redraws new game board generated from AI within ai.py from line above
         self.draw_game_board()
+        self.white_timer_box.insert(END, str(time_taken))
+        self.white_moves_box.insert(END, selected_move)
         self.initialize_game_board_pieces()
         self.increment_turn_count()  # increments turn count of current turn turn_color
         self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
@@ -1019,10 +1025,11 @@ class GameBoard(tk.Tk):
         player_two_pieces_label.grid(column=4, row=3)
 
     def current_move_timer(self):
+
         font = ("Montserrat", 18, "bold")
-        current_move_timer = Label(self, text=f"Time:\n3:00", bg=self.bg, font=font,
+        self.current_move_timer_label = Label(self, text=f"Time:\n3:00", bg=self.bg, font=font,
                                    fg=self.font_color)
-        current_move_timer.grid(column=3, row=2)
+        self.current_move_timer_label.grid(column=3, row=2)
 
     def set_pieces_count(self):
         """
@@ -1113,6 +1120,16 @@ class GameBoard(tk.Tk):
         self.canvas.bind("<Button-1>", self.click_event_listener_engine)  # sets up mouse click event listener
 
         self.mainloop()
+
+    def update_timer(self):
+
+        time_limit = self.settings_selections['time1']
+        timer = time_limit*1000
+        while timer > 0:
+            timer = time_limit * 1000 - 100
+
+            self.current_move_timer_label.configure(text=timer)
+            self.after(100, self.update_timer())
 
 
 def main():

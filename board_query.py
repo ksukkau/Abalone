@@ -272,12 +272,12 @@ def push_eval(state):
         # find distance of pushed piece from the edge
         piece_location = Converter.external_notation_to_internal(move[1][1])
         row_number = Converter.convert_row_to_string_or_int(piece_location[0])
-        center_val = -(center(state[1], state[2]))
-        total = 5 + center_val
+        center_val = center(state[1], state[2])
+        total = 5 - center_val
         if total < 2:
-            return 10
+            return 5
         else:
-            return 2
+            return 0.5
     else:
         return 0
 
