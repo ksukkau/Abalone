@@ -57,7 +57,7 @@ class GameBoard(tk.Tk):
         self.white_pieces = None
         self.black_pieces = None
         self.settings = None
-        self.settings_selections = {'turn_color': 0, 'mode_p1': "Human", 'mode_p2': "Human", 'config': 0, 'turns': 15,
+        self.settings_selections = {'turn_color': 0, 'mode_p1': "Human", 'mode_p2': "Human", 'config': 0, 'turns': 30,
                                     'time1': 30, 'time2': 30}
         self.spot_coords = {}
         self.board_screen_pos = None
@@ -316,8 +316,10 @@ class GameBoard(tk.Tk):
         update = self.update_timerbox_and_moves_for_color()
         update[0].insert(END, f"{time_taken:.5f}")
         update[1].insert(END, selected_move[:3])
+
         self.initialize_game_board_pieces()
         self.increment_turn_count()  # increments turn count of current turn turn_color
+        self.player_info()
         self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
 
     def update_timerbox_and_moves_for_color(self):
@@ -516,8 +518,10 @@ class GameBoard(tk.Tk):
         """
         if self.turn == "black":
             self.turn_count_black += 1
+            self.black_move_count -= 1
         else:
             self.turn_count_white += 1
+            self.white_move_count -= 1
 
     def move_single_selected_piece(self, new_row_num: int, new_col_num: int, new_x_pos: int, new_y_pos: int, index=-1):
         """
@@ -938,7 +942,9 @@ class GameBoard(tk.Tk):
             update = self.update_timerbox_and_moves_for_color()
             update[0].insert(END, f"{time_taken:.5f}")
             update[1].insert(END, selected_move[:3])
+
             self.increment_turn_count()  # increments turn count of current turn turn_color
+            self.player_info()
             #################### AI ####################
 
             self.update()  # forces tkinter to re-draw the new board despite being blocked by the while-loop
@@ -994,6 +1000,7 @@ class GameBoard(tk.Tk):
         self.black_timer_box = Listbox(self, height=25, width=20)
         timer_black_label.grid(row=8, column=5, padx=5, columnspan=2)
         self.black_timer_box.grid(row=9, column=5, rowspan=6, columnspan=1, padx=5, pady=5)
+        self.show_timer()
 
     def draw_moves_window(self):
         """
@@ -1003,6 +1010,7 @@ class GameBoard(tk.Tk):
         self.white_moves_box.grid(row=2, column=6, rowspan=6, columnspan=1, padx=5, pady=5)
         self.black_moves_box = Listbox(self, height=25, width=20)
         self.black_moves_box.grid(row=9, column=6, rowspan=6, columnspan=1, padx=5, pady=5)
+        self.show_moves()
 
     def show_timer(self):
         """
@@ -1027,10 +1035,11 @@ class GameBoard(tk.Tk):
         self.set_pieces_count()
         player_one = Label(self, text="White", bg=self.bg, font=font, fg=self.font_color)
         player_one.grid(column=2, padx=3, row=1)
-        player_one_moves_label = Label(self, text=f"Moves\n{self.white_move_count}", bg=self.bg, font=self.font,
+        player_one_moves_label = Label(self, bg=self.bg, font=self.font,
                                        fg=self.font_color)
         player_one_moves_label.grid(column=2, row=2)
-        player_one_pieces_label = Label(self, text=f"Pieces lost\n{self.white_pieces}", bg=self.bg, font=self.font,
+        player_one_moves_label.configure(text=f" Remaining Moves\n{self.white_move_count}")
+        player_one_pieces_label = Label(self, text=f"Pieces lost\n{abs(self.white_pieces-14)}", bg=self.bg, font=self.font,
                                         fg=self.font_color)
         player_one_pieces_label.grid(column=2, row=3)
 
@@ -1038,10 +1047,11 @@ class GameBoard(tk.Tk):
 
         player_two = Label(self, text="Black", bg=self.bg, font=font, fg=self.font_color)
         player_two.grid(column=4, padx=3, row=1)
-        player_two_moves_label = Label(self, text=f"Moves\n{self.black_move_count}", bg=self.bg, font=self.font,
+        player_two_moves_label = Label(self, bg=self.bg, font=self.font,
                                        fg=self.font_color)
         player_two_moves_label.grid(column=4, row=2)
-        player_two_pieces_label = Label(self, text=f"Pieces lost\n{self.black_pieces}", bg=self.bg, font=self.font,
+        player_two_moves_label.configure(text=f"Remaining Moves\n{self.black_move_count}")
+        player_two_pieces_label = Label(self, text=f"Pieces lost\n{abs(self.black_pieces - 14)}", bg=self.bg, font=self.font,
                                         fg=self.font_color)
         player_two_pieces_label.grid(column=4, row=3)
 
@@ -1081,7 +1091,8 @@ class GameBoard(tk.Tk):
         start = Button(frame, text="Start", width=10, bg=self.bg, font=font2, fg=self.font_color)
         stop = Button(frame, text="Stop", width=10, bg=self.bg, font=font2, fg=self.font_color)
         pause = Button(frame, text="Pause", width=10, bg=self.bg, font=font2, fg=self.font_color)
-        reset = Button(frame, text="Reset", width=10, bg=self.bg, font=font2, fg=self.font_color)
+        reset = Button(frame, text="Reset", width=10, bg=self.bg, font=font2, fg=self.font_color,
+                       command=self.reset_game)
         undo = Button(frame, text="Undo Last", width=10, bg=self.bg, font=font2, fg=self.font_color)
         settings = Button(frame, text="Settings", width=10, bg=self.bg, font=font2, fg=self.font_color,
                           command=self.settings_set_up)
@@ -1119,9 +1130,23 @@ class GameBoard(tk.Tk):
 
         print("before")
         self.apply_draw_game_board_layout()
+        self.white_move_count = self.settings_selections['turns']
+        self.black_move_count = self.settings_selections['turns']
+        self.player_info()
+        self.draw_moves_window()
+        self.draw_timer_window()
         self.apply_game_mode()
 
         print("after")
+
+    def reset_game(self):
+        self.apply_draw_game_board_layout()
+        self.white_move_count = self.settings_selections['turns']
+        self.black_move_count = self.settings_selections['turns']
+        self.player_info()
+        self.draw_moves_window()
+        self.draw_timer_window()
+        self.apply_game_mode()
 
     def new_game_window(self):
         """
@@ -1134,10 +1159,8 @@ class GameBoard(tk.Tk):
         self.apply_draw_game_board_layout()
 
         self.draw_timer_window()
-        self.show_timer()
-        self.draw_moves_window()
-        self.show_moves()
 
+        self.draw_moves_window()
         self.canvas.bind("<Button-1>", self.click_event_listener_engine)  # sets up mouse click event listener
 
         self.mainloop()
