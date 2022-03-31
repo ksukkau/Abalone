@@ -215,7 +215,7 @@ class GameBoard(tk.Tk):
                                 if piece_clicked in self.possible_inline_moves:
                                     self.store_last_move()  # stores the last AI move
 
-                                    #--- Stores the notation for the human move ---#
+                                    # --- Stores the notation for the human move ---#
                                     direction = self.Move.get_dir_of_selected_pieces([(row_key, col), self.selected_pieces[0]])[0]
                                     selected_piece = self.selected_pieces[0]
                                     selected_piece_external_notation = Converter.internal_notation_to_external(selected_piece[0], selected_piece[1])
@@ -389,7 +389,6 @@ class GameBoard(tk.Tk):
             self.repopulate_listbox(self.black_moves_box, previous_state["black_moves"])
             self.repopulate_listbox(self.white_moves_box, previous_state["white_moves"])
 
-
             # undoes the black and white move count
             self.black_move_count = previous_state["black_move_count"]
             self.white_move_count = previous_state["white_move_count"]
@@ -481,9 +480,8 @@ class GameBoard(tk.Tk):
 
         self.store_last_move()  # stores the last AI move
 
-
         self.increment_turn_count()  # increments turn count of current turn turn_color
-        #self.update_timer()
+        # self.update_timer()
         start = time.perf_counter()
         self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
         result = self.Minimax.alpha_beta(["move", self.game_board, self.turn, 0])  # gets move and board from ai choice
@@ -1221,7 +1219,7 @@ class GameBoard(tk.Tk):
                                        fg=self.font_color)
         player_one_moves_label.grid(column=2, row=2)
         player_one_moves_label.configure(text=f" Remaining Moves\n{self.white_move_count}")
-        player_one_pieces_label = Label(self, text=f"Pieces lost\n{abs(self.white_pieces-14)}", bg=self.bg, font=self.font,
+        player_one_pieces_label = Label(self, text=f"Pieces lost\n{abs(self.white_pieces - 14)}", bg=self.bg, font=self.font,
                                         fg=self.font_color)
         player_one_pieces_label.grid(column=2, row=3)
 
@@ -1241,7 +1239,7 @@ class GameBoard(tk.Tk):
 
         font = ("Montserrat", 18, "bold")
         self.current_move_timer_label = Label(self, text=f"Time:\n3:00", bg=self.bg, font=font,
-                                   fg=self.font_color)
+                                              fg=self.font_color)
         self.current_move_timer_label.grid(column=3, row=2)
 
     def set_pieces_count(self):
@@ -1351,7 +1349,6 @@ class GameBoard(tk.Tk):
             time_limit -= 1
             self.current_move_timer_label.configure(text=time_limit)
             self.after(100, self.update_timer)
-
 
 
 def main():

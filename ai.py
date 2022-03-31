@@ -82,7 +82,7 @@ turn = "black"
 
 class Minimax:
 
-    def __init__(self, max_depth=3):
+    def __init__(self, max_depth=2):
         self.max_depth = max_depth
         self.pruned = 0
 
@@ -165,11 +165,8 @@ class Minimax:
         choice_index = Random.randint(Random(), 0, len(list) - 1)
         return list[choice_index]
 
-
     @staticmethod
     def get_next_states(state):
         generator = StateSpaceGenerator(state[1], state[2])
         next_states = generator.run_generation()
         return next_states
-
-
