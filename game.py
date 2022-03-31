@@ -382,9 +382,6 @@ class GameBoard(tk.Tk):
         if len(self.previous_board_states) > 0:
             previous_state = self.previous_board_states.pop()
 
-            print(f"BLACK MOVES {previous_state['black_moves']}")
-            print(f"WHITE MOVES {previous_state['white_moves']}")
-
             # deletes content within the black & white, timer & moves box
             self.repopulate_listbox(self.black_timer_box, previous_state["black_timer_box"])
             self.repopulate_listbox(self.white_timer_box, previous_state["white_timer_box"])
@@ -448,7 +445,6 @@ class GameBoard(tk.Tk):
         """
         Stores the entire game state to allow the undo button to function
         """
-        print("STORED")
         game_board = deepcopy(self.game_board)
 
         black_move_count = self.black_move_count
