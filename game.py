@@ -304,11 +304,19 @@ class GameBoard(tk.Tk):
 
         # redraws new game board generated from AI within ai.py from line above
         self.draw_game_board()
-        self.white_timer_box.insert(END, str(time_taken))
-        self.white_moves_box.insert(END, selected_move)
+        update = self.update_timerbox_and_moves_for_color()
+        update[0].insert(END, f"{time_taken:.5f}")
+        update[1].insert(END, selected_move[:3])
         self.initialize_game_board_pieces()
         self.increment_turn_count()  # increments turn count of current turn turn_color
         self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
+
+    def update_timerbox_and_moves_for_color(self):
+        if self.turn == "black":
+            return self.black_timer_box, self.black_moves_box
+        else:
+            return self.white_timer_box, self.white_moves_box
+
 
     def perform_sidestep(self, sidestep_move_details: list):
         """
@@ -905,18 +913,22 @@ class GameBoard(tk.Tk):
             # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
             self.increment_turn_count()  # increments turn count of current turn turn_color
             self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
+            start = time.perf_counter()
             result = self.Minimax.alpha_beta(
                 ["move", self.game_board, self.turn, 0])  # gets move and board from ai choice
 
             self.game_board = result[1]  # ai selected board
             selected_move = result[
                 0]  # the move needs to print to the game console and show highlighted ai pieces
+            time_taken = time.perf_counter() - start
             print("Ai selected move" + str(selected_move))
             # redraws new game board generated from AI within ai.py from line above
 
             self.draw_game_board()
             self.initialize_game_board_pieces()
-
+            update = self.update_timerbox_and_moves_for_color()
+            update[0].insert(END, f"{time_taken:.5f}")
+            update[1].insert(END, selected_move[:3])
             self.increment_turn_count()  # increments turn count of current turn turn_color
             #################### AI ####################
 
@@ -995,8 +1007,8 @@ class GameBoard(tk.Tk):
         """
         Initializes the move history window within the GUI for both black and white teams.
         """
-        self.white_moves_box.insert(END, "Moves:")
-        self.black_moves_box.insert(END, "Moves:")
+        self.white_moves_box.insert(END, "Moves:", "")
+        self.black_moves_box.insert(END, "Moves:", "")
 
     def player_info(self):
         """
