@@ -111,6 +111,7 @@ class GameBoard(tk.Tk):
         piece has been clicked, it is highlighted and the selected game piece is colored green.
         :param event: an Event object containing various data attributes including the x and y coords of the click event
         """
+        DEBUG_PRINT_STATEMENTS = True  # setting to True enables print statements that contain additional information
         RANGE = 20
         print(f"Clicked at {event.x}, {event.y}")
 
@@ -130,7 +131,7 @@ class GameBoard(tk.Tk):
                         selected_piece_color = selected_row[col].get("turn_color")
 
                         piece_clicked = Converter.internal_notation_to_external(row, col)
-                        print(f"Selected piece at: {piece_clicked} {self.game_board[row_key][col]['turn_color']}")  # prints clicked piece
+                        print(f"Selected piece at: {piece_clicked} {self.game_board[row_key][col]['turn_color']}\n")  # prints clicked piece
 
                         # ensures that the turn turn_color can't select the opposing turn_color's pieces for movement
                         if selected_piece_color == self.turn:
@@ -188,12 +189,13 @@ class GameBoard(tk.Tk):
                                             self.selected_pieces_xy_coords.append(
                                                 (piece_x_pos, piece_y_pos))  # adds xy coords to list
 
-                            print("\n--- Debug ---")
-                            print(f"Adj spaces: {self.adjacent_spaces}")
-                            print(f"Num selected: {self.num_pieces_selected}")
-                            print(f"Selected pieces: {self.selected_pieces}")
-                            print(f"XY Coords: {self.selected_pieces_xy_coords}")
-                            print("-------------\n")
+                            if DEBUG_PRINT_STATEMENTS:
+                                print("--- Debug ---")
+                                print(f"Adj spaces: {self.adjacent_spaces}")
+                                print(f"Num selected: {self.num_pieces_selected}")
+                                print(f"Selected pieces: {self.selected_pieces}")
+                                print(f"XY Coords: {self.selected_pieces_xy_coords}")
+                                print("-------------\n")
 
                         elif self.num_pieces_selected > 0:
 
@@ -202,6 +204,8 @@ class GameBoard(tk.Tk):
                                 self.possible_inline_moves = self.Move.get_possible_single_moves(self.selected_pieces,
                                                                                                  self.num_pieces_selected,
                                                                                                  self.game_board)
+                                if DEBUG_PRINT_STATEMENTS:
+                                    print(f"Possible inline moves: {self.possible_inline_moves}")
 
                                 # checks if new space clicked is unoccupied, if so then performs single piece move
                                 if piece_clicked in self.possible_inline_moves:
@@ -222,6 +226,8 @@ class GameBoard(tk.Tk):
                                                                                                   self.num_pieces_selected,
                                                                                                   self.game_board, self.turn,
                                                                                                   vector_of_dir)
+                                if DEBUG_PRINT_STATEMENTS:
+                                    print(f"Valid INLINE moves: {self.possible_inline_moves}")
 
                                 if piece_clicked in self.possible_inline_moves.keys():
 
@@ -276,6 +282,9 @@ class GameBoard(tk.Tk):
                                 else:
                                     # gets all possible sidestep moves
                                     self.possible_sidestep_moves = self.Move.get_valid_sidestep_moves(self.selected_pieces, self.num_pieces_selected, self.game_board, self.turn, vector_of_dir)
+
+                                    if DEBUG_PRINT_STATEMENTS:
+                                        print(f"Valid SIDESTEP moves: {self.possible_sidestep_moves}")
 
                                     # iterates through all possible side step moves and checks if the 1st piece selected
                                     # is the same as the first piece selected for all possible sidestep moves
