@@ -1189,12 +1189,13 @@ class GameBoard(tk.Tk):
         """
         Initializes and draws the window containing the turn timer for both the black and white team.
         """
+        font = 12
         timer_white_label = Label(self, text="White Player", bg=self.bg, font=self.font, fg=self.font_color)
-        self.white_timer_box = Listbox(self, height=25, width=20)
+        self.white_timer_box = Listbox(self, height=25, width=20, font=font)
         timer_white_label.grid(row=1, column=5, padx=5, columnspan=2)
         self.white_timer_box.grid(row=2, column=5, rowspan=6, columnspan=1, padx=5, pady=5)
         timer_black_label = Label(self, text="Black Player", bg=self.bg, font=self.font, fg=self.font_color)
-        self.black_timer_box = Listbox(self, height=25, width=20)
+        self.black_timer_box = Listbox(self, height=25, width=20, font=font)
         timer_black_label.grid(row=8, column=5, padx=5, columnspan=2)
         self.black_timer_box.grid(row=9, column=5, rowspan=6, columnspan=1, padx=5, pady=5)
         self.show_timer()
@@ -1203,9 +1204,10 @@ class GameBoard(tk.Tk):
         """
         Initializes the window used to display the move count of both the black and white team.
         """
-        self.white_moves_box = Listbox(self, height=25, width=20)
+        font = 12
+        self.white_moves_box = Listbox(self, height=25, width=20, font=font)
         self.white_moves_box.grid(row=2, column=6, rowspan=6, columnspan=1, padx=5, pady=5)
-        self.black_moves_box = Listbox(self, height=25, width=20)
+        self.black_moves_box = Listbox(self, height=25, width=20, font=font)
         self.black_moves_box.grid(row=9, column=6, rowspan=6, columnspan=1, padx=5, pady=5)
         self.show_moves()
 
