@@ -25,8 +25,11 @@ class Settings(tk.Toplevel):
         self.mode_choice_p2 = StringVar()
         self.board_config = IntVar()
         self.turn_value = IntVar()
+        self.turn_value.set(20)
         self.turn_timer_value = IntVar()
+        self.turn_timer_value.set(10)
         self.turn_timer_value2 = IntVar()
+        self.turn_timer_value2.set(10)
         self.selections = {}
         self.font = "Montserrat", 10
 
