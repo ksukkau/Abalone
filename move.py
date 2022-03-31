@@ -363,7 +363,3 @@ class Move:
             dir = row_dir_values[index]
 
         return dir
-
-
-
-

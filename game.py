@@ -77,8 +77,7 @@ class GameBoard(tk.Tk):
         self.sumito_chain = []  # stores the chain of pieces to be sumito, in order
         self.dir_tuple_sumito = ()  # stores the vector of direction for the sumito chain
         self.first_piece_selection = None  # stores the index of piece adjacent to first piece in sumito chain
-
-        self.test = []
+        self.latest_human_move = ()  # stores the latest human move
 
     @staticmethod
     def get_row_key(row: int, offset=0) -> str:
@@ -209,6 +208,13 @@ class GameBoard(tk.Tk):
 
                                 # checks if new space clicked is unoccupied, if so then performs single piece move
                                 if piece_clicked in self.possible_inline_moves:
+
+                                    #--- Stores the notation for the human move ---#
+                                    direction = self.Move.get_dir_of_selected_pieces([(row_key, col), self.selected_pieces[0]])[0]
+                                    selected_piece = self.selected_pieces[0]
+                                    selected_piece_external_notation = Converter.internal_notation_to_external(selected_piece[0], selected_piece[1])
+                                    self.latest_human_move = ("i", (selected_piece_external_notation, selected_piece_external_notation), direction)
+
                                     # TODO refactor code block below to its own method
                                     self.move_single_selected_piece(row, col, piece_x_pos, piece_y_pos)
                                     self.num_pieces_selected = 0  # resets num of pieces selected
@@ -238,9 +244,40 @@ class GameBoard(tk.Tk):
 
                                         # if the clicked piece is adjacent to the 1st selected game piece
                                         if piece_clicked in self.adjacent_spaces:
+
+                                            # --- Stores the notation for the human move ---#
+                                            first_selected_piece = self.selected_pieces[0]
+                                            last_selected_piece = self.selected_pieces[-1]
+                                            first_piece_external = Converter.internal_notation_to_external(first_selected_piece[0], first_selected_piece[1])
+                                            last_piece_external = Converter.internal_notation_to_external(last_selected_piece[0], last_selected_piece[1])
+
+                                            if self.num_pieces_selected == 3:  # checks for 3 piece inline move
+                                                second_selected_piece = self.selected_pieces[1]
+                                                second_piece_external = Converter.internal_notation_to_external(second_selected_piece[0], second_selected_piece[1])
+                                                self.latest_human_move = ("i", (first_piece_external, second_piece_external, last_piece_external), vector_of_dir[0])
+                                            else:
+                                                self.latest_human_move = ("i", (first_piece_external, last_piece_external), vector_of_dir[0])
+                                            # ---------------------------------------------- #
+
+                                            # draws the move on the game board
                                             self.move_single_selected_piece(row, col, piece_x_pos, piece_y_pos)
 
                                         else:
+                                            # --- Stores the notation for the human move ---#
+                                            first_selected_piece = self.selected_pieces[0]
+                                            last_selected_piece = self.selected_pieces[-1]
+                                            first_piece_external = Converter.internal_notation_to_external(first_selected_piece[0], first_selected_piece[1])
+                                            last_piece_external = Converter.internal_notation_to_external(last_selected_piece[0], last_selected_piece[1])
+
+                                            if self.num_pieces_selected == 3:  # checks for 3 piece inline move
+                                                second_selected_piece = self.selected_pieces[1]
+                                                second_piece_external = Converter.internal_notation_to_external(second_selected_piece[0], second_selected_piece[1])
+                                                self.latest_human_move = ("i", (first_piece_external, second_piece_external, last_piece_external), vector_of_dir[-1])
+                                            else:
+                                                self.latest_human_move = ("i", (first_piece_external, last_piece_external), vector_of_dir[-1])
+                                            # ---------------------------------------------- #
+
+                                            # draws the move on the game board
                                             self.move_single_selected_piece(row, col, piece_x_pos, piece_y_pos, index=0)
 
                                         # TODO refactor code block below to its own method
@@ -253,16 +290,31 @@ class GameBoard(tk.Tk):
 
                                         self.apply_ai()  # gets, and applies, the AI's move
 
-                                        # print("\n--- Debug ---")
-                                        # print(f"Black turn num: {self.turn_count_black}")
-                                        # print(f"White turn num: {self.turn_count_white}")
-                                        # print("-------------\n")
+                                        if DEBUG_PRINT_STATEMENTS:
+                                            print("\n--- Debug ---")
+                                            print(f"Black turn num: {self.turn_count_black}")
+                                            print(f"White turn num: {self.turn_count_white}")
+                                            print("-------------\n")
 
                                     # checks if the player is trying to perform a sumito
                                     elif self.possible_inline_moves[piece_clicked] == "sumito":
                                         valid_sumito = self.is_valid_sumito(row_key, col)
 
                                         if valid_sumito:
+                                            # --- Stores the notation for the human move ---#
+                                            first_selected_piece = self.selected_pieces[0]
+                                            last_selected_piece = self.selected_pieces[-1]
+                                            first_piece_external = Converter.internal_notation_to_external(first_selected_piece[0], first_selected_piece[1])
+                                            last_piece_external = Converter.internal_notation_to_external(last_selected_piece[0], last_selected_piece[1])
+
+                                            if self.num_pieces_selected == 3:  # checks for 3 piece inline move
+                                                second_selected_piece = self.selected_pieces[1]
+                                                second_piece_external = Converter.internal_notation_to_external(second_selected_piece[0], second_selected_piece[1])
+                                                self.latest_human_move = ("i", (first_piece_external, second_piece_external, last_piece_external), vector_of_dir[0])
+                                            else:
+                                                self.latest_human_move = ("i", (first_piece_external, last_piece_external), vector_of_dir[0])
+                                            # ---------------------------------------------- #
+
                                             # call method to perform sumito (shift pieces, account for off board push)
                                             self.execute_sumito()
 
@@ -278,7 +330,6 @@ class GameBoard(tk.Tk):
                                         # clears the chain of sumito'ed pieces
                                         self.sumito_chain = []
 
-                                    # For some reason this is never called
                                 else:
                                     # gets all possible sidestep moves
                                     self.possible_sidestep_moves = self.Move.get_valid_sidestep_moves(self.selected_pieces, self.num_pieces_selected, self.game_board, self.turn, vector_of_dir)
@@ -292,6 +343,21 @@ class GameBoard(tk.Tk):
 
                                         piece_clicked_internal_notation = Converter.external_notation_to_internal(piece_clicked)
                                         if piece_clicked_internal_notation == valid_sidestep_pieces[0][0] and self.num_pieces_selected == len(valid_sidestep_pieces[0]):
+
+                                            # --- Stores the notation for the human move ---#
+                                            direction = valid_sidestep_pieces[1]
+                                            first_selected_piece = self.selected_pieces[0]
+                                            last_selected_piece = self.selected_pieces[-1]
+                                            first_piece_external = Converter.internal_notation_to_external(first_selected_piece[0], first_selected_piece[1])
+                                            last_piece_external = Converter.internal_notation_to_external(last_selected_piece[0], last_selected_piece[1])
+
+                                            if self.num_pieces_selected == 3:  # checks for 3 piece inline move
+                                                second_selected_piece = self.selected_pieces[1]
+                                                second_piece_external = Converter.internal_notation_to_external(second_selected_piece[0], second_selected_piece[1])
+                                                self.latest_human_move = ("i", (first_piece_external, second_piece_external, last_piece_external), direction)
+                                            else:
+                                                self.latest_human_move = ("i", (first_piece_external, last_piece_external), direction)
+                                            # ---------------------------------------------- #
 
                                             # helper method to perform the sidestep move
                                             self.perform_sidestep(valid_sidestep_pieces)
@@ -327,7 +393,6 @@ class GameBoard(tk.Tk):
             return self.black_timer_box, self.black_moves_box
         else:
             return self.white_timer_box, self.white_moves_box
-
 
     def perform_sidestep(self, sidestep_move_details: list):
         """
