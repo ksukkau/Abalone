@@ -9,31 +9,6 @@ def get_opposite_color(color):
 
 
 class KatsHeuristic:
-    # Currently unused left in place for testing purposes
-    #
-    # @staticmethod
-    # def heuristic(state):
-    #
-    #
-    #     center_value = center(state[1], state[2]) - center(state[1], get_opposite_color(state[2]))
-    #
-    #     move = state[0]
-    #     if len(move[1]) == 3:
-    #         push = 100
-    #     else:
-    #         push = 0
-    #     # #
-    #     #
-    #     # grouping = 0
-    #     # if abs(center_value) > 2:
-    #     #     grouping = groups(board, turn) - groups(board, turn)
-    #         # return 1/ grouping
-    #     #
-    #     marbles = 0
-    #     if abs(center_value) < 1.8:
-    #         marbles = pieces(state[1], state[2]) - pieces(state[1], get_opposite_color(state[2]))
-    #
-    #     return center_value #+ marbles #  + push
 
     @staticmethod
     def weighted_heuristic(state):
@@ -41,10 +16,7 @@ class KatsHeuristic:
         center_weight = 5
         push_weight = 15
         group_weight = 3
-        move_size = 3
 
-        # piece_count = move_piece_count(state)
-        # print("piece count:" + str(piece_count))
         score = pieces(state[1], state[2]) - pieces(state[1], get_opposite_color(state[2]))
         print("Score", score)
         center_value = center(state[1], state[2]) - center(state[1], get_opposite_color(state[2]))

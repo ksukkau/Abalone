@@ -282,19 +282,6 @@ def push_eval(state):
         return 0
 
 
-def move_piece_count(state):
-    move_notation = state[0]
-    if len(move_notation[1]) == 3:
-        move = move_notation[1], move_notation[2]
-    else:
-        move = move_notation
-    first_piece_location = Converter.external_notation_to_internal(move[1][0])
-    first_row_number = Converter.convert_row_to_string_or_int(first_piece_location[0])
-    last_piece_location = Converter.external_notation_to_internal(move[1][1])
-    last_row_number = Converter.convert_row_to_string_or_int(last_piece_location[0])
-    return abs(first_piece_location[1] - last_piece_location[1] + first_row_number - last_row_number)
-
-
 class AllyCount:
 
     def __init__(self):

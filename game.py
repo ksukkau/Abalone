@@ -1095,9 +1095,9 @@ class GameBoard(tk.Tk):
         self.initialize_game_board_array()
 
         game_layout = self.settings_selections["config"]
-        if game_layout == 2:
+        if game_layout == 3:
             self.initialize_german_layout()
-        elif game_layout == 3:
+        elif game_layout == 2:
             self.initialize_belgian_layout()
         else:
             self.initialize_default_layout()
