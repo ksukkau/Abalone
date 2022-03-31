@@ -78,6 +78,7 @@ class GameBoard(tk.Tk):
         self.dir_tuple_sumito = ()  # stores the vector of direction for the sumito chain
         self.first_piece_selection = None  # stores the index of piece adjacent to first piece in sumito chain
         self.latest_human_move = ()  # stores the latest human move
+        self.human_start = 0
 
     @staticmethod
     def get_row_key(row: int, offset=0) -> str:
@@ -110,6 +111,7 @@ class GameBoard(tk.Tk):
         piece has been clicked, it is highlighted and the selected game piece is colored green.
         :param event: an Event object containing various data attributes including the x and y coords of the click event
         """
+
         DEBUG_PRINT_STATEMENTS = True  # setting to True enables print statements that contain additional information
         RANGE = 20
         print(f"Clicked at {event.x}, {event.y}")
@@ -213,6 +215,7 @@ class GameBoard(tk.Tk):
                                     direction = self.Move.get_dir_of_selected_pieces([(row_key, col), self.selected_pieces[0]])[0]
                                     selected_piece = self.selected_pieces[0]
                                     selected_piece_external_notation = Converter.internal_notation_to_external(selected_piece[0], selected_piece[1])
+                                    human_time_taken = time.perf_counter() - self.human_start
                                     self.latest_human_move = ("i", (selected_piece_external_notation, selected_piece_external_notation), direction)
 
                                     # TODO refactor code block below to its own method
@@ -222,7 +225,9 @@ class GameBoard(tk.Tk):
                                     self.possible_inline_moves = set()  # resets set
                                     self.selected_pieces = []  # resets list
                                     self.selected_pieces_xy_coords = []  # resets list
-
+                                    update = self.update_timerbox_and_moves_for_color()
+                                    update[1].insert(END, self.latest_human_move)
+                                    update[0].insert(END, f"{human_time_taken:.5f}")
                                     self.apply_ai()  # gets, and applies, the AI's move
 
                             # performs 2 or 3 group piece movements
@@ -254,8 +259,10 @@ class GameBoard(tk.Tk):
                                             if self.num_pieces_selected == 3:  # checks for 3 piece inline move
                                                 second_selected_piece = self.selected_pieces[1]
                                                 second_piece_external = Converter.internal_notation_to_external(second_selected_piece[0], second_selected_piece[1])
+                                                human_time_taken = time.perf_counter() - self.human_start
                                                 self.latest_human_move = ("i", (first_piece_external, second_piece_external, last_piece_external), vector_of_dir[0])
                                             else:
+                                                human_time_taken = time.perf_counter() - self.human_start
                                                 self.latest_human_move = ("i", (first_piece_external, last_piece_external), vector_of_dir[0])
                                             # ---------------------------------------------- #
 
@@ -272,8 +279,11 @@ class GameBoard(tk.Tk):
                                             if self.num_pieces_selected == 3:  # checks for 3 piece inline move
                                                 second_selected_piece = self.selected_pieces[1]
                                                 second_piece_external = Converter.internal_notation_to_external(second_selected_piece[0], second_selected_piece[1])
+                                                human_time_taken = time.perf_counter() - self.human_start
                                                 self.latest_human_move = ("i", (first_piece_external, second_piece_external, last_piece_external), vector_of_dir[-1])
+
                                             else:
+                                                human_time_taken = time.perf_counter() - self.human_start
                                                 self.latest_human_move = ("i", (first_piece_external, last_piece_external), vector_of_dir[-1])
                                             # ---------------------------------------------- #
 
@@ -288,6 +298,9 @@ class GameBoard(tk.Tk):
                                         self.selected_pieces = []  # resets list
                                         self.selected_pieces_xy_coords = []  # resets list
 
+                                        update = self.update_timerbox_and_moves_for_color()
+                                        update[1].insert(END, self.latest_human_move)
+                                        update[0].insert(END, f"{human_time_taken:.5f}")
                                         self.apply_ai()  # gets, and applies, the AI's move
 
                                         if DEBUG_PRINT_STATEMENTS:
@@ -310,8 +323,10 @@ class GameBoard(tk.Tk):
                                             if self.num_pieces_selected == 3:  # checks for 3 piece inline move
                                                 second_selected_piece = self.selected_pieces[1]
                                                 second_piece_external = Converter.internal_notation_to_external(second_selected_piece[0], second_selected_piece[1])
+                                                human_time_taken = time.perf_counter() - self.human_start
                                                 self.latest_human_move = ("i", (first_piece_external, second_piece_external, last_piece_external), vector_of_dir[0])
                                             else:
+                                                human_time_taken = time.perf_counter() - self.human_start
                                                 self.latest_human_move = ("i", (first_piece_external, last_piece_external), vector_of_dir[0])
                                             # ---------------------------------------------- #
 
@@ -325,6 +340,9 @@ class GameBoard(tk.Tk):
                                             self.selected_pieces = []  # resets list
                                             self.selected_pieces_xy_coords = []  # resets list
 
+                                            update = self.update_timerbox_and_moves_for_color()
+                                            update[1].insert(END, self.latest_human_move)
+                                            update[0].insert(END, f"{human_time_taken:.5f}")
                                             self.apply_ai()  # gets, and applies, the AI's move
 
                                         # clears the chain of sumito'ed pieces
@@ -354,23 +372,24 @@ class GameBoard(tk.Tk):
                                             if self.num_pieces_selected == 3:  # checks for 3 piece inline move
                                                 second_selected_piece = self.selected_pieces[1]
                                                 second_piece_external = Converter.internal_notation_to_external(second_selected_piece[0], second_selected_piece[1])
+                                                human_time_taken = time.perf_counter() - self.human_start
                                                 self.latest_human_move = ("i", (first_piece_external, second_piece_external, last_piece_external), direction)
                                             else:
+                                                human_time_taken = time.perf_counter() - self.human_start
                                                 self.latest_human_move = ("i", (first_piece_external, last_piece_external), direction)
                                             # ---------------------------------------------- #
 
                                             # helper method to perform the sidestep move
                                             self.perform_sidestep(valid_sidestep_pieces)
+                                            update = self.update_timerbox_and_moves_for_color()
+                                            update[1].insert(END, self.latest_human_move)
+                                            update[0].insert(END, f"{human_time_taken:.5f}")
                                             self.apply_ai()  # gets, and applies, the AI's move
 
     def apply_ai(self):
         """
         Gets the AI's move, and then redraws the game board with the AI's new move.
         """
-        # updates human time taken and move
-        update = self.update_timerbox_and_moves_for_color()
-        # update[0].insert(END, f"{time_taken:.5f}")  # TODO where the human timer would be updated
-        update[1].insert(END, self.latest_human_move)
 
         self.increment_turn_count()  # increments turn count of current turn turn_color
         #self.update_timer()
@@ -391,7 +410,9 @@ class GameBoard(tk.Tk):
         self.initialize_game_board_pieces()
         self.increment_turn_count()  # increments turn count of current turn turn_color
         self.player_info()
-        self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
+        self.turn = Converter.get_opposite_color(self.turn) # turn turn_color change
+        self.human_start = time.perf_counter()
+
 
     def update_timerbox_and_moves_for_color(self):
         if self.turn == "black":
