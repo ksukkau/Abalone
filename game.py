@@ -367,6 +367,11 @@ class GameBoard(tk.Tk):
         """
         Gets the AI's move, and then redraws the game board with the AI's new move.
         """
+        # updates human time taken and move
+        update = self.update_timerbox_and_moves_for_color()
+        # update[0].insert(END, f"{time_taken:.5f}")  # TODO where the human timer would be updated
+        update[1].insert(END, self.latest_human_move)
+
         self.increment_turn_count()  # increments turn count of current turn turn_color
         #self.update_timer()
         start = time.perf_counter()
