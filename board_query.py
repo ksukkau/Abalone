@@ -269,14 +269,8 @@ def push_eval(state, center_val):
         push = False
 
     if push:
-        # find distance of pushed piece from the edge couldnt figure this out,
-        # i think if ew can add distance to the edge for this move as in doesit move you closer to the edge
-        # or transition in score somehow this would make our ai more agressive
-        piece_location = Converter.external_notation_to_internal(move[1][1])
-        row_number = Converter.convert_row_to_string_or_int(piece_location[0])
-        print("center_val", center_val)
         total = 5 - center_val
-        print("total", total)
+        #print("total", total)
         if total < 4.8:
             return 5
         else:

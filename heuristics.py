@@ -12,19 +12,19 @@ class KatsHeuristic:
 
     @staticmethod
     def weighted_heuristic(state):
-        score_weight = 30
+        score_weight = 50
         center_weight = 5
         push_weight = 15
         group_weight = 3
 
         score = pieces(state[1], state[2]) - pieces(state[1], get_opposite_color(state[2]))
-        print("Score", score)
+        #print("Score", score)
         center_value = center(state[1], state[2]) - center(state[1], get_opposite_color(state[2]))
-        print("centerValue ", center_value)
+        #print("centerValue ", center_value)
         group = len(groups(state[1], state[2])) - len(groups(state[1], get_opposite_color(state[2])))
-        print('group', group)
+        #print('group', group)
         push = push_eval(state, center_value)
-        print("Push", push)
+        #print("Push", push)
         int_value = int(score_weight * score + center_weight * center_value + push_weight * push + group * group_weight)
         return int_value
 
