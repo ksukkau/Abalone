@@ -67,6 +67,7 @@ class GameBoard(tk.Tk):
         self.current_move_timer_label = None
         # ----- AI ----- #
         self.Minimax = Minimax()
+        self.ai_moved_pieces = []
 
         # ----- Piece Movement ----- #
         self.Move = Move()  # initializes the Move object
@@ -383,10 +384,10 @@ class GameBoard(tk.Tk):
                                                 second_selected_piece = self.selected_pieces[1]
                                                 second_piece_external = Converter.internal_notation_to_external(second_selected_piece[0], second_selected_piece[1])
                                                 human_time_taken = time.perf_counter() - self.human_start
-                                                self.latest_human_move = ("i", (first_piece_external, second_piece_external, last_piece_external), direction)
+                                                self.latest_human_move = ("s", (first_piece_external, second_piece_external, last_piece_external), direction)
                                             else:
                                                 human_time_taken = time.perf_counter() - self.human_start
-                                                self.latest_human_move = ("i", (first_piece_external, last_piece_external), direction)
+                                                self.latest_human_move = ("s", (first_piece_external, last_piece_external), direction)
                                             # ---------------------------------------------- #
 
                                             # helper method to perform the sidestep move
@@ -523,8 +524,49 @@ class GameBoard(tk.Tk):
         self.initialize_game_board_pieces()
         self.increment_turn_count()  # increments turn count of current turn turn_color
         self.player_info()
-        self.turn = Converter.get_opposite_color(self.turn) # turn turn_color change
+
+        self.highlight_ai_move(selected_move)  # highlights the AI move yellow
+
+
+        self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
         self.human_start = time.perf_counter()
+
+    def highlight_ai_move(self, selected_move: list):
+        lead_piece_moved_internal = Converter.external_notation_to_internal(selected_move[1][0])
+        piece_to_move = Converter.external_notation_to_internal(selected_move[1][-1])
+
+        cardinal_dir = selected_move[2]
+
+        # sets the number of iterations to check and highlight AI moved pieces depending if the move was
+        # a sidestep or inline
+        if selected_move[0] == "s":
+            iterations = range(0, len(selected_move[1]))  # subtract 1 as 1 piece is already moved on line before 'try'
+        elif selected_move[1][0] == selected_move[0][-1]:  # checks for single piece move
+            iterations = range(0, 1)
+        else:
+            iterations = range(0, 3)
+
+        for iter in iterations:
+            dir_tuple = self.Move.get_adjusted_tuple_or_cardinal_dir(piece_to_move[0], cardinal_dir=cardinal_dir)
+            piece_to_move = Converter.simulate_game_piece_movement(piece_to_move[0], piece_to_move[1], dir_tuple)
+            try:
+                # handles highlighting pieces for inline moves
+                if selected_move[0] == "i":
+                    if self.game_board[piece_to_move[0]][piece_to_move[1]]["turn_color"] == self.turn:
+                        piece_x_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["x_pos"]
+                        piece_y_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["y_pos"]
+
+                        self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn, "red")
+                elif selected_move[0] == "s":
+                    if self.game_board[piece_to_move[0]][piece_to_move[1]]["turn_color"] == self.turn:
+                        piece_x_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["x_pos"]
+                        piece_y_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["y_pos"]
+
+                        self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn, "red")
+                        piece_to_move = Converter.external_notation_to_internal(selected_move[1][iter])
+
+            except (IndexError, KeyError):
+                pass
 
     def update_timerbox_and_moves_for_color(self):
         if self.turn == "black":
@@ -850,7 +892,7 @@ class GameBoard(tk.Tk):
                                 piece_x_pos + self.piece_radius,
                                 piece_y_pos + self.piece_radius, fill=piece_color)
 
-    def draw_game_piece_selection(self, piece_x_pos: float, piece_y_pos: float, piece_color: str):
+    def draw_game_piece_selection(self, piece_x_pos: float, piece_y_pos: float, piece_color: str, selection_color="green"):
         """
         Draws the green circle on the game piece that the player has clicked on to select for movement.
         :param piece_x_pos: a float
@@ -860,7 +902,7 @@ class GameBoard(tk.Tk):
         self.canvas.create_oval(piece_x_pos - self.selection_radius,
                                 piece_y_pos - self.selection_radius,
                                 piece_x_pos + self.selection_radius,
-                                piece_y_pos + self.selection_radius, fill="green")
+                                piece_y_pos + self.selection_radius, fill=selection_color)
 
         self.canvas.create_oval(piece_x_pos - self.selection_redraw_radius,
                                 piece_y_pos - self.selection_redraw_radius,
