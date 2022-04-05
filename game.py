@@ -532,9 +532,12 @@ class GameBoard(tk.Tk):
         self.human_start = time.perf_counter()
 
     def highlight_ai_move(self, selected_move: list):
-        lead_piece_moved_internal = Converter.external_notation_to_internal(selected_move[1][0])
+        """
+        Handles highlighting the AI most recent move.
+        :param selected_move: a list, containing the type of move and pieces moved
+        :return:
+        """
         piece_to_move = Converter.external_notation_to_internal(selected_move[1][-1])
-
         cardinal_dir = selected_move[2]
 
         # sets the number of iterations to check and highlight AI moved pieces depending if the move was
@@ -553,18 +556,19 @@ class GameBoard(tk.Tk):
                 # handles highlighting pieces for inline moves
                 if selected_move[0] == "i":
                     if self.game_board[piece_to_move[0]][piece_to_move[1]]["turn_color"] == self.turn:
+                        # extracts x and y coords and highlights moved pieces
                         piece_x_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["x_pos"]
                         piece_y_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["y_pos"]
-
                         self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn, "red")
                 elif selected_move[0] == "s":
                     if self.game_board[piece_to_move[0]][piece_to_move[1]]["turn_color"] == self.turn:
+                        # extracts x and y coords and highlights moved pieces
                         piece_x_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["x_pos"]
                         piece_y_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["y_pos"]
-
                         self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn, "red")
-                        piece_to_move = Converter.external_notation_to_internal(selected_move[1][iter])
 
+                        # sets the next piece to the next piece within selected_move[1]
+                        piece_to_move = Converter.external_notation_to_internal(selected_move[1][iter])
             except (IndexError, KeyError):
                 pass
 
