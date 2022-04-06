@@ -59,7 +59,7 @@ class GameBoard(tk.Tk):
         self.white_pieces = None
         self.black_pieces = None
         self.settings = None
-        self.settings_selections = {'turn_color': 0, 'mode_p1': "Human", 'mode_p2': "Human", 'config': 0, 'turns': 30,
+        self.settings_selections = {'turn_color': 1, 'mode_p1': "Human", 'mode_p2': "Human", 'config': 0, 'turns': 30,
                                     'time1': 30, 'time2': 30}
         self.spot_coords = {}
         self.board_screen_pos = None
@@ -68,6 +68,7 @@ class GameBoard(tk.Tk):
         # ----- AI ----- #
         self.Minimax = Minimax()
         self.ai_moved_pieces = []
+        self.human_vs_human = False
 
         # ----- Piece Movement ----- #
         self.Move = Move()  # initializes the Move object
@@ -495,41 +496,48 @@ class GameBoard(tk.Tk):
         """
         Gets the AI's move, and then redraws the game board with the AI's new move.
         """
-        self.store_last_move()  # stores the last AI move
+        if not self.human_vs_human:
+            self.store_last_move()  # stores the last AI move
 
-        self.increment_turn_count()  # increments turn count of current turn turn_color
-        # self.update_timer()
-        start = time.perf_counter()
-        self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
-        result = self.Minimax.alpha_beta(["move", self.game_board, self.turn, 0])  # gets move and board from ai choice
-        self.game_board = result[1]  # ai selected board
-        selected_move = result[0]  # the move needs to print to the game console and show highlighted ai pieces
-        time_taken = time.perf_counter() - start
+            self.increment_turn_count()  # increments turn count of current turn turn_color
+            # self.update_timer()
 
-        if self.turn == "black":
-            turn_timer = 'time1'
-        else:
-            turn_timer = 'time2'
-        if time_taken > self.settings_selections[turn_timer]:
-            messagebox.showinfo("Timer", "Out of Time!")
+            start = time.perf_counter()
 
-        print("Ai selected move" + str(selected_move))
+            self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
+            if self.turn == "black":
+                turn_timer = self.settings_selections['time1']
+            else:
+                turn_timer = self.settings_selections['time2']
 
-        # redraws new game board generated from AI within ai.py from line above
-        self.draw_game_board()
-        update = self.update_timerbox_and_moves_for_color()
-        update[0].insert(END, f"{time_taken:.5f}")
-        update[1].insert(END, selected_move[:3])
-
-        self.initialize_game_board_pieces()
-        self.increment_turn_count()  # increments turn count of current turn turn_color
-        self.player_info()
-
-        self.highlight_ai_move(selected_move)  # highlights the AI move yellow
+            result = self.Minimax.alpha_beta(["move", self.game_board, self.turn, 0, start, turn_timer])  # gets move and board from ai choice
+            self.game_board = result[1]  # ai selected board
+            selected_move = result[0]  # the move needs to print to the game console and show highlighted ai pieces
+            time_taken = time.perf_counter() - start
 
 
-        self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
-        self.human_start = time.perf_counter()
+
+            print("Ai selected move" + str(selected_move))
+
+            # redraws new game board generated from AI within ai.py from line above
+            self.draw_game_board()
+            update = self.update_timerbox_and_moves_for_color()
+            update[0].insert(END, f"{time_taken:.5f}")
+            update[1].insert(END, selected_move[:3])
+
+            self.initialize_game_board_pieces()
+            self.increment_turn_count()  # increments turn count of current turn turn_color
+            self.player_info()
+
+            self.highlight_ai_move(selected_move)  # highlights the AI move yellow
+
+            self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
+            self.human_start = time.perf_counter()
+        else:  # handles Human vs Human
+            self.store_last_move()  # stores the last AI move
+            self.increment_turn_count()  # increments turn count of current turn turn_color
+            self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
+            self.player_info()
 
     def highlight_ai_move(self, selected_move: list):
         """
@@ -551,8 +559,9 @@ class GameBoard(tk.Tk):
 
         for iter in iterations:
             dir_tuple = self.Move.get_adjusted_tuple_or_cardinal_dir(piece_to_move[0], cardinal_dir=cardinal_dir)
-            piece_to_move = Converter.simulate_game_piece_movement(piece_to_move[0], piece_to_move[1], dir_tuple)
             try:
+                piece_to_move = Converter.simulate_game_piece_movement(piece_to_move[0], piece_to_move[1], dir_tuple)
+
                 # handles highlighting pieces for inline moves
                 if selected_move[0] == "i":
                     if self.game_board[piece_to_move[0]][piece_to_move[1]]["turn_color"] == self.turn:
@@ -1151,21 +1160,34 @@ class GameBoard(tk.Tk):
         self.draw_game_board()
         self.initialize_game_board_pieces()
 
-    def make_random_first_move(self):
+    def make_random_first_move(self) -> list:
         """
         Gets the first random move for black.
+        :return: a list, containing the AI's selected move.
         """
         ZERO_INDEX_OFFSET = 1
 
+        start = time.perf_counter()
         StateSpaceGenRandFirstMove = StateSpaceGenerator(self.game_board, self.turn)
         states = StateSpaceGenRandFirstMove.run_generation()
 
         random_int = random.randint(0, len(states) - ZERO_INDEX_OFFSET)  # gets a random int
         random_state = states[random_int]  # gets a random state with the random int
+        time_taken = time.perf_counter() - start
 
         self.game_board = random_state[1]
         self.draw_game_board()
+
+        update = self.update_timerbox_and_moves_for_color()
+        update[0].insert(END, f"{time_taken:.5f}")
+        update[1].insert(END, random_state[0][:3])
+
+        self.player_info()
+
         self.initialize_game_board_pieces()
+        self.increment_turn_count()  # increments turn count of current turn turn_color
+
+        return random_state[0]
 
     def ai_vs_ai(self):
         while True:
@@ -1174,7 +1196,11 @@ class GameBoard(tk.Tk):
             self.increment_turn_count()  # increments turn count of current turn turn_color
             self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
             start = time.perf_counter()
-            result = self.Minimax.alpha_beta(["move", self.game_board, self.turn, 0])  # gets move and board from ai choice
+            if self.turn == "black":
+                turn_timer = self.settings_selections['time1']
+            else:
+                turn_timer = self.settings_selections['time2']
+            result = self.Minimax.alpha_beta(["move", self.game_board, self.turn, 0, start, turn_timer])  # gets move and board from ai choice
 
             self.game_board = result[1]  # ai selected board
             selected_move = result[0]  # the move needs to print to the game console and show highlighted ai pieces
@@ -1221,15 +1247,34 @@ class GameBoard(tk.Tk):
         p1_settings = self.settings_selections["mode_p1"]
         p2_settings = self.settings_selections["mode_p2"]
 
-        self.canvas.unbind("<Button-1>")  # unbinds mouse click event listener
+        self.turn = "black"
 
         if p1_settings == "Computer" and p2_settings == "Computer":
+            self.canvas.unbind("<Button-1>")  # unbinds mouse click event listener
             self.make_random_first_move()
             self.ai_vs_ai()
-        elif p1_settings == "Computer" and self.settings_selections['turn_color'] == 1:
-            self.make_random_first_move()
-        else:
-            self.canvas.bind("<Button-1>", self.click_event_listener_engine)  # re-initializes mouse click event listener
+
+        elif p1_settings == "Computer" and p2_settings == "Human":
+            self.turn = "black"
+            selected_move = self.make_random_first_move()
+            self.highlight_ai_move(selected_move)
+            self.turn = "white"
+
+        elif p1_settings == "Human" and p2_settings == "Human":
+            # P1 color selected is only applied in the Human vs Human game mode
+            if self.settings_selections["turn_color"] in (0, 1):
+                self.turn = "black"
+            else:
+                self.turn = "white"
+            self.human_vs_human = True  # disables the AI
+
+        # only time piece selection isn't available is in AI vs AI
+        if p1_settings != "Computer" and p2_settings != "Computer":
+            self.canvas.bind("<Button-1>", self.click_event_listener_engine)  # sets up mouse click event listener
+
+        # checks if game mode is changed from Human vs Human
+        if p1_settings != "Human" or p2_settings != "Human":
+            self.human_vs_human = False  # re-enables the AI
 
     def draw_timer_window(self):
         """
@@ -1404,8 +1449,8 @@ class GameBoard(tk.Tk):
         self.apply_draw_game_board_layout()
 
         self.draw_timer_window()
-
         self.draw_moves_window()
+
         self.canvas.bind("<Button-1>", self.click_event_listener_engine)  # sets up mouse click event listener
 
         self.mainloop()
