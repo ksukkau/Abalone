@@ -28,7 +28,7 @@ class GameBoard(tk.Tk):
         # default background turn_color
         self.bg = "#303b41"
 
-        self.title("Abalone - G5")
+        self.title("Abalone (not the snail) - G5")
         self.width = 700
         self.height = 500
         self.canvas = Canvas(self, width=self.width, height=self.height, bg=self.bg, highlightthickness=0)
