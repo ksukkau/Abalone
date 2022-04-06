@@ -1190,32 +1190,8 @@ class GameBoard(tk.Tk):
 
     def ai_vs_ai(self):
         while True:
-            #################### AI ####################
-            # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
-            self.increment_turn_count()  # increments turn count of current turn turn_color
-            self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
-            start = time.perf_counter()
-            if self.turn == "black":
-                turn_timer = self.settings_selections['time1']
-            else:
-                turn_timer = self.settings_selections['time2']
-            result = self.Minimax.alpha_beta(["move", self.game_board, self.turn, 0, start, turn_timer])  # gets move and board from ai choice
-
-            self.game_board = result[1]  # ai selected board
-            selected_move = result[0]  # the move needs to print to the game console and show highlighted ai pieces
-            time_taken = time.perf_counter() - start
-            print("Ai selected move" + str(selected_move))
-            # redraws new game board generated from AI within ai.py from line above
-
-            self.draw_game_board()
-            self.initialize_game_board_pieces()
-            update = self.update_timerbox_and_moves_for_color()
-            update[0].insert(END, f"{time_taken:.5f}")
-            update[1].insert(END, selected_move[:3])
-
-            self.increment_turn_count()  # increments turn count of current turn turn_color
-            self.player_info()
-            #################### AI ####################
+            self.apply_ai()
+            self.turn = Converter.get_opposite_color(self.turn)
 
             self.update()  # forces tkinter to re-draw the new board despite being blocked by the while-loop
 
