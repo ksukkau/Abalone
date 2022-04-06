@@ -28,7 +28,7 @@ class GameBoard(tk.Tk):
         # default background turn_color
         self.bg = "#303b41"
 
-        self.title("Game")
+        self.title("Abalone - G5")
         self.width = 700
         self.height = 500
         self.canvas = Canvas(self, width=self.width, height=self.height, bg=self.bg, highlightthickness=0)
@@ -541,9 +541,8 @@ class GameBoard(tk.Tk):
 
     def highlight_ai_move(self, selected_move: list):
         """
-        Handles highlighting the AI most recent move.
+        Handles highlighting the AI's most recent move.
         :param selected_move: a list, containing the type of move and pieces moved
-        :return:
         """
         piece_to_move = Converter.external_notation_to_internal(selected_move[1][-1])
         cardinal_dir = selected_move[2]
@@ -557,7 +556,7 @@ class GameBoard(tk.Tk):
         else:
             iterations = range(0, 3)
 
-        for iter in iterations:
+        for iteration in iterations:
             dir_tuple = self.Move.get_adjusted_tuple_or_cardinal_dir(piece_to_move[0], cardinal_dir=cardinal_dir)
             try:
                 piece_to_move = Converter.simulate_game_piece_movement(piece_to_move[0], piece_to_move[1], dir_tuple)
@@ -577,7 +576,7 @@ class GameBoard(tk.Tk):
                         self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn, "red")
 
                         # sets the next piece to the next piece within selected_move[1]
-                        piece_to_move = Converter.external_notation_to_internal(selected_move[1][iter])
+                        piece_to_move = Converter.external_notation_to_internal(selected_move[1][iteration])
             except (IndexError, KeyError):
                 pass
 
