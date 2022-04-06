@@ -263,7 +263,13 @@ def space_translation(board, adj_list, color):
 def push_eval(state, center_val):
 
     move = state[0]
-    if len(move[1]) == 3:
+
+    # gets color of leading piece within piece notation, cause within our notation, the lead piece in the Move
+    # is the opposing color (e.g. move[1][0] will be the opposite color for a sumito)
+    internal_notation = Converter.external_notation_to_internal(move[1][0])
+    color_of_lead_piece_in_move_notation = state[1][internal_notation[0]][internal_notation[1]]["turn_color"]
+
+    if len(move[1]) == 3 and color_of_lead_piece_in_move_notation != state[2] and color_of_lead_piece_in_move_notation is not None:
         push = True
     else:
         push = False
