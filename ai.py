@@ -1,3 +1,4 @@
+import time
 from random import Random
 
 from heuristics import KatsHeuristic
@@ -7,7 +8,7 @@ from state_space_generator import *
 
 class Minimax:
 
-    def __init__(self, max_depth=2):
+    def __init__(self, max_depth=3):
         self.max_depth = max_depth
         self.pruned = 0
 
@@ -19,9 +20,15 @@ class Minimax:
         for next_state in next_states:
             # print(next_state[0])
             next_depth_state = next_state[0], next_state[1], self.get_opposite_color(state[2]), state[3] + 1
-            value = max(value, self.min_value(next_depth_state, a, b))
+            #print("min start", (time.perf_counter() - state[4]))
+            value = max(value, self.min_value(next_depth_state, a, b, state[4], state[5]))
+            #print("min END", (time.perf_counter() - state[4]))
             a = max(a, value)
             next_states_values_dict.update({value: next_depth_state})
+            time_taken = time.perf_counter() - state[4]
+            print("time taken ",time_taken)
+            if time_taken + 0.03 > state[5]:
+                break
 
         # print([x for x, y in next_states_values_dict.items()])
         max_val = min([x for x in next_states_values_dict.keys()])  # finds the lowest valued item in list
@@ -32,7 +39,7 @@ class Minimax:
         print(self.pruned)  # prints number of nodes pruned
         return choice[1][0], choice[1][1]  # returns updated game board to game.py on line 249 within game.py
 
-    def max_value(self, depth_state, a, b):
+    def max_value(self, depth_state, a, b, start, time_limit):
         if self.is_terminal(depth_state):  # if depth is equal to max depth
             value = self.get_value(depth_state)
             # print("Max value", value)
@@ -43,14 +50,19 @@ class Minimax:
         next_states = self.get_next_states(depth_state)
         for next_state in next_states:
             next_depth_state = next_state[0], next_state[1], self.get_opposite_color(depth_state[2]), depth_state[3] + 1
-            v = max(v, self.min_value(next_depth_state, a, b))
+            v = max(v, self.min_value(next_depth_state, a, b, start, time_limit))
             if v >= b:
                 self.pruned += 1
                 return v
             a = max(a, v)
+
+            time_taken = time.perf_counter() - start
+            print("time taken ",time_taken)
+            if time_taken + 0.03 > time_limit:
+                break
         return v
 
-    def min_value(self, depth_state, a, b):
+    def min_value(self, depth_state, a, b, start, time_limit):
         if self.is_terminal(depth_state):  # if depth is equal to max depth
             value = self.get_value(depth_state)
             # print("Min value", value)
@@ -61,11 +73,16 @@ class Minimax:
         next_states = self.get_next_states(depth_state)
         for next_state in next_states:
             next_depth_state = next_state[0], next_state[1], self.get_opposite_color(depth_state[2]), depth_state[3] + 1
-            v = min(v, self.max_value(next_depth_state, a, b))
+            v = min(v, self.max_value(next_depth_state, a, b, start, time_limit))
             if v <= a:
                 self.pruned += 1
                 return v
             b = min(b, v)
+
+            time_taken = time.perf_counter() - start
+            print("time taken ",time_taken)
+            if time_taken + 0.03 > time_limit:
+                break
         return v
 
     @staticmethod

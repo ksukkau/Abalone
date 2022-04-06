@@ -501,19 +501,21 @@ class GameBoard(tk.Tk):
 
             self.increment_turn_count()  # increments turn count of current turn turn_color
             # self.update_timer()
+
             start = time.perf_counter()
+
             self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
-            result = self.Minimax.alpha_beta(["move", self.game_board, self.turn, 0])  # gets move and board from ai choice
+            if self.turn == "black":
+                turn_timer = self.settings_selections['time1']
+            else:
+                turn_timer = self.settings_selections['time2']
+
+            result = self.Minimax.alpha_beta(["move", self.game_board, self.turn, 0, start, turn_timer])  # gets move and board from ai choice
             self.game_board = result[1]  # ai selected board
             selected_move = result[0]  # the move needs to print to the game console and show highlighted ai pieces
             time_taken = time.perf_counter() - start
 
-            if self.turn == "black":
-                turn_timer = 'time1'
-            else:
-                turn_timer = 'time2'
-            if time_taken > self.settings_selections[turn_timer]:
-                messagebox.showinfo("Timer", "Out of Time!")
+
 
             print("Ai selected move" + str(selected_move))
 
@@ -1194,7 +1196,11 @@ class GameBoard(tk.Tk):
             self.increment_turn_count()  # increments turn count of current turn turn_color
             self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
             start = time.perf_counter()
-            result = self.Minimax.alpha_beta(["move", self.game_board, self.turn, 0])  # gets move and board from ai choice
+            if self.turn == "black":
+                turn_timer = self.settings_selections['time1']
+            else:
+                turn_timer = self.settings_selections['time2']
+            result = self.Minimax.alpha_beta(["move", self.game_board, self.turn, 0, start, turn_timer])  # gets move and board from ai choice
 
             self.game_board = result[1]  # ai selected board
             selected_move = result[0]  # the move needs to print to the game console and show highlighted ai pieces
