@@ -46,10 +46,12 @@ class GameBoard(tk.Tk):
         self.game_over = False
         self.selected_pieces = {}
         self.last_hex = None
-        self.white_timer = 0
-        self.black_timer = 0
-        self.white_timer = None
-        self.black_timer = None
+        # self.white_timer = 0
+        # self.black_timer = 0
+        # self.white_timer = None
+        # self.black_timer = None
+        self.black_total_time = 0
+        self.white_total_time = 0
         self.white_timer_box = None
         self.black_timer_box = None
         self.white_moves_box = None
@@ -60,7 +62,7 @@ class GameBoard(tk.Tk):
         self.black_pieces = None
         self.settings = None
         self.settings_selections = {'turn_color': 1, 'mode_p1': "Human", 'mode_p2': "Human", 'config': 0, 'turns': 30,
-                                    'time1': 30, 'time2': 30}
+                                    'time1': 5, 'time2': 5}
         self.spot_coords = {}
         self.board_screen_pos = None
         self.game_board = None
@@ -235,6 +237,8 @@ class GameBoard(tk.Tk):
                                     update = self.update_timerbox_and_moves_for_color()
                                     update[1].insert(END, self.latest_human_move)
                                     update[0].insert(END, f"{human_time_taken:.5f}")
+                                    self.update_time(human_time_taken)
+                                    self.update_total_time()
                                     self.apply_ai()  # gets, and applies, the AI's move
 
                             # performs 2 or 3 group piece movements
@@ -310,6 +314,8 @@ class GameBoard(tk.Tk):
                                         update = self.update_timerbox_and_moves_for_color()
                                         update[1].insert(END, self.latest_human_move)
                                         update[0].insert(END, f"{human_time_taken:.5f}")
+                                        self.update_time(human_time_taken)
+                                        self.update_total_time()
                                         self.apply_ai()  # gets, and applies, the AI's move
 
                                         if DEBUG_PRINT_STATEMENTS:
@@ -354,6 +360,8 @@ class GameBoard(tk.Tk):
                                             update = self.update_timerbox_and_moves_for_color()
                                             update[1].insert(END, self.latest_human_move)
                                             update[0].insert(END, f"{human_time_taken:.5f}")
+                                            self.update_time(human_time_taken)
+                                            self.update_total_time()
                                             self.apply_ai()  # gets, and applies, the AI's move
 
                                         # clears the chain of sumito'ed pieces
@@ -396,6 +404,8 @@ class GameBoard(tk.Tk):
                                             update = self.update_timerbox_and_moves_for_color()
                                             update[1].insert(END, self.latest_human_move)
                                             update[0].insert(END, f"{human_time_taken:.5f}")
+                                            self.update_time(human_time_taken)
+                                            self.update_total_time()
                                             self.apply_ai()  # gets, and applies, the AI's move
 
     def undo_last_move(self):
@@ -524,6 +534,8 @@ class GameBoard(tk.Tk):
             update = self.update_timerbox_and_moves_for_color()
             update[0].insert(END, f"{time_taken:.5f}")
             update[1].insert(END, selected_move[:3])
+            self.update_time(time_taken)
+            self.update_total_time()
 
             self.initialize_game_board_pieces()
             self.increment_turn_count()  # increments turn count of current turn turn_color
@@ -583,9 +595,15 @@ class GameBoard(tk.Tk):
 
     def update_timerbox_and_moves_for_color(self):
         if self.turn == "black":
-            return self.black_timer_box, self.black_moves_box
+            return [self.black_timer_box, self.black_moves_box]
         else:
-            return self.white_timer_box, self.white_moves_box
+            return [self.white_timer_box, self.white_moves_box]
+
+    def update_time(self, time):
+        if self.turn == "black":
+            self.black_total_time += time
+        else:
+            self.white_total_time += time
 
     def perform_sidestep(self, sidestep_move_details: list):
         """
@@ -1181,6 +1199,8 @@ class GameBoard(tk.Tk):
         update = self.update_timerbox_and_moves_for_color()
         update[0].insert(END, f"{time_taken:.5f}")
         update[1].insert(END, random_state[0][:3])
+        self.update_time(time_taken)
+        self.update_total_time()
 
         self.player_info()
 
@@ -1213,6 +1233,9 @@ class GameBoard(tk.Tk):
             update = self.update_timerbox_and_moves_for_color()
             update[0].insert(END, f"{time_taken:.5f}")
             update[1].insert(END, selected_move[:3])
+            self.update_time(time_taken)
+            self.update_total_time()
+
 
             self.increment_turn_count()  # increments turn count of current turn turn_color
             self.player_info()
@@ -1276,18 +1299,30 @@ class GameBoard(tk.Tk):
         if p1_settings != "Human" or p2_settings != "Human":
             self.human_vs_human = False  # re-enables the AI
 
+    def update_total_time(self):
+        total_time_white = Label(self, text=f"Total Time {self.white_total_time:.2f}", bg=self.bg, font=self.font,
+                                 fg=self.font_color)
+        total_time_black = Label(self, text=f"Total Time {self.black_total_time:.2f}", bg=self.bg, font=self.font,
+                                 fg=self.font_color)
+        total_time_black.grid(row=8, column=6, padx=5)
+        total_time_white.grid(row=1, column=6, padx=5)
+
     def draw_timer_window(self):
         """
         Initializes and draws the window containing the turn timer for both the black and white team.
         """
         font = 12
         timer_white_label = Label(self, text="White Player", bg=self.bg, font=self.font, fg=self.font_color)
+
         self.white_timer_box = Listbox(self, height=25, width=20, font=font)
-        timer_white_label.grid(row=1, column=5, padx=5, columnspan=2)
+        timer_white_label.grid(row=1, column=5, padx=5)
+
         self.white_timer_box.grid(row=2, column=5, rowspan=6, columnspan=1, padx=5, pady=5)
         timer_black_label = Label(self, text="Black Player", bg=self.bg, font=self.font, fg=self.font_color)
+
         self.black_timer_box = Listbox(self, height=25, width=20, font=font)
-        timer_black_label.grid(row=8, column=5, padx=5, columnspan=2)
+        timer_black_label.grid(row=8, column=5, padx=5)
+
         self.black_timer_box.grid(row=9, column=5, rowspan=6, columnspan=1, padx=5, pady=5)
         self.show_timer()
 
@@ -1307,15 +1342,15 @@ class GameBoard(tk.Tk):
         Initializes the data attribute variable to display the total time and time per move for both the black and white
         teams.
         """
-        self.black_timer_box.insert(END, f"Total Time: ", "Time for per move: ")
-        self.white_timer_box.insert(END, f"Total Time: ", "Time for per move: ")
+        self.black_timer_box.insert(END,"Time for per move: ")
+        self.white_timer_box.insert(END,"Time for per move: ")
 
     def show_moves(self):
         """
         Initializes the move history window within the GUI for both black and white teams.
         """
-        self.white_moves_box.insert(END, "Moves:", "")
-        self.black_moves_box.insert(END, "Moves:", "")
+        self.white_moves_box.insert(END, "Moves:")
+        self.black_moves_box.insert(END, "Moves:")
 
     def player_info(self):
         """
