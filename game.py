@@ -28,7 +28,7 @@ class GameBoard(tk.Tk):
         # default background turn_color
         self.bg = "#303b41"
 
-        self.title("Game")
+        self.title("Abalone (not the snail) - G5")
         self.width = 700
         self.height = 500
         self.canvas = Canvas(self, width=self.width, height=self.height, bg=self.bg, highlightthickness=0)
@@ -553,9 +553,8 @@ class GameBoard(tk.Tk):
 
     def highlight_ai_move(self, selected_move: list):
         """
-        Handles highlighting the AI most recent move.
+        Handles highlighting the AI's most recent move.
         :param selected_move: a list, containing the type of move and pieces moved
-        :return:
         """
         piece_to_move = Converter.external_notation_to_internal(selected_move[1][-1])
         cardinal_dir = selected_move[2]
@@ -569,7 +568,7 @@ class GameBoard(tk.Tk):
         else:
             iterations = range(0, 3)
 
-        for iter in iterations:
+        for iteration in iterations:
             dir_tuple = self.Move.get_adjusted_tuple_or_cardinal_dir(piece_to_move[0], cardinal_dir=cardinal_dir)
             try:
                 piece_to_move = Converter.simulate_game_piece_movement(piece_to_move[0], piece_to_move[1], dir_tuple)
@@ -589,7 +588,7 @@ class GameBoard(tk.Tk):
                         self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn, "red")
 
                         # sets the next piece to the next piece within selected_move[1]
-                        piece_to_move = Converter.external_notation_to_internal(selected_move[1][iter])
+                        piece_to_move = Converter.external_notation_to_internal(selected_move[1][iteration])
             except (IndexError, KeyError):
                 pass
 
@@ -1211,35 +1210,8 @@ class GameBoard(tk.Tk):
 
     def ai_vs_ai(self):
         while True:
-            #################### AI ####################
-            # -- Turn change and AI move (TODO refactor into its own method eventually) -- #
-            self.increment_turn_count()  # increments turn count of current turn turn_color
-            self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
-            start = time.perf_counter()
-            if self.turn == "black":
-                turn_timer = self.settings_selections['time1']
-            else:
-                turn_timer = self.settings_selections['time2']
-            result = self.Minimax.alpha_beta(["move", self.game_board, self.turn, 0, start, turn_timer])  # gets move and board from ai choice
-
-            self.game_board = result[1]  # ai selected board
-            selected_move = result[0]  # the move needs to print to the game console and show highlighted ai pieces
-            time_taken = time.perf_counter() - start
-            print("Ai selected move" + str(selected_move))
-            # redraws new game board generated from AI within ai.py from line above
-
-            self.draw_game_board()
-            self.initialize_game_board_pieces()
-            update = self.update_timerbox_and_moves_for_color()
-            update[0].insert(END, f"{time_taken:.5f}")
-            update[1].insert(END, selected_move[:3])
-            self.update_time(time_taken)
-            self.update_total_time()
-
-
-            self.increment_turn_count()  # increments turn count of current turn turn_color
-            self.player_info()
-            #################### AI ####################
+            self.apply_ai()
+            self.turn = Converter.get_opposite_color(self.turn)
 
             self.update()  # forces tkinter to re-draw the new board despite being blocked by the while-loop
 
