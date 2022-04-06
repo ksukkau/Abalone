@@ -278,9 +278,9 @@ def push_eval(state, center_val):
         total = 5 - center_val
         #print("total", total)
         if total < 4.8:
-            return 5
-        else:
             return 0.5
+        else:
+            return 5
     else:
         return 0
 
