@@ -14,7 +14,7 @@ class KatsHeuristic:
     def weighted_heuristic(state):
         score_weight = 50
         center_weight = 5
-        push_weight = 15
+        push_weight = 25
         group_weight = 3
 
         score = pieces(state[1], state[2]) - pieces(state[1], get_opposite_color(state[2]))
