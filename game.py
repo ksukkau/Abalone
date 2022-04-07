@@ -581,12 +581,13 @@ class GameBoard(tk.Tk):
         # a sidestep or inline
         if selected_move[0] == "s":
             iterations = range(0, len(selected_move[1]))  # subtract 1 as 1 piece is already moved on line before 'try'
-        elif selected_move[1][0] == selected_move[0][-1]:  # checks for single piece move
+        elif selected_move[1][0] == selected_move[1][-1]:  # checks for single piece move
             iterations = range(0, 1)
         else:
             iterations = range(0, 3)
 
         for iteration in iterations:
+
             try:
                 dir_tuple = self.Move.get_adjusted_tuple_or_cardinal_dir(piece_to_move[0], cardinal_dir=cardinal_dir)
                 piece_to_move = Converter.simulate_game_piece_movement(piece_to_move[0], piece_to_move[1], dir_tuple)
