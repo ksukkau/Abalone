@@ -88,6 +88,7 @@ class GameBoard(tk.Tk):
 
         # ----- Undo Moves ----- #
         self.previous_board_states = []
+
     @staticmethod
     def get_row_key(row: int, offset=0) -> str:
         """
@@ -119,7 +120,7 @@ class GameBoard(tk.Tk):
         piece has been clicked, it is highlighted and the selected game piece is colored green.
         :param event: an Event object containing various data attributes including the x and y coords of the click event
         """
-        DEBUG_PRINT_STATEMENTS = False  # setting to True enables print statements that contain additional information
+        DEBUG_PRINT_STATEMENTS = False  # setting to True enables print statements that contain additional Click & Piece information
         RANGE = 20
         print(f"Clicked at {event.x}, {event.y}")
 
@@ -440,10 +441,10 @@ class GameBoard(tk.Tk):
             self.selected_pieces = []
             self.selected_pieces_xy_coords = []
             self.num_pieces_selected = 0
-            self.sumito_chain = []  # stores the chain of pieces to be sumito, in order
-            self.dir_tuple_sumito = ()  # stores the vector of direction for the sumito chain
-            self.first_piece_selection = None  # stores the index of piece adjacent to first piece in sumito chain
-            self.latest_human_move = ()  # stores the latest human move
+            self.sumito_chain = []  # resets the chain of pieces to be sumito, in order
+            self.dir_tuple_sumito = ()  # resets the vector of direction for the sumito chain
+            self.first_piece_selection = None  # resets the index of piece adjacent to first piece in sumito chain
+            self.latest_human_move = ()  # resets the latest human move
 
             self.remove_selection_flag()
 
@@ -525,8 +526,6 @@ class GameBoard(tk.Tk):
             selected_move = result[0]  # the move needs to print to the game console and show highlighted ai pieces
             time_taken = time.perf_counter() - start
 
-
-
             print("Ai selected move" + str(selected_move))
 
             # redraws new game board generated from AI within ai.py from line above
@@ -545,11 +544,30 @@ class GameBoard(tk.Tk):
 
             self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
             self.human_start = time.perf_counter()
+
+            self.update_piece_count()
         else:  # handles Human vs Human
             self.store_last_move()  # stores the last AI move
             self.increment_turn_count()  # increments turn count of current turn turn_color
             self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
             self.player_info()
+
+    def update_piece_count(self):
+        """
+        Updates the piece count (or pieces lost) for the human player when playing against the AI.
+        """
+        piece_count = 0
+        for row in self.game_board:
+            entire_row = self.game_board[row]
+            for column in entire_row:
+                if column["turn_color"] == self.turn:
+                    piece_count += 1
+
+        if self.turn == "black":
+            self.black_pieces = piece_count
+        else:
+            self.white_pieces = piece_count
+        self.player_info()
 
     def highlight_ai_move(self, selected_move: list):
         """
@@ -563,32 +581,34 @@ class GameBoard(tk.Tk):
         # a sidestep or inline
         if selected_move[0] == "s":
             iterations = range(0, len(selected_move[1]))  # subtract 1 as 1 piece is already moved on line before 'try'
-        elif selected_move[1][0] == selected_move[0][-1]:  # checks for single piece move
+        elif selected_move[1][0] == selected_move[1][-1]:  # checks for single piece move
             iterations = range(0, 1)
         else:
             iterations = range(0, 3)
 
         for iteration in iterations:
-            dir_tuple = self.Move.get_adjusted_tuple_or_cardinal_dir(piece_to_move[0], cardinal_dir=cardinal_dir)
+
             try:
+                dir_tuple = self.Move.get_adjusted_tuple_or_cardinal_dir(piece_to_move[0], cardinal_dir=cardinal_dir)
                 piece_to_move = Converter.simulate_game_piece_movement(piece_to_move[0], piece_to_move[1], dir_tuple)
 
-                # handles highlighting pieces for inline moves
-                if selected_move[0] == "i":
-                    if self.game_board[piece_to_move[0]][piece_to_move[1]]["turn_color"] == self.turn:
-                        # extracts x and y coords and highlights moved pieces
-                        piece_x_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["x_pos"]
-                        piece_y_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["y_pos"]
-                        self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn, "red")
-                elif selected_move[0] == "s":
-                    if self.game_board[piece_to_move[0]][piece_to_move[1]]["turn_color"] == self.turn:
-                        # extracts x and y coords and highlights moved pieces
-                        piece_x_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["x_pos"]
-                        piece_y_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["y_pos"]
-                        self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn, "red")
+                if piece_to_move[1] > 0:
+                    # handles highlighting pieces for inline moves
+                    if selected_move[0] == "i":
+                        if self.game_board[piece_to_move[0]][piece_to_move[1]]["turn_color"] == self.turn:
+                            # extracts x and y coords and highlights moved pieces
+                            piece_x_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["x_pos"]
+                            piece_y_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["y_pos"]
+                            self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn, "red")
+                    elif selected_move[0] == "s":
+                        if self.game_board[piece_to_move[0]][piece_to_move[1]]["turn_color"] == self.turn:
+                            # extracts x and y coords and highlights moved pieces
+                            piece_x_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["x_pos"]
+                            piece_y_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["y_pos"]
+                            self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn, "red")
 
-                        # sets the next piece to the next piece within selected_move[1]
-                        piece_to_move = Converter.external_notation_to_internal(selected_move[1][iteration])
+                            # sets the next piece to the next piece within selected_move[1]
+                            piece_to_move = Converter.external_notation_to_internal(selected_move[1][iteration])
             except (IndexError, KeyError):
                 pass
 
@@ -1264,7 +1284,7 @@ class GameBoard(tk.Tk):
             self.human_vs_human = True  # disables the AI
 
         # only time piece selection isn't available is in AI vs AI
-        if p1_settings != "Computer" and p2_settings != "Computer":
+        if p1_settings != "Computer" or p2_settings != "Computer":
             self.canvas.bind("<Button-1>", self.click_event_listener_engine)  # sets up mouse click event listener
 
         # checks if game mode is changed from Human vs Human

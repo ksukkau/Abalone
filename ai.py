@@ -28,7 +28,7 @@ class Minimax:
             next_states_values_dict.update({value: next_depth_state})
             time_taken = time.perf_counter() - state[4]
             #print(" ",time_taken)
-            if time_taken + 0.03 > state[5]:
+            if time_taken + 1 > state[5]:
                 break
 
         # print([x for x, y in next_states_values_dict.items()])
@@ -59,7 +59,7 @@ class Minimax:
 
             time_taken = time.perf_counter() - start
             #print("time taken ",time_taken)
-            if time_taken + 0.03 > time_limit:
+            if time_taken + 1 > time_limit:
                 break
         return v
 
@@ -82,7 +82,7 @@ class Minimax:
 
             time_taken = time.perf_counter() - start
             #print("time taken ",time_taken)
-            if time_taken + 0.03 > time_limit:
+            if time_taken + 1 > time_limit:
                 break
         return v
 
