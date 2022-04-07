@@ -122,6 +122,21 @@ class GameBoard(tk.Tk):
         """
         DEBUG_PRINT_STATEMENTS = False  # setting to True enables print statements that contain additional Click & Piece information
         RANGE = 20
+        # Timer check for human player
+        if self.turn == "black":
+            turn_timer = self.settings_selections['time1']
+        else:
+            turn_timer = self.settings_selections['time2']
+        time_taken = time.perf_counter() - self.human_start
+        if time_taken > turn_timer:
+            time_limit_result = tk.messagebox.askquestion(title="Time limit reached", message="Continue?")
+            human_timer_result = None
+            while human_timer_result is None:
+                if time_limit_result == 'yes':
+                    human_timer_result = time_limit_result
+                    self.human_start = time.perf_counter()
+                elif time_limit_result == 'no':
+                    exit(0)
         print(f"Clicked at {event.x}, {event.y}")
 
         for row in range(self.hexes_across):
@@ -563,6 +578,7 @@ class GameBoard(tk.Tk):
             self.increment_turn_count()  # increments turn count of current turn turn_color
             self.turn = Converter.get_opposite_color(self.turn)  # turn turn_color change
             self.player_info()
+        self.human_start = time.perf_counter()
 
     def update_piece_count(self):
         """
