@@ -556,7 +556,6 @@ class GameBoard(tk.Tk):
         """
         Updates the piece count (or pieces lost) for the human player when playing against the AI.
         """
-        TOTAL_NUM_OF_PIECES = 14
         piece_count = 0
         for row in self.game_board:
             entire_row = self.game_board[row]
@@ -592,22 +591,23 @@ class GameBoard(tk.Tk):
             try:
                 piece_to_move = Converter.simulate_game_piece_movement(piece_to_move[0], piece_to_move[1], dir_tuple)
 
-                # handles highlighting pieces for inline moves
-                if selected_move[0] == "i":
-                    if self.game_board[piece_to_move[0]][piece_to_move[1]]["turn_color"] == self.turn:
-                        # extracts x and y coords and highlights moved pieces
-                        piece_x_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["x_pos"]
-                        piece_y_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["y_pos"]
-                        self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn, "red")
-                elif selected_move[0] == "s":
-                    if self.game_board[piece_to_move[0]][piece_to_move[1]]["turn_color"] == self.turn:
-                        # extracts x and y coords and highlights moved pieces
-                        piece_x_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["x_pos"]
-                        piece_y_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["y_pos"]
-                        self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn, "red")
+                if piece_to_move[1] > 0:
+                    # handles highlighting pieces for inline moves
+                    if selected_move[0] == "i":
+                        if self.game_board[piece_to_move[0]][piece_to_move[1]]["turn_color"] == self.turn:
+                            # extracts x and y coords and highlights moved pieces
+                            piece_x_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["x_pos"]
+                            piece_y_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["y_pos"]
+                            self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn, "red")
+                    elif selected_move[0] == "s":
+                        if self.game_board[piece_to_move[0]][piece_to_move[1]]["turn_color"] == self.turn:
+                            # extracts x and y coords and highlights moved pieces
+                            piece_x_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["x_pos"]
+                            piece_y_pos = self.game_board[piece_to_move[0]][piece_to_move[1]]["y_pos"]
+                            self.draw_game_piece_selection(piece_x_pos, piece_y_pos, self.turn, "red")
 
-                        # sets the next piece to the next piece within selected_move[1]
-                        piece_to_move = Converter.external_notation_to_internal(selected_move[1][iteration])
+                            # sets the next piece to the next piece within selected_move[1]
+                            piece_to_move = Converter.external_notation_to_internal(selected_move[1][iteration])
             except (IndexError, KeyError):
                 pass
 
