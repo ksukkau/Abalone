@@ -13,6 +13,7 @@ class Minimax:
         self.pruned = 0
 
     def alpha_beta(self, state):
+        self.pruned = 0
         a, b, value = float('-inf'), float('inf'), float('-inf')
         generator = StateSpaceGenerator(state[1], state[2])
         next_states = generator.run_generation()
