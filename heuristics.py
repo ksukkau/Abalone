@@ -13,7 +13,7 @@ class KatsHeuristic:
     @staticmethod
     def weighted_heuristic(state):
         score_weight = 50
-        center_weight = 5
+        center_weight = 10
         push_weight = 25
         group_weight = 3
 

@@ -8,7 +8,7 @@ from state_space_generator import *
 
 class Minimax:
 
-    def __init__(self, max_depth=3):
+    def __init__(self, max_depth=5):
         self.max_depth = max_depth
         self.pruned = 0
 
@@ -37,7 +37,7 @@ class Minimax:
                    x[0] == max_val]  # finds all item with same value as max_val
         # print(options)
         choice = self.random_choice(options)  # randomly selects move from options
-        print(self.pruned)  # prints number of nodes pruned
+        #print(self.pruned)  # prints number of nodes pruned
         return choice[1][0], choice[1][1]  # returns updated game board to game.py on line 249 within game.py
 
     def max_value(self, depth_state, a, b, start, time_limit):
