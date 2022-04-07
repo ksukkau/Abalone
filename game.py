@@ -240,6 +240,9 @@ class GameBoard(tk.Tk):
                                     update[0].insert(END, f"{human_time_taken:.5f}")
                                     self.update_time(human_time_taken)
                                     self.update_total_time()
+                                    if self.check_win():
+                                        break
+
                                     self.apply_ai()  # gets, and applies, the AI's move
 
                             # performs 2 or 3 group piece movements
@@ -317,6 +320,9 @@ class GameBoard(tk.Tk):
                                         update[0].insert(END, f"{human_time_taken:.5f}")
                                         self.update_time(human_time_taken)
                                         self.update_total_time()
+                                        if self.check_win():
+                                            break
+
                                         self.apply_ai()  # gets, and applies, the AI's move
 
                                         if DEBUG_PRINT_STATEMENTS:
@@ -363,6 +369,9 @@ class GameBoard(tk.Tk):
                                             update[0].insert(END, f"{human_time_taken:.5f}")
                                             self.update_time(human_time_taken)
                                             self.update_total_time()
+                                            if self.check_win():
+                                                break
+
                                             self.apply_ai()  # gets, and applies, the AI's move
 
                                         # clears the chain of sumito'ed pieces
@@ -407,6 +416,9 @@ class GameBoard(tk.Tk):
                                             update[0].insert(END, f"{human_time_taken:.5f}")
                                             self.update_time(human_time_taken)
                                             self.update_total_time()
+                                            if self.check_win():
+                                                break
+
                                             self.apply_ai()  # gets, and applies, the AI's move
 
     def undo_last_move(self):
@@ -1230,30 +1242,35 @@ class GameBoard(tk.Tk):
 
     def ai_vs_ai(self):
         while True:
+            if self.check_win():
+                break
             self.apply_ai()
             self.turn = Converter.get_opposite_color(self.turn)
-
             self.update()  # forces tkinter to re-draw the new board despite being blocked by the while-loop
 
-            if self.black_pieces < 8:
-                print("White wins! Six Black pieces pushed off the board!")
-                break
-            elif self.white_pieces < 8:
-                print("Black wins! Six White pieces pushed off the board!")
-                break
+    def check_win(self):
+
+        if self.black_pieces < 8:
+            print("White wins! Six Black pieces pushed off the board!")
+            return True
+        elif self.white_pieces < 8:
+            print("Black wins! Six White pieces pushed off the board!")
+            return True
 
             # if turn limit is reached, turn_color with the most marbles pushed off wins, else there is a tie
-            elif self.black_move_count == 0 or self.white_move_count == 0:
-                if self.white_pieces < self.black_pieces:
-                    print("Turn limit reached, Black wins! More White pieces pushed off the board than Black pieces.")
-                elif self.white_pieces > self.black_pieces:
-                    print("Turn limit reached, White wins! More Black pieces pushed off the board than White pieces.")
-                elif self.white_pieces == self.black_pieces:
-                    print("Turn limit reached, it's a tie! Same amount of Black and White pieces remaining.")
+        elif self.black_move_count == 0 or self.white_move_count == 0:
+            if self.black_move_count == 1 or self.white_move_count == 1:
+                return False
+            elif self.white_pieces < self.black_pieces:
+                print("Turn limit reached, Black wins! More White pieces pushed off the board than Black pieces.")
+            elif self.white_pieces > self.black_pieces:
+                print("Turn limit reached, White wins! More Black pieces pushed off the board than White pieces.")
+            elif self.white_pieces == self.black_pieces:
+                print("Turn limit reached, it's a tie! Same amount of Black and White pieces remaining.")
 
-                print(f"Black pieces remaining: {self.black_pieces}")
-                print(f"White pieces remaining: {self.white_pieces}")
-                break
+            print(f"Black pieces remaining: {self.black_pieces}")
+            print(f"White pieces remaining: {self.white_pieces}")
+            return True
 
     def apply_game_mode(self):
         """
