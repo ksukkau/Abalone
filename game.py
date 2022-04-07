@@ -587,8 +587,8 @@ class GameBoard(tk.Tk):
             iterations = range(0, 3)
 
         for iteration in iterations:
-            dir_tuple = self.Move.get_adjusted_tuple_or_cardinal_dir(piece_to_move[0], cardinal_dir=cardinal_dir)
             try:
+                dir_tuple = self.Move.get_adjusted_tuple_or_cardinal_dir(piece_to_move[0], cardinal_dir=cardinal_dir)
                 piece_to_move = Converter.simulate_game_piece_movement(piece_to_move[0], piece_to_move[1], dir_tuple)
 
                 if piece_to_move[1] > 0:
