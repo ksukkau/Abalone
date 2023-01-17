@@ -1,2 +1,3 @@
 # Abalone
-Abalone game including GUI, and Computer player logic 
+Abalone game including GUI, state space generator, player logic 
+uses Minimax and selected heuristics to make moves 
